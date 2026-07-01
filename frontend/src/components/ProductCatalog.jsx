@@ -1,197 +1,170 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { fetchProducts } from '../services/api';
 
-function ProductCatalog() {
+export default function ProductCatalog() {
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
+  const [category, setCategory] = useState('');
+  const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [alertMsg, setAlertMsg] = useState('');
 
-  // Core automotive categories for the filter sidebar
-  const categories = [
-    "Engine Parts", 
-    "Brake System", 
-    "Suspension & Steering", 
-    "Electrical Components", 
-    "Body Parts & Trims",
-    "Filtration & Fluids"
+  // Keywords explicitly matched to values in your "products in json.json" file[cite: 1]
+  const reasonableFilters = [
+    { label: "✨ All Spares", value: "" },
+    { label: "🪞 Mirrors", value: "MIRROR" },
+    { label: "🚗 Bumpers & Slides", value: "BUMPER" },
+    { label: "💡 Headlens & Lamps", value: "LAMP" },
+    { label: "🛠️ Mouldings & Trim", value: "MOULDING" },
+    { label: "🧬 Weatherstrips", value: "WEATHERSTRIP" },
+    { label: "🏁 Grilles", value: "GRILLE" },
+    { label: "⚙️ Prado Specific", value: "PRADO" } // Sourced directly from your json patterns[cite: 1]
   ];
 
-  // Fetch data dynamically whenever search, category, or page shifts
   useEffect(() => {
     setLoading(true);
-    const delayDebounceFn = setTimeout(() => {
-      const queryParams = new URLSearchParams({
-        search: search,
-        category: selectedCategory,
-        page: currentPage,
-        limit: 12 // 12 items per grid page feels snappy
+    // When a category tab is active, we merge it into the search parameter loop
+    // to query text records perfectly even without an explicit category database key
+    const activeSearchQuery = category ? `${category} ${search}`.trim() : search;
+
+    fetchProducts(activeSearchQuery, '', page, 12)
+      .then(res => {
+        setProducts(res.data.products || []);
+        setTotalPages(res.data.totalPages || 1);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Error connecting to inventory grid:", err);
+        setLoading(false);
       });
+  }, [search, category, page]);
 
-      fetch(`http://localhost:5000/api/products?${queryParams.toString()}`)
-        .then((res) => res.json())
-        .then((data) => {
-          setProducts(data.products);
-          setTotalPages(data.totalPages);
-          setTotalItems(data.totalItems);
-          setLoading(false);
-        })
-        .catch((err) => {
-          console.error("Error linking to inventory catalog:", err);
-          setLoading(false);
-        });
-    }, 300); // 300ms debounce prevents slamming the server on every keystroke
+  const addToCart = (product) => {
+    const currentCart = JSON.parse(localStorage.getItem('mhenik_cart')) || [];
+    const existingIndex = currentCart.findIndex(item => item.sku === product.sku);
+    
+    if (existingIndex > -1) {
+      currentCart[existingIndex].qty += 1;
+    } else {
+      currentCart.push({
+        sku: product.sku,
+        name: product.product_name,
+        price: 4500,
+        qty: 1
+      });
+    }
 
-    return () => clearTimeout(delayDebounceFn);
-  }, [search, selectedCategory, currentPage]);
-
-  // Reset page number back to 1 if user changes filters
-  const handleSearchChange = (e) => {
-    setSearch(e.target.value);
-    setCurrentPage(1);
-  };
-
-  const handleCategorySelect = (category) => {
-    setSelectedCategory(category === selectedCategory ? '' : category);
-    setCurrentPage(1);
+    localStorage.setItem('mhenik_cart', JSON.stringify(currentCart));
+    setAlertMsg(`Added ${product.product_name} to cart!`);
+    setTimeout(() => setAlertMsg(''), 3000);
+    window.dispatchEvent(new Event('storage'));
   };
 
   return (
-    <div class="row g-4">
-      {/* 1. Sidebar Search and Filtering Pane (col-md-3) */}
-      <div class="col-md-3">
-        <div class="card border-0 shadow-sm p-4 sticky-top" style={{ top: '20px', zIndex: 10 }}>
-          <h5 class="fw-bold text-dark mb-3">Filter Inventory</h5>
-          
-          {/* Text input lookup */}
-          <div class="mb-4">
-            <label class="form-label small fw-semibold text-muted">Search Name or SKU</label>
-            <input 
-              type="text" 
-              class="form-control" 
-              placeholder="e.g. PRADO, 3161..." 
-              value={search}
-              onChange={handleSearchChange}
-            />
-          </div>
+    <div className="w-100">
+      {alertMsg && (
+        <div className="position-fixed bottom-0 end-0 p-3" style={{ zIndex: 1050 }}>
+          <div className="alert alert-success border-0 shadow-sm fw-bold">{alertMsg}</div>
+        </div>
+      )}
 
-          {/* Category checklist */}
-          <div>
-            <label class="form-label small fw-semibold text-muted mb-2">Vehicle Categories</label>
-            <div class="d-flex flex-column gap-2">
-              {categories.map((cat, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  class={`btn btn-sm text-start py-2 px-3 rounded ${selectedCategory === cat ? 'btn-primary' : 'btn-light text-secondary'}`}
-                  onClick={() => handleCategorySelect(cat)}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-            {selectedCategory && (
-              <button 
-                class="btn btn-link btn-sm text-danger mt-3 p-0 text-decoration-none"
-                onClick={() => setSelectedCategory('')}
+      {/* 💡 INLINE SEARCH CATEGORIES: Clean Tab Matrix Styled Row */}
+      <div className="card border-0 shadow-sm p-3 rounded-mhenik card-mhenik-glass mb-4">
+        <span className="text-muted small fw-bold d-block mb-2 text-uppercase tracking-wider">Filter Registry Group</span>
+        <div className="d-flex flex-wrap gap-2">
+          {reasonableFilters.map((tab) => (
+            <button
+              key={tab.value}
+              type="button"
+              className={`btn btn-sm fw-bold px-3 py-2 rounded-2 transition-all ${
+                category === tab.value 
+                  ? 'btn-mhenik-primary shadow-sm' 
+                  : 'btn-light text-secondary border border-light'
+              }`}
+              onClick={() => { setCategory(tab.value); setPage(1); }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Primary Input Sourcing Query */}
+      <div className="mb-4">
+        <input
+          type="text"
+          className="form-control form-control-lg border-0 shadow-sm p-3 fs-6 rounded-mhenik bg-white rounded-3"
+          placeholder="Type an automotive part name or specific model profile keywords..."
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+        />
+      </div>
+
+      {loading ? (
+        <div className="text-center py-5"><div className="spinner-border text-mhenik-crimson"></div></div>
+      ) : (
+        <>
+          <div className="row g-3">
+            {products.length === 0 ? (
+              <div className="col-12 text-center py-5 bg-white rounded-3 shadow-sm border">
+                <p className="text-muted fw-bold mb-0">No genuine parts match the active filter configurations.</p>
+              </div>
+            ) : (
+              /* 💡 Overwrite the products.map card generation loop in frontend/src/components/ProductCatalog.jsx */
+        products.map((p) => (
+          <div className="col-sm-6 col-md-4 col-lg-3" key={p.sku}>
+            <div className="card h-100 border-0 shadow-sm bg-white rounded-3 rounded-mhenik card-mhenik-glass d-flex flex-column justify-content-between hover-lift">
+              
+              {/* 📸 Clean Image Placeholder Box with fallback layout */}
+              <div 
+                className="card-img-top d-flex align-items-center justify-content-center bg-light rounded-top-3 border-bottom text-muted position-relative"
+                style={{ height: '160px', overflow: 'hidden' }}
               >
-                Clear Category Filter ×
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* 2. Live Inventory Grid Display (col-md-9) */}
-      <div class="col-md-9">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <p class="text-muted mb-0">
-            Showing <strong class="text-dark">{loading ? '...' : products.length}</strong> of <strong class="text-dark">{totalItems}</strong> matching parts
-          </p>
-        </div>
-
-        {loading ? (
-          <div class="text-center py-5">
-            <div class="spinner-border text-primary" role="status"></div>
-            <p class="text-muted mt-2">Streaming structured catalog items...</p>
-          </div>
-        ) : products.length === 0 ? (
-          <div class="card border-0 shadow-sm p-5 text-center bg-white rounded-3">
-            <h4 class="text-muted fw-bold">No Components Found</h4>
-            <p class="text-muted small mb-0">Double check your SKU reference or query keywords.</p>
-          </div>
-        ) : (
-          <>
-            {/* Cards Grid */}
-            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
-              {products.map((product) => (
-                <div class="col" key={product.sku}>
-                  <div class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden transition-all hover-shadow">
-                    
-                    {/* Component Image Box via our css aspect handling tool */}
-                    <div class="product-img-container border-bottom">
-                      <img 
-                        src={`http://localhost:5000/uploads/${product.sku}.jpg`} 
-                        alt={product.product_name}
-                        onError={(e) => { e.target.src = 'https://placehold.co/300x250?text=No+Image'; }}
-                      />
-                    </div>
-
-                    {/* Card Specifications Body */}
-                    <div class="card-body d-flex flex-column justify-content-between p-3">
-                      <div>
-                        <div class="d-flex justify-content-between align-items-start mb-1">
-                          <span class="badge bg-secondary-subtle text-secondary small font-monospace">{product.sku}</span>
-                          <span class="text-muted tiny text-uppercase font-monospace small">{product.category || 'Spare Part'}</span>
-                        </div>
-                        <h6 class="card-title text-dark fw-bold text-truncate mb-2" title={product.product_name}>
-                          {product.product_name}
-                        </h6>
-                        <p class="card-text text-muted small text-start lh-sm mb-3 text-line-clamp">
-                          {product.description || 'Genuine replacement component calibrated for direct vehicle layout compliance.'}
-                        </p>
-                      </div>
-
-                      <Link to={`/product/${product.sku}`} class="btn btn-outline-primary btn-sm w-100 fw-semibold py-2">
-                        View Item Specifications →
-                      </Link>
-                    </div>
-
-                  </div>
+                {/* You can swap the source for real file names (e.g. `/images/${p.sku}.jpg`) easily here later */}
+                <div className="text-center p-3">
+                  <span className="fs-2 d-block mb-1 opacity-50">🔧</span>
+                  <span className="text-uppercase tracking-wider font-monospace px-2 py-1 rounded bg-white border border-light small" style={{ fontSize: '10px' }}>
+                    No Image Attached
+                  </span>
                 </div>
-              ))}
-            </div>
+              </div>
 
-            {/* 3. Bootstrap Pagination Controls Footer */}
-            {totalPages > 1 && (
-              <nav class="d-flex justify-content-center mt-5">
-                <ul class="pagination pagination-sm shadow-sm">
-                  <li class={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                    <button class="page-link py-2 px-3" onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}>
-                      Previous
-                    </button>
-                  </li>
-                  <li class="page-item disabled">
-                    <span class="page-link bg-white text-dark py-2 px-3 fw-medium">
-                      Page {currentPage} of {totalPages}
-                    </span>
-                  </li>
-                  <li class={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                    <button class="page-link py-2 px-3" onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}>
-                      Next
-                    </button>
-                  </li>
-                </ul>
-              </nav>
+              <div className="card-body p-3 d-flex flex-column justify-content-between">
+                <div>
+                  <span className="badge bg-light text-secondary border font-monospace mb-2 small">{p.sku}</span>
+                  <h6 className="fw-bold text-dark text-uppercase lh-base mb-1" style={{ fontSize: '0.85rem', minHeight: '38px' }}>
+                    {p.product_name}
+                  </h6>
+                </div>
+                <p className="text-success small fw-bold mt-2 mb-0">Est: Ksh 4,500</p>
+              </div>
+
+              <div className="card-footer bg-transparent border-0 pt-0 p-3">
+                <button 
+                  type="button"
+                  className="btn btn-sm btn-mhenik-secondary w-100 fw-bold rounded-2 py-2" 
+                  onClick={() => addToCart(p)}
+                >
+                  🛒 Add to Cart
+                </button>
+              </div>
+            </div>
+          </div>
+        ))
             )}
-          </>
-        )}
-      </div>
+          </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="d-flex justify-content-center gap-2 mt-5">
+              <button type="button" className="btn btn-sm btn-dark px-3" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Prev</button>
+              <span className="align-self-center font-monospace px-3 fw-bold text-secondary">Page {page} of {totalPages}</span>
+              <button type="button" className="btn btn-sm btn-dark px-3" disabled={page === totalPages} onClick={() => setPage(p => p + 1)}>Next</button>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
-
-export default ProductCatalog;

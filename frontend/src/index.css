@@ -1,18 +1,104 @@
-a {
-  text-decoration: none !important;
+:root {
+  --mhenik-crimson: #612940;
+  --mhenik-sky: #5FA8D3;
+  --mhenik-white: #FFFFFF;
+  --mhenik-light-bg: #F8F9FA;
+  --mhenik-dark: #1E1E24;
+
+  --mhenik-translucent-white: rgba(255, 255, 255, 0.88);
 }
 
-/* Forces image frames to keep uniform dimensions across different screen aspect ratios */
-.product-img-container {
-  height: 250px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #f8f9fa;
+/* 🔩 Repeating Nuts & Bolts Textured Canvas Pattern */
+.mhenik-pattern-canvas {
+  background-color: #F3F4F6;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44'%3E%3Cg fill='%23612940' fill-opacity='0.03'%3E%3Cpath d='M12 4.5l3.5 2v4l-3.5 2-3.5-2v-4zM34 26.5l3.5 2v4l-3.5 2-3.5-2v-4z'/%3E%3Ccircle cx='12' cy='30' r='1.5'/%3E%3Ccircle cx='34' cy='8' r='1.5'/%3E%3C/g%3E%3C/svg%3E");
 }
 
-.product-img-container img {
-  max-height: 100%;
-  max-width: 100%;
-  object-fit: contain;
+/* 🛡️ Enhanced Smooth Rounded Utilities */
+.rounded-mhenik {
+  border-radius: 20px !important;
+}
+
+.card-mhenik-glass {
+  background-color: var(--mhenik-translucent-white) !important;
+  backdrop-filter: blur(10px); /* Creates a smooth premium glass frost */
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Background Utilities */
+.bg-mhenik-crimson { background-color: var(--mhenik-crimson) !important; }
+.bg-mhenik-sky { background-color: var(--mhenik-sky) !important; }
+.bg-mhenik-dark { background-color: var(--mhenik-dark) !important; }
+
+/* Text Utilities */
+.text-mhenik-crimson { color: var(--mhenik-crimson) !important; }
+.text-mhenik-sky { color: var(--mhenik-sky) !important; }
+
+/* Custom Component Overrides */
+.btn-mhenik-primary {
+  background-color: var(--mhenik-crimson);
+  color: var(--mhenik-white);
+  border: none;
+  transition: all 0.2s ease;
+}
+.btn-mhenik-primary:hover {
+  background-color: #4A1E2F;
+  color: var(--mhenik-white);
+}
+
+.btn-mhenik-secondary {
+  background-color: var(--mhenik-sky);
+  color: var(--mhenik-dark);
+  border: none;
+  transition: all 0.2s ease;
+}
+.btn-mhenik-secondary:hover {
+  background-color: #4B92BA;
+  color: var(--mhenik-dark);
+}
+
+.card-mhenik-stat {
+  border-left: 4px solid var(--mhenik-crimson) !important;
+}
+
+/* Custom Animated Navigation Links */
+.custom-nav-link {
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-block;
+}
+
+/* Hover State: Enlarge slightly and increase weights */
+.custom-nav-link:hover {
+  transform: scale(1.06); /* Smoothly enlarges a bit */
+  font-weight: 700 !important; /* Becomes bolder */
+  color: var(--mhenik-crimson) !important; /* Highlights using your branding violet */
+}
+
+/* Underline Animation Setup */
+.custom-nav-link::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  transform: scaleX(0);
+  height: 2px;
+  bottom: -2px;
+  left: 0;
+  background-color: var(--mhenik-sky); /* Underline matches your fresh sky blue palette */
+  transform-origin: bottom right;
+  transition: transform 0.25s ease-out;
+}
+
+.custom-nav-link:hover::after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
+
+/* Hover lift effect for product cards */
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(95, 168, 211, 0.15) !important;
 }
