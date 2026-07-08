@@ -1,0 +1,5 @@
+SKU,Product_Name,Category,Make,Model,Position,Selling_Price,category_id,vehicle_id
+1155,AIR CLEANER HOUSING REVO,Engine & Cooling,Toyota,Hilux,,5500.00,cat_08,veh_050
+1883,AIR PIPE CLEANER DUALIS,Engine & Cooling,Nissan,Dualis,,4500.00,cat_16,veh_020
+3746,ALLOY AXIO LH,Mirrors,Toyota,Axio,Left,85.00,cat_17,veh_040
+2633,ARC MOULDING CX5 18 FL,Body Trim & Mouldings,Mazda,CX5,Front Left,3500.00,cat_02,veh_013

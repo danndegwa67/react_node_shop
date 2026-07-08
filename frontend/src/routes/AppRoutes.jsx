@@ -8,6 +8,8 @@ import Orders from '../pages/Orders';
 import About from '../pages/About';
 import Contact from '../pages/Contact';
 import FAQ from '../pages/FAQ';
+import AdminScan from '../pages/AdminScan';
+import AdminDashboard from '../pages/AdminDashboard';
 
 function AppRoutes() {
   return (
@@ -27,6 +29,10 @@ function AppRoutes() {
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/faq" element={<FAQ />} />
+      <Route path="/admin/scan" element={<AdminScan />} />
+
+      {/* Admin Dashboard */}
+      <Route path="/admin/dashboard" element={<AdminDashboard />} />
     </Routes>
   );
 }

@@ -1,0 +1,62 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated-client"
+}
+
+model Category {
+  id       String    @id
+  name     String
+  products Product[]
+}
+
+model Vehicle {
+  id       String    @id
+  make     String
+  model    String
+  products Product[]
+}
+
+model Product {
+  sku          String      @id
+  productName  String
+  position     String?  
+  sellingPrice Float
+  stock        Int         @default(0)
+  category_id  String
+  category     Category    @relation(fields: [category_id], references: [id])
+  vehicle_id   String
+  vehicle      Vehicle     @relation(fields: [vehicle_id], references: [id])
+  orderItems   OrderItem[] // Relates to order processing
+}
+
+// 👥 New Table: Employee access controls
+model User {
+  id       String @id @default(uuid())
+  email    String @unique
+  password String // Hashed
+  name     String
+  role     String @default("employee") // "employee" or "admin"
+}
+
+// 📦 New Table: Customer/Invoice Orders requiring approval
+model Order {
+  id          String      @id @default(uuid())
+  customerName String
+  status      String      @default("PENDING") // PENDING, APPROVED, DISAPPROVED, DEPARTED
+  createdAt   DateTime    @default(now())
+  items       OrderItem[]
+}
+
+// ⛓️ Join Table: Products inside an order
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productSku String
+  product   Product @relation(fields: [productSku], references: [sku])
+  quantity  Int
+}

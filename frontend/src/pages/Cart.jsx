@@ -35,26 +35,40 @@ export default function Cart() {
   const processRequestCheckout = () => {
     if (cartItems.length === 0) return;
 
-    // Compile active cart list items straight into order tracking history
-    const runningOrders = JSON.parse(localStorage.getItem('mhenik_orders')) || [];
-    const randomRefNum = `MT-2026-${Math.floor(1000 + Math.random() * 9000)}`;
-    
-    const newOrder = {
-      orderId: randomRefNum,
-      date: new Date().toLocaleDateString(),
-      status: "Pending Verification",
+    // 📦 Assemble the structured payload matching our Express route rules
+    const orderPayload = {
+      customerName: "Joshua Ochieng", // Sourced automatically for availability logs
       items: cartItems
     };
 
-    runningOrders.unshift(newOrder); 
-    localStorage.setItem('mhenik_orders', JSON.stringify(runningOrders));
-    
-    // Wipe local user state clear post checkout
-    localStorage.removeItem('mhenik_cart');
-    window.dispatchEvent(new Event('storage'));
+    // 🌐 Stream the request payload directly to your Node/Postgres backend
+    fetch('http://localhost:5000/api/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(orderPayload)
+    })
+    .then(res => {
+      if (!res.ok) {
+        throw new Error("Failed to register availability container block.");
+      }
+      return res.json();
+    })
+    .then(data => {
+      alert("✅ Success! Your availability request has been sent to the warehouse framework.");
+      
+      // Clear the cart locally once successfully logged in the database
+      localStorage.removeItem('mhenik_cart');
+      window.dispatchEvent(new Event('storage'));
 
-    // Move straight to dashboard tracking view
-    navigate('/orders');
+      // Redirect over to the customer's order history tracking pane
+      navigate('/orders');
+    })
+    .catch(err => {
+      console.error("Network write exception posting checkout container:", err);
+      alert("❌ Error: Could not connect to the warehouse registration desk.");
+    });
   };
 
   const calculateSubtotal = () => {
