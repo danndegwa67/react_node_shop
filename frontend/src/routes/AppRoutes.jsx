@@ -10,6 +10,7 @@ import Contact from '../pages/Contact';
 import FAQ from '../pages/FAQ';
 import AdminScan from '../pages/AdminScan';
 import AdminDashboard from '../pages/AdminDashboard';
+import AdminAuth from '../pages/AdminAuth';
 
 function AppRoutes() {
   return (
@@ -33,6 +34,8 @@ function AppRoutes() {
 
       {/* Admin Dashboard */}
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
+      <Route path="/admin/auth" element={<AdminAuth />} />
+      
     </Routes>
   );
 }

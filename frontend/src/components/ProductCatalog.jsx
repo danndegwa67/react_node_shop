@@ -11,14 +11,14 @@ export default function ProductCatalog() {
   const [alertMsg, setAlertMsg] = useState('');
 
   const reasonableFilters = [
-    { label: "✨ All Spares", value: "" },
-    { label: "🪞 Mirrors", value: "MIRROR" },
-    { label: "🚗 Bumpers & Slides", value: "BUMPER" },
-    { label: "💡 Headlens & Lamps", value: "LAMP" },
-    { label: "🛠️ Mouldings & Trim", value: "MOULDING" },
-    { label: "🧬 Weatherstrips", value: "WEATHERSTRIP" },
-    { label: "🏁 Grilles", value: "GRILLE" },
-    { label: "⚙️ Prado Specific", value: "PRADO" }
+    { label: "All Spares", value: "" },
+    { label: "Mirrors", value: "MIRROR" },
+    { label: "Bumpers & Slides", value: "BUMPER" },
+    { label: "Headlens & Lamps", value: "LAMP" },
+    { label: "Mouldings & Trim", value: "MOULDING" },
+    { label: "Weatherstrips", value: "WEATHERSTRIP" },
+    { label: "Grilles", value: "GRILLE" },
+    { label: "Prado Specific", value: "PRADO" }
   ];
 
   useEffect(() => {
