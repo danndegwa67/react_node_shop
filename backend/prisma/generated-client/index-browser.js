@@ -146,7 +146,9 @@ exports.Prisma.UserScalarFieldEnum = {
   email: 'email',
   password: 'password',
   name: 'name',
-  role: 'role'
+  role: 'role',
+  status: 'status',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.OrderScalarFieldEnum = {
@@ -161,6 +163,27 @@ exports.Prisma.OrderItemScalarFieldEnum = {
   orderId: 'orderId',
   productSku: 'productSku',
   quantity: 'quantity'
+};
+
+exports.Prisma.ActivityLogScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  userName: 'userName',
+  action: 'action',
+  details: 'details',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.StockAdjustmentScalarFieldEnum = {
+  id: 'id',
+  productSku: 'productSku',
+  productName: 'productName',
+  oldStock: 'oldStock',
+  newStock: 'newStock',
+  reason: 'reason',
+  requestedBy: 'requestedBy',
+  status: 'status',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.SortOrder = {
@@ -185,7 +208,9 @@ exports.Prisma.ModelName = {
   Product: 'Product',
   User: 'User',
   Order: 'Order',
-  OrderItem: 'OrderItem'
+  OrderItem: 'OrderItem',
+  ActivityLog: 'ActivityLog',
+  StockAdjustment: 'StockAdjustment'
 };
 
 /**

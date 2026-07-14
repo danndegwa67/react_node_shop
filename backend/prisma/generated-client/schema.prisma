@@ -35,11 +35,13 @@ model Product {
 
 // 👥 New Table: Employee access controls
 model User {
-  id       String @id @default(uuid())
-  email    String @unique
-  password String // Hashed
-  name     String
-  role     String @default("employee") // "employee" or "admin"
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("employee")
+  status    String   @default("PENDING") // 👈 Ensure this exact line is present
+  createdAt DateTime @default(now())
 }
 
 // 📦 New Table: Customer/Invoice Orders requiring approval
@@ -59,4 +61,25 @@ model OrderItem {
   productSku String
   product    Product @relation(fields: [productSku], references: [sku])
   quantity   Int
+}
+
+model ActivityLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  userName  String   @default("System / Scanner")
+  action    String // e.g., "APPROVED_ORDER", "SCAN_DEPARTURE", "REGISTER_USER"
+  details   String // e.g., "Approved order ref: MT-2026-4821"
+  createdAt DateTime @default(now())
+}
+
+model StockAdjustment {
+  id          String   @id @default(uuid())
+  productSku  String
+  productName String
+  oldStock    Int
+  newStock    Int
+  reason      String
+  requestedBy String // Name of staff member who initiated it
+  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt   DateTime @default(now())
 }

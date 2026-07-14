@@ -43,6 +43,16 @@ export type Order = $Result.DefaultSelection<Prisma.$OrderPayload>
  * 
  */
 export type OrderItem = $Result.DefaultSelection<Prisma.$OrderItemPayload>
+/**
+ * Model ActivityLog
+ * 
+ */
+export type ActivityLog = $Result.DefaultSelection<Prisma.$ActivityLogPayload>
+/**
+ * Model StockAdjustment
+ * 
+ */
+export type StockAdjustment = $Result.DefaultSelection<Prisma.$StockAdjustmentPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -224,6 +234,26 @@ export class PrismaClient<
     * ```
     */
   get orderItem(): Prisma.OrderItemDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.activityLog`: Exposes CRUD operations for the **ActivityLog** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ActivityLogs
+    * const activityLogs = await prisma.activityLog.findMany()
+    * ```
+    */
+  get activityLog(): Prisma.ActivityLogDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.stockAdjustment`: Exposes CRUD operations for the **StockAdjustment** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more StockAdjustments
+    * const stockAdjustments = await prisma.stockAdjustment.findMany()
+    * ```
+    */
+  get stockAdjustment(): Prisma.StockAdjustmentDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -663,7 +693,9 @@ export namespace Prisma {
     Product: 'Product',
     User: 'User',
     Order: 'Order',
-    OrderItem: 'OrderItem'
+    OrderItem: 'OrderItem',
+    ActivityLog: 'ActivityLog',
+    StockAdjustment: 'StockAdjustment'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -679,7 +711,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "category" | "vehicle" | "product" | "user" | "order" | "orderItem"
+      modelProps: "category" | "vehicle" | "product" | "user" | "order" | "orderItem" | "activityLog" | "stockAdjustment"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1127,6 +1159,154 @@ export namespace Prisma {
           }
         }
       }
+      ActivityLog: {
+        payload: Prisma.$ActivityLogPayload<ExtArgs>
+        fields: Prisma.ActivityLogFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ActivityLogFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ActivityLogFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogPayload>
+          }
+          findFirst: {
+            args: Prisma.ActivityLogFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ActivityLogFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogPayload>
+          }
+          findMany: {
+            args: Prisma.ActivityLogFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogPayload>[]
+          }
+          create: {
+            args: Prisma.ActivityLogCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogPayload>
+          }
+          createMany: {
+            args: Prisma.ActivityLogCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ActivityLogCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogPayload>[]
+          }
+          delete: {
+            args: Prisma.ActivityLogDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogPayload>
+          }
+          update: {
+            args: Prisma.ActivityLogUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogPayload>
+          }
+          deleteMany: {
+            args: Prisma.ActivityLogDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ActivityLogUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ActivityLogUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogPayload>[]
+          }
+          upsert: {
+            args: Prisma.ActivityLogUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ActivityLogPayload>
+          }
+          aggregate: {
+            args: Prisma.ActivityLogAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateActivityLog>
+          }
+          groupBy: {
+            args: Prisma.ActivityLogGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ActivityLogGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ActivityLogCountArgs<ExtArgs>
+            result: $Utils.Optional<ActivityLogCountAggregateOutputType> | number
+          }
+        }
+      }
+      StockAdjustment: {
+        payload: Prisma.$StockAdjustmentPayload<ExtArgs>
+        fields: Prisma.StockAdjustmentFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.StockAdjustmentFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockAdjustmentPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.StockAdjustmentFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockAdjustmentPayload>
+          }
+          findFirst: {
+            args: Prisma.StockAdjustmentFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockAdjustmentPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.StockAdjustmentFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockAdjustmentPayload>
+          }
+          findMany: {
+            args: Prisma.StockAdjustmentFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockAdjustmentPayload>[]
+          }
+          create: {
+            args: Prisma.StockAdjustmentCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockAdjustmentPayload>
+          }
+          createMany: {
+            args: Prisma.StockAdjustmentCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.StockAdjustmentCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockAdjustmentPayload>[]
+          }
+          delete: {
+            args: Prisma.StockAdjustmentDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockAdjustmentPayload>
+          }
+          update: {
+            args: Prisma.StockAdjustmentUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockAdjustmentPayload>
+          }
+          deleteMany: {
+            args: Prisma.StockAdjustmentDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.StockAdjustmentUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.StockAdjustmentUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockAdjustmentPayload>[]
+          }
+          upsert: {
+            args: Prisma.StockAdjustmentUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockAdjustmentPayload>
+          }
+          aggregate: {
+            args: Prisma.StockAdjustmentAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateStockAdjustment>
+          }
+          groupBy: {
+            args: Prisma.StockAdjustmentGroupByArgs<ExtArgs>
+            result: $Utils.Optional<StockAdjustmentGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.StockAdjustmentCountArgs<ExtArgs>
+            result: $Utils.Optional<StockAdjustmentCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1241,6 +1421,8 @@ export namespace Prisma {
     user?: UserOmit
     order?: OrderOmit
     orderItem?: OrderItemOmit
+    activityLog?: ActivityLogOmit
+    stockAdjustment?: StockAdjustmentOmit
   }
 
   /* Types for Logging */
@@ -4710,6 +4892,8 @@ export namespace Prisma {
     password: string | null
     name: string | null
     role: string | null
+    status: string | null
+    createdAt: Date | null
   }
 
   export type UserMaxAggregateOutputType = {
@@ -4718,6 +4902,8 @@ export namespace Prisma {
     password: string | null
     name: string | null
     role: string | null
+    status: string | null
+    createdAt: Date | null
   }
 
   export type UserCountAggregateOutputType = {
@@ -4726,6 +4912,8 @@ export namespace Prisma {
     password: number
     name: number
     role: number
+    status: number
+    createdAt: number
     _all: number
   }
 
@@ -4736,6 +4924,8 @@ export namespace Prisma {
     password?: true
     name?: true
     role?: true
+    status?: true
+    createdAt?: true
   }
 
   export type UserMaxAggregateInputType = {
@@ -4744,6 +4934,8 @@ export namespace Prisma {
     password?: true
     name?: true
     role?: true
+    status?: true
+    createdAt?: true
   }
 
   export type UserCountAggregateInputType = {
@@ -4752,6 +4944,8 @@ export namespace Prisma {
     password?: true
     name?: true
     role?: true
+    status?: true
+    createdAt?: true
     _all?: true
   }
 
@@ -4833,6 +5027,8 @@ export namespace Prisma {
     password: string
     name: string
     role: string
+    status: string
+    createdAt: Date
     _count: UserCountAggregateOutputType | null
     _min: UserMinAggregateOutputType | null
     _max: UserMaxAggregateOutputType | null
@@ -4858,6 +5054,8 @@ export namespace Prisma {
     password?: boolean
     name?: boolean
     role?: boolean
+    status?: boolean
+    createdAt?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -4866,6 +5064,8 @@ export namespace Prisma {
     password?: boolean
     name?: boolean
     role?: boolean
+    status?: boolean
+    createdAt?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -4874,6 +5074,8 @@ export namespace Prisma {
     password?: boolean
     name?: boolean
     role?: boolean
+    status?: boolean
+    createdAt?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectScalar = {
@@ -4882,9 +5084,11 @@ export namespace Prisma {
     password?: boolean
     name?: boolean
     role?: boolean
+    status?: boolean
+    createdAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "password" | "name" | "role", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "password" | "name" | "role" | "status" | "createdAt", ExtArgs["result"]["user"]>
 
   export type $UserPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "User"
@@ -4895,6 +5099,8 @@ export namespace Prisma {
       password: string
       name: string
       role: string
+      status: string
+      createdAt: Date
     }, ExtArgs["result"]["user"]>
     composites: {}
   }
@@ -5323,6 +5529,8 @@ export namespace Prisma {
     readonly password: FieldRef<"User", 'String'>
     readonly name: FieldRef<"User", 'String'>
     readonly role: FieldRef<"User", 'String'>
+    readonly status: FieldRef<"User", 'String'>
+    readonly createdAt: FieldRef<"User", 'DateTime'>
   }
     
 
@@ -7849,6 +8057,2109 @@ export namespace Prisma {
 
 
   /**
+   * Model ActivityLog
+   */
+
+  export type AggregateActivityLog = {
+    _count: ActivityLogCountAggregateOutputType | null
+    _min: ActivityLogMinAggregateOutputType | null
+    _max: ActivityLogMaxAggregateOutputType | null
+  }
+
+  export type ActivityLogMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    userName: string | null
+    action: string | null
+    details: string | null
+    createdAt: Date | null
+  }
+
+  export type ActivityLogMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    userName: string | null
+    action: string | null
+    details: string | null
+    createdAt: Date | null
+  }
+
+  export type ActivityLogCountAggregateOutputType = {
+    id: number
+    userId: number
+    userName: number
+    action: number
+    details: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type ActivityLogMinAggregateInputType = {
+    id?: true
+    userId?: true
+    userName?: true
+    action?: true
+    details?: true
+    createdAt?: true
+  }
+
+  export type ActivityLogMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    userName?: true
+    action?: true
+    details?: true
+    createdAt?: true
+  }
+
+  export type ActivityLogCountAggregateInputType = {
+    id?: true
+    userId?: true
+    userName?: true
+    action?: true
+    details?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type ActivityLogAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ActivityLog to aggregate.
+     */
+    where?: ActivityLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ActivityLogs to fetch.
+     */
+    orderBy?: ActivityLogOrderByWithRelationInput | ActivityLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ActivityLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ActivityLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ActivityLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ActivityLogs
+    **/
+    _count?: true | ActivityLogCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ActivityLogMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ActivityLogMaxAggregateInputType
+  }
+
+  export type GetActivityLogAggregateType<T extends ActivityLogAggregateArgs> = {
+        [P in keyof T & keyof AggregateActivityLog]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateActivityLog[P]>
+      : GetScalarType<T[P], AggregateActivityLog[P]>
+  }
+
+
+
+
+  export type ActivityLogGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ActivityLogWhereInput
+    orderBy?: ActivityLogOrderByWithAggregationInput | ActivityLogOrderByWithAggregationInput[]
+    by: ActivityLogScalarFieldEnum[] | ActivityLogScalarFieldEnum
+    having?: ActivityLogScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ActivityLogCountAggregateInputType | true
+    _min?: ActivityLogMinAggregateInputType
+    _max?: ActivityLogMaxAggregateInputType
+  }
+
+  export type ActivityLogGroupByOutputType = {
+    id: string
+    userId: string | null
+    userName: string
+    action: string
+    details: string
+    createdAt: Date
+    _count: ActivityLogCountAggregateOutputType | null
+    _min: ActivityLogMinAggregateOutputType | null
+    _max: ActivityLogMaxAggregateOutputType | null
+  }
+
+  type GetActivityLogGroupByPayload<T extends ActivityLogGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ActivityLogGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ActivityLogGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ActivityLogGroupByOutputType[P]>
+            : GetScalarType<T[P], ActivityLogGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ActivityLogSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    userName?: boolean
+    action?: boolean
+    details?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["activityLog"]>
+
+  export type ActivityLogSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    userName?: boolean
+    action?: boolean
+    details?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["activityLog"]>
+
+  export type ActivityLogSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    userName?: boolean
+    action?: boolean
+    details?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["activityLog"]>
+
+  export type ActivityLogSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    userName?: boolean
+    action?: boolean
+    details?: boolean
+    createdAt?: boolean
+  }
+
+  export type ActivityLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "userName" | "action" | "details" | "createdAt", ExtArgs["result"]["activityLog"]>
+
+  export type $ActivityLogPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ActivityLog"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string | null
+      userName: string
+      action: string
+      details: string
+      createdAt: Date
+    }, ExtArgs["result"]["activityLog"]>
+    composites: {}
+  }
+
+  type ActivityLogGetPayload<S extends boolean | null | undefined | ActivityLogDefaultArgs> = $Result.GetResult<Prisma.$ActivityLogPayload, S>
+
+  type ActivityLogCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ActivityLogFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ActivityLogCountAggregateInputType | true
+    }
+
+  export interface ActivityLogDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ActivityLog'], meta: { name: 'ActivityLog' } }
+    /**
+     * Find zero or one ActivityLog that matches the filter.
+     * @param {ActivityLogFindUniqueArgs} args - Arguments to find a ActivityLog
+     * @example
+     * // Get one ActivityLog
+     * const activityLog = await prisma.activityLog.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ActivityLogFindUniqueArgs>(args: SelectSubset<T, ActivityLogFindUniqueArgs<ExtArgs>>): Prisma__ActivityLogClient<$Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ActivityLog that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ActivityLogFindUniqueOrThrowArgs} args - Arguments to find a ActivityLog
+     * @example
+     * // Get one ActivityLog
+     * const activityLog = await prisma.activityLog.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ActivityLogFindUniqueOrThrowArgs>(args: SelectSubset<T, ActivityLogFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ActivityLogClient<$Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ActivityLog that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ActivityLogFindFirstArgs} args - Arguments to find a ActivityLog
+     * @example
+     * // Get one ActivityLog
+     * const activityLog = await prisma.activityLog.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ActivityLogFindFirstArgs>(args?: SelectSubset<T, ActivityLogFindFirstArgs<ExtArgs>>): Prisma__ActivityLogClient<$Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ActivityLog that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ActivityLogFindFirstOrThrowArgs} args - Arguments to find a ActivityLog
+     * @example
+     * // Get one ActivityLog
+     * const activityLog = await prisma.activityLog.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ActivityLogFindFirstOrThrowArgs>(args?: SelectSubset<T, ActivityLogFindFirstOrThrowArgs<ExtArgs>>): Prisma__ActivityLogClient<$Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ActivityLogs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ActivityLogFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ActivityLogs
+     * const activityLogs = await prisma.activityLog.findMany()
+     * 
+     * // Get first 10 ActivityLogs
+     * const activityLogs = await prisma.activityLog.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const activityLogWithIdOnly = await prisma.activityLog.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ActivityLogFindManyArgs>(args?: SelectSubset<T, ActivityLogFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ActivityLog.
+     * @param {ActivityLogCreateArgs} args - Arguments to create a ActivityLog.
+     * @example
+     * // Create one ActivityLog
+     * const ActivityLog = await prisma.activityLog.create({
+     *   data: {
+     *     // ... data to create a ActivityLog
+     *   }
+     * })
+     * 
+     */
+    create<T extends ActivityLogCreateArgs>(args: SelectSubset<T, ActivityLogCreateArgs<ExtArgs>>): Prisma__ActivityLogClient<$Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ActivityLogs.
+     * @param {ActivityLogCreateManyArgs} args - Arguments to create many ActivityLogs.
+     * @example
+     * // Create many ActivityLogs
+     * const activityLog = await prisma.activityLog.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ActivityLogCreateManyArgs>(args?: SelectSubset<T, ActivityLogCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ActivityLogs and returns the data saved in the database.
+     * @param {ActivityLogCreateManyAndReturnArgs} args - Arguments to create many ActivityLogs.
+     * @example
+     * // Create many ActivityLogs
+     * const activityLog = await prisma.activityLog.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ActivityLogs and only return the `id`
+     * const activityLogWithIdOnly = await prisma.activityLog.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ActivityLogCreateManyAndReturnArgs>(args?: SelectSubset<T, ActivityLogCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ActivityLog.
+     * @param {ActivityLogDeleteArgs} args - Arguments to delete one ActivityLog.
+     * @example
+     * // Delete one ActivityLog
+     * const ActivityLog = await prisma.activityLog.delete({
+     *   where: {
+     *     // ... filter to delete one ActivityLog
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ActivityLogDeleteArgs>(args: SelectSubset<T, ActivityLogDeleteArgs<ExtArgs>>): Prisma__ActivityLogClient<$Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ActivityLog.
+     * @param {ActivityLogUpdateArgs} args - Arguments to update one ActivityLog.
+     * @example
+     * // Update one ActivityLog
+     * const activityLog = await prisma.activityLog.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ActivityLogUpdateArgs>(args: SelectSubset<T, ActivityLogUpdateArgs<ExtArgs>>): Prisma__ActivityLogClient<$Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ActivityLogs.
+     * @param {ActivityLogDeleteManyArgs} args - Arguments to filter ActivityLogs to delete.
+     * @example
+     * // Delete a few ActivityLogs
+     * const { count } = await prisma.activityLog.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ActivityLogDeleteManyArgs>(args?: SelectSubset<T, ActivityLogDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ActivityLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ActivityLogUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ActivityLogs
+     * const activityLog = await prisma.activityLog.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ActivityLogUpdateManyArgs>(args: SelectSubset<T, ActivityLogUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ActivityLogs and returns the data updated in the database.
+     * @param {ActivityLogUpdateManyAndReturnArgs} args - Arguments to update many ActivityLogs.
+     * @example
+     * // Update many ActivityLogs
+     * const activityLog = await prisma.activityLog.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ActivityLogs and only return the `id`
+     * const activityLogWithIdOnly = await prisma.activityLog.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ActivityLogUpdateManyAndReturnArgs>(args: SelectSubset<T, ActivityLogUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ActivityLog.
+     * @param {ActivityLogUpsertArgs} args - Arguments to update or create a ActivityLog.
+     * @example
+     * // Update or create a ActivityLog
+     * const activityLog = await prisma.activityLog.upsert({
+     *   create: {
+     *     // ... data to create a ActivityLog
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ActivityLog we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ActivityLogUpsertArgs>(args: SelectSubset<T, ActivityLogUpsertArgs<ExtArgs>>): Prisma__ActivityLogClient<$Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ActivityLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ActivityLogCountArgs} args - Arguments to filter ActivityLogs to count.
+     * @example
+     * // Count the number of ActivityLogs
+     * const count = await prisma.activityLog.count({
+     *   where: {
+     *     // ... the filter for the ActivityLogs we want to count
+     *   }
+     * })
+    **/
+    count<T extends ActivityLogCountArgs>(
+      args?: Subset<T, ActivityLogCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ActivityLogCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ActivityLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ActivityLogAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ActivityLogAggregateArgs>(args: Subset<T, ActivityLogAggregateArgs>): Prisma.PrismaPromise<GetActivityLogAggregateType<T>>
+
+    /**
+     * Group by ActivityLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ActivityLogGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ActivityLogGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ActivityLogGroupByArgs['orderBy'] }
+        : { orderBy?: ActivityLogGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ActivityLogGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetActivityLogGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ActivityLog model
+   */
+  readonly fields: ActivityLogFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ActivityLog.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ActivityLogClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ActivityLog model
+   */
+  interface ActivityLogFieldRefs {
+    readonly id: FieldRef<"ActivityLog", 'String'>
+    readonly userId: FieldRef<"ActivityLog", 'String'>
+    readonly userName: FieldRef<"ActivityLog", 'String'>
+    readonly action: FieldRef<"ActivityLog", 'String'>
+    readonly details: FieldRef<"ActivityLog", 'String'>
+    readonly createdAt: FieldRef<"ActivityLog", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ActivityLog findUnique
+   */
+  export type ActivityLogFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLog
+     */
+    select?: ActivityLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLog
+     */
+    omit?: ActivityLogOmit<ExtArgs> | null
+    /**
+     * Filter, which ActivityLog to fetch.
+     */
+    where: ActivityLogWhereUniqueInput
+  }
+
+  /**
+   * ActivityLog findUniqueOrThrow
+   */
+  export type ActivityLogFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLog
+     */
+    select?: ActivityLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLog
+     */
+    omit?: ActivityLogOmit<ExtArgs> | null
+    /**
+     * Filter, which ActivityLog to fetch.
+     */
+    where: ActivityLogWhereUniqueInput
+  }
+
+  /**
+   * ActivityLog findFirst
+   */
+  export type ActivityLogFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLog
+     */
+    select?: ActivityLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLog
+     */
+    omit?: ActivityLogOmit<ExtArgs> | null
+    /**
+     * Filter, which ActivityLog to fetch.
+     */
+    where?: ActivityLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ActivityLogs to fetch.
+     */
+    orderBy?: ActivityLogOrderByWithRelationInput | ActivityLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ActivityLogs.
+     */
+    cursor?: ActivityLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ActivityLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ActivityLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ActivityLogs.
+     */
+    distinct?: ActivityLogScalarFieldEnum | ActivityLogScalarFieldEnum[]
+  }
+
+  /**
+   * ActivityLog findFirstOrThrow
+   */
+  export type ActivityLogFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLog
+     */
+    select?: ActivityLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLog
+     */
+    omit?: ActivityLogOmit<ExtArgs> | null
+    /**
+     * Filter, which ActivityLog to fetch.
+     */
+    where?: ActivityLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ActivityLogs to fetch.
+     */
+    orderBy?: ActivityLogOrderByWithRelationInput | ActivityLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ActivityLogs.
+     */
+    cursor?: ActivityLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ActivityLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ActivityLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ActivityLogs.
+     */
+    distinct?: ActivityLogScalarFieldEnum | ActivityLogScalarFieldEnum[]
+  }
+
+  /**
+   * ActivityLog findMany
+   */
+  export type ActivityLogFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLog
+     */
+    select?: ActivityLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLog
+     */
+    omit?: ActivityLogOmit<ExtArgs> | null
+    /**
+     * Filter, which ActivityLogs to fetch.
+     */
+    where?: ActivityLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ActivityLogs to fetch.
+     */
+    orderBy?: ActivityLogOrderByWithRelationInput | ActivityLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ActivityLogs.
+     */
+    cursor?: ActivityLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ActivityLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ActivityLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ActivityLogs.
+     */
+    distinct?: ActivityLogScalarFieldEnum | ActivityLogScalarFieldEnum[]
+  }
+
+  /**
+   * ActivityLog create
+   */
+  export type ActivityLogCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLog
+     */
+    select?: ActivityLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLog
+     */
+    omit?: ActivityLogOmit<ExtArgs> | null
+    /**
+     * The data needed to create a ActivityLog.
+     */
+    data: XOR<ActivityLogCreateInput, ActivityLogUncheckedCreateInput>
+  }
+
+  /**
+   * ActivityLog createMany
+   */
+  export type ActivityLogCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ActivityLogs.
+     */
+    data: ActivityLogCreateManyInput | ActivityLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ActivityLog createManyAndReturn
+   */
+  export type ActivityLogCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLog
+     */
+    select?: ActivityLogSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLog
+     */
+    omit?: ActivityLogOmit<ExtArgs> | null
+    /**
+     * The data used to create many ActivityLogs.
+     */
+    data: ActivityLogCreateManyInput | ActivityLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ActivityLog update
+   */
+  export type ActivityLogUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLog
+     */
+    select?: ActivityLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLog
+     */
+    omit?: ActivityLogOmit<ExtArgs> | null
+    /**
+     * The data needed to update a ActivityLog.
+     */
+    data: XOR<ActivityLogUpdateInput, ActivityLogUncheckedUpdateInput>
+    /**
+     * Choose, which ActivityLog to update.
+     */
+    where: ActivityLogWhereUniqueInput
+  }
+
+  /**
+   * ActivityLog updateMany
+   */
+  export type ActivityLogUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ActivityLogs.
+     */
+    data: XOR<ActivityLogUpdateManyMutationInput, ActivityLogUncheckedUpdateManyInput>
+    /**
+     * Filter which ActivityLogs to update
+     */
+    where?: ActivityLogWhereInput
+    /**
+     * Limit how many ActivityLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ActivityLog updateManyAndReturn
+   */
+  export type ActivityLogUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLog
+     */
+    select?: ActivityLogSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLog
+     */
+    omit?: ActivityLogOmit<ExtArgs> | null
+    /**
+     * The data used to update ActivityLogs.
+     */
+    data: XOR<ActivityLogUpdateManyMutationInput, ActivityLogUncheckedUpdateManyInput>
+    /**
+     * Filter which ActivityLogs to update
+     */
+    where?: ActivityLogWhereInput
+    /**
+     * Limit how many ActivityLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ActivityLog upsert
+   */
+  export type ActivityLogUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLog
+     */
+    select?: ActivityLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLog
+     */
+    omit?: ActivityLogOmit<ExtArgs> | null
+    /**
+     * The filter to search for the ActivityLog to update in case it exists.
+     */
+    where: ActivityLogWhereUniqueInput
+    /**
+     * In case the ActivityLog found by the `where` argument doesn't exist, create a new ActivityLog with this data.
+     */
+    create: XOR<ActivityLogCreateInput, ActivityLogUncheckedCreateInput>
+    /**
+     * In case the ActivityLog was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ActivityLogUpdateInput, ActivityLogUncheckedUpdateInput>
+  }
+
+  /**
+   * ActivityLog delete
+   */
+  export type ActivityLogDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLog
+     */
+    select?: ActivityLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLog
+     */
+    omit?: ActivityLogOmit<ExtArgs> | null
+    /**
+     * Filter which ActivityLog to delete.
+     */
+    where: ActivityLogWhereUniqueInput
+  }
+
+  /**
+   * ActivityLog deleteMany
+   */
+  export type ActivityLogDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ActivityLogs to delete
+     */
+    where?: ActivityLogWhereInput
+    /**
+     * Limit how many ActivityLogs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ActivityLog without action
+   */
+  export type ActivityLogDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ActivityLog
+     */
+    select?: ActivityLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ActivityLog
+     */
+    omit?: ActivityLogOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model StockAdjustment
+   */
+
+  export type AggregateStockAdjustment = {
+    _count: StockAdjustmentCountAggregateOutputType | null
+    _avg: StockAdjustmentAvgAggregateOutputType | null
+    _sum: StockAdjustmentSumAggregateOutputType | null
+    _min: StockAdjustmentMinAggregateOutputType | null
+    _max: StockAdjustmentMaxAggregateOutputType | null
+  }
+
+  export type StockAdjustmentAvgAggregateOutputType = {
+    oldStock: number | null
+    newStock: number | null
+  }
+
+  export type StockAdjustmentSumAggregateOutputType = {
+    oldStock: number | null
+    newStock: number | null
+  }
+
+  export type StockAdjustmentMinAggregateOutputType = {
+    id: string | null
+    productSku: string | null
+    productName: string | null
+    oldStock: number | null
+    newStock: number | null
+    reason: string | null
+    requestedBy: string | null
+    status: string | null
+    createdAt: Date | null
+  }
+
+  export type StockAdjustmentMaxAggregateOutputType = {
+    id: string | null
+    productSku: string | null
+    productName: string | null
+    oldStock: number | null
+    newStock: number | null
+    reason: string | null
+    requestedBy: string | null
+    status: string | null
+    createdAt: Date | null
+  }
+
+  export type StockAdjustmentCountAggregateOutputType = {
+    id: number
+    productSku: number
+    productName: number
+    oldStock: number
+    newStock: number
+    reason: number
+    requestedBy: number
+    status: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type StockAdjustmentAvgAggregateInputType = {
+    oldStock?: true
+    newStock?: true
+  }
+
+  export type StockAdjustmentSumAggregateInputType = {
+    oldStock?: true
+    newStock?: true
+  }
+
+  export type StockAdjustmentMinAggregateInputType = {
+    id?: true
+    productSku?: true
+    productName?: true
+    oldStock?: true
+    newStock?: true
+    reason?: true
+    requestedBy?: true
+    status?: true
+    createdAt?: true
+  }
+
+  export type StockAdjustmentMaxAggregateInputType = {
+    id?: true
+    productSku?: true
+    productName?: true
+    oldStock?: true
+    newStock?: true
+    reason?: true
+    requestedBy?: true
+    status?: true
+    createdAt?: true
+  }
+
+  export type StockAdjustmentCountAggregateInputType = {
+    id?: true
+    productSku?: true
+    productName?: true
+    oldStock?: true
+    newStock?: true
+    reason?: true
+    requestedBy?: true
+    status?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type StockAdjustmentAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which StockAdjustment to aggregate.
+     */
+    where?: StockAdjustmentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StockAdjustments to fetch.
+     */
+    orderBy?: StockAdjustmentOrderByWithRelationInput | StockAdjustmentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: StockAdjustmentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StockAdjustments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StockAdjustments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned StockAdjustments
+    **/
+    _count?: true | StockAdjustmentCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: StockAdjustmentAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: StockAdjustmentSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: StockAdjustmentMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: StockAdjustmentMaxAggregateInputType
+  }
+
+  export type GetStockAdjustmentAggregateType<T extends StockAdjustmentAggregateArgs> = {
+        [P in keyof T & keyof AggregateStockAdjustment]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateStockAdjustment[P]>
+      : GetScalarType<T[P], AggregateStockAdjustment[P]>
+  }
+
+
+
+
+  export type StockAdjustmentGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StockAdjustmentWhereInput
+    orderBy?: StockAdjustmentOrderByWithAggregationInput | StockAdjustmentOrderByWithAggregationInput[]
+    by: StockAdjustmentScalarFieldEnum[] | StockAdjustmentScalarFieldEnum
+    having?: StockAdjustmentScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: StockAdjustmentCountAggregateInputType | true
+    _avg?: StockAdjustmentAvgAggregateInputType
+    _sum?: StockAdjustmentSumAggregateInputType
+    _min?: StockAdjustmentMinAggregateInputType
+    _max?: StockAdjustmentMaxAggregateInputType
+  }
+
+  export type StockAdjustmentGroupByOutputType = {
+    id: string
+    productSku: string
+    productName: string
+    oldStock: number
+    newStock: number
+    reason: string
+    requestedBy: string
+    status: string
+    createdAt: Date
+    _count: StockAdjustmentCountAggregateOutputType | null
+    _avg: StockAdjustmentAvgAggregateOutputType | null
+    _sum: StockAdjustmentSumAggregateOutputType | null
+    _min: StockAdjustmentMinAggregateOutputType | null
+    _max: StockAdjustmentMaxAggregateOutputType | null
+  }
+
+  type GetStockAdjustmentGroupByPayload<T extends StockAdjustmentGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<StockAdjustmentGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof StockAdjustmentGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], StockAdjustmentGroupByOutputType[P]>
+            : GetScalarType<T[P], StockAdjustmentGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type StockAdjustmentSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    productSku?: boolean
+    productName?: boolean
+    oldStock?: boolean
+    newStock?: boolean
+    reason?: boolean
+    requestedBy?: boolean
+    status?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["stockAdjustment"]>
+
+  export type StockAdjustmentSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    productSku?: boolean
+    productName?: boolean
+    oldStock?: boolean
+    newStock?: boolean
+    reason?: boolean
+    requestedBy?: boolean
+    status?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["stockAdjustment"]>
+
+  export type StockAdjustmentSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    productSku?: boolean
+    productName?: boolean
+    oldStock?: boolean
+    newStock?: boolean
+    reason?: boolean
+    requestedBy?: boolean
+    status?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["stockAdjustment"]>
+
+  export type StockAdjustmentSelectScalar = {
+    id?: boolean
+    productSku?: boolean
+    productName?: boolean
+    oldStock?: boolean
+    newStock?: boolean
+    reason?: boolean
+    requestedBy?: boolean
+    status?: boolean
+    createdAt?: boolean
+  }
+
+  export type StockAdjustmentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "productSku" | "productName" | "oldStock" | "newStock" | "reason" | "requestedBy" | "status" | "createdAt", ExtArgs["result"]["stockAdjustment"]>
+
+  export type $StockAdjustmentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "StockAdjustment"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      productSku: string
+      productName: string
+      oldStock: number
+      newStock: number
+      reason: string
+      requestedBy: string
+      status: string
+      createdAt: Date
+    }, ExtArgs["result"]["stockAdjustment"]>
+    composites: {}
+  }
+
+  type StockAdjustmentGetPayload<S extends boolean | null | undefined | StockAdjustmentDefaultArgs> = $Result.GetResult<Prisma.$StockAdjustmentPayload, S>
+
+  type StockAdjustmentCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<StockAdjustmentFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: StockAdjustmentCountAggregateInputType | true
+    }
+
+  export interface StockAdjustmentDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['StockAdjustment'], meta: { name: 'StockAdjustment' } }
+    /**
+     * Find zero or one StockAdjustment that matches the filter.
+     * @param {StockAdjustmentFindUniqueArgs} args - Arguments to find a StockAdjustment
+     * @example
+     * // Get one StockAdjustment
+     * const stockAdjustment = await prisma.stockAdjustment.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends StockAdjustmentFindUniqueArgs>(args: SelectSubset<T, StockAdjustmentFindUniqueArgs<ExtArgs>>): Prisma__StockAdjustmentClient<$Result.GetResult<Prisma.$StockAdjustmentPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one StockAdjustment that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {StockAdjustmentFindUniqueOrThrowArgs} args - Arguments to find a StockAdjustment
+     * @example
+     * // Get one StockAdjustment
+     * const stockAdjustment = await prisma.stockAdjustment.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends StockAdjustmentFindUniqueOrThrowArgs>(args: SelectSubset<T, StockAdjustmentFindUniqueOrThrowArgs<ExtArgs>>): Prisma__StockAdjustmentClient<$Result.GetResult<Prisma.$StockAdjustmentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first StockAdjustment that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockAdjustmentFindFirstArgs} args - Arguments to find a StockAdjustment
+     * @example
+     * // Get one StockAdjustment
+     * const stockAdjustment = await prisma.stockAdjustment.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends StockAdjustmentFindFirstArgs>(args?: SelectSubset<T, StockAdjustmentFindFirstArgs<ExtArgs>>): Prisma__StockAdjustmentClient<$Result.GetResult<Prisma.$StockAdjustmentPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first StockAdjustment that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockAdjustmentFindFirstOrThrowArgs} args - Arguments to find a StockAdjustment
+     * @example
+     * // Get one StockAdjustment
+     * const stockAdjustment = await prisma.stockAdjustment.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends StockAdjustmentFindFirstOrThrowArgs>(args?: SelectSubset<T, StockAdjustmentFindFirstOrThrowArgs<ExtArgs>>): Prisma__StockAdjustmentClient<$Result.GetResult<Prisma.$StockAdjustmentPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more StockAdjustments that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockAdjustmentFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all StockAdjustments
+     * const stockAdjustments = await prisma.stockAdjustment.findMany()
+     * 
+     * // Get first 10 StockAdjustments
+     * const stockAdjustments = await prisma.stockAdjustment.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const stockAdjustmentWithIdOnly = await prisma.stockAdjustment.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends StockAdjustmentFindManyArgs>(args?: SelectSubset<T, StockAdjustmentFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StockAdjustmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a StockAdjustment.
+     * @param {StockAdjustmentCreateArgs} args - Arguments to create a StockAdjustment.
+     * @example
+     * // Create one StockAdjustment
+     * const StockAdjustment = await prisma.stockAdjustment.create({
+     *   data: {
+     *     // ... data to create a StockAdjustment
+     *   }
+     * })
+     * 
+     */
+    create<T extends StockAdjustmentCreateArgs>(args: SelectSubset<T, StockAdjustmentCreateArgs<ExtArgs>>): Prisma__StockAdjustmentClient<$Result.GetResult<Prisma.$StockAdjustmentPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many StockAdjustments.
+     * @param {StockAdjustmentCreateManyArgs} args - Arguments to create many StockAdjustments.
+     * @example
+     * // Create many StockAdjustments
+     * const stockAdjustment = await prisma.stockAdjustment.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends StockAdjustmentCreateManyArgs>(args?: SelectSubset<T, StockAdjustmentCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many StockAdjustments and returns the data saved in the database.
+     * @param {StockAdjustmentCreateManyAndReturnArgs} args - Arguments to create many StockAdjustments.
+     * @example
+     * // Create many StockAdjustments
+     * const stockAdjustment = await prisma.stockAdjustment.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many StockAdjustments and only return the `id`
+     * const stockAdjustmentWithIdOnly = await prisma.stockAdjustment.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends StockAdjustmentCreateManyAndReturnArgs>(args?: SelectSubset<T, StockAdjustmentCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StockAdjustmentPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a StockAdjustment.
+     * @param {StockAdjustmentDeleteArgs} args - Arguments to delete one StockAdjustment.
+     * @example
+     * // Delete one StockAdjustment
+     * const StockAdjustment = await prisma.stockAdjustment.delete({
+     *   where: {
+     *     // ... filter to delete one StockAdjustment
+     *   }
+     * })
+     * 
+     */
+    delete<T extends StockAdjustmentDeleteArgs>(args: SelectSubset<T, StockAdjustmentDeleteArgs<ExtArgs>>): Prisma__StockAdjustmentClient<$Result.GetResult<Prisma.$StockAdjustmentPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one StockAdjustment.
+     * @param {StockAdjustmentUpdateArgs} args - Arguments to update one StockAdjustment.
+     * @example
+     * // Update one StockAdjustment
+     * const stockAdjustment = await prisma.stockAdjustment.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends StockAdjustmentUpdateArgs>(args: SelectSubset<T, StockAdjustmentUpdateArgs<ExtArgs>>): Prisma__StockAdjustmentClient<$Result.GetResult<Prisma.$StockAdjustmentPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more StockAdjustments.
+     * @param {StockAdjustmentDeleteManyArgs} args - Arguments to filter StockAdjustments to delete.
+     * @example
+     * // Delete a few StockAdjustments
+     * const { count } = await prisma.stockAdjustment.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends StockAdjustmentDeleteManyArgs>(args?: SelectSubset<T, StockAdjustmentDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more StockAdjustments.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockAdjustmentUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many StockAdjustments
+     * const stockAdjustment = await prisma.stockAdjustment.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends StockAdjustmentUpdateManyArgs>(args: SelectSubset<T, StockAdjustmentUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more StockAdjustments and returns the data updated in the database.
+     * @param {StockAdjustmentUpdateManyAndReturnArgs} args - Arguments to update many StockAdjustments.
+     * @example
+     * // Update many StockAdjustments
+     * const stockAdjustment = await prisma.stockAdjustment.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more StockAdjustments and only return the `id`
+     * const stockAdjustmentWithIdOnly = await prisma.stockAdjustment.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends StockAdjustmentUpdateManyAndReturnArgs>(args: SelectSubset<T, StockAdjustmentUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StockAdjustmentPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one StockAdjustment.
+     * @param {StockAdjustmentUpsertArgs} args - Arguments to update or create a StockAdjustment.
+     * @example
+     * // Update or create a StockAdjustment
+     * const stockAdjustment = await prisma.stockAdjustment.upsert({
+     *   create: {
+     *     // ... data to create a StockAdjustment
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the StockAdjustment we want to update
+     *   }
+     * })
+     */
+    upsert<T extends StockAdjustmentUpsertArgs>(args: SelectSubset<T, StockAdjustmentUpsertArgs<ExtArgs>>): Prisma__StockAdjustmentClient<$Result.GetResult<Prisma.$StockAdjustmentPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of StockAdjustments.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockAdjustmentCountArgs} args - Arguments to filter StockAdjustments to count.
+     * @example
+     * // Count the number of StockAdjustments
+     * const count = await prisma.stockAdjustment.count({
+     *   where: {
+     *     // ... the filter for the StockAdjustments we want to count
+     *   }
+     * })
+    **/
+    count<T extends StockAdjustmentCountArgs>(
+      args?: Subset<T, StockAdjustmentCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], StockAdjustmentCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a StockAdjustment.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockAdjustmentAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends StockAdjustmentAggregateArgs>(args: Subset<T, StockAdjustmentAggregateArgs>): Prisma.PrismaPromise<GetStockAdjustmentAggregateType<T>>
+
+    /**
+     * Group by StockAdjustment.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockAdjustmentGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends StockAdjustmentGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: StockAdjustmentGroupByArgs['orderBy'] }
+        : { orderBy?: StockAdjustmentGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, StockAdjustmentGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetStockAdjustmentGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the StockAdjustment model
+   */
+  readonly fields: StockAdjustmentFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for StockAdjustment.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__StockAdjustmentClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the StockAdjustment model
+   */
+  interface StockAdjustmentFieldRefs {
+    readonly id: FieldRef<"StockAdjustment", 'String'>
+    readonly productSku: FieldRef<"StockAdjustment", 'String'>
+    readonly productName: FieldRef<"StockAdjustment", 'String'>
+    readonly oldStock: FieldRef<"StockAdjustment", 'Int'>
+    readonly newStock: FieldRef<"StockAdjustment", 'Int'>
+    readonly reason: FieldRef<"StockAdjustment", 'String'>
+    readonly requestedBy: FieldRef<"StockAdjustment", 'String'>
+    readonly status: FieldRef<"StockAdjustment", 'String'>
+    readonly createdAt: FieldRef<"StockAdjustment", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * StockAdjustment findUnique
+   */
+  export type StockAdjustmentFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockAdjustment
+     */
+    select?: StockAdjustmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockAdjustment
+     */
+    omit?: StockAdjustmentOmit<ExtArgs> | null
+    /**
+     * Filter, which StockAdjustment to fetch.
+     */
+    where: StockAdjustmentWhereUniqueInput
+  }
+
+  /**
+   * StockAdjustment findUniqueOrThrow
+   */
+  export type StockAdjustmentFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockAdjustment
+     */
+    select?: StockAdjustmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockAdjustment
+     */
+    omit?: StockAdjustmentOmit<ExtArgs> | null
+    /**
+     * Filter, which StockAdjustment to fetch.
+     */
+    where: StockAdjustmentWhereUniqueInput
+  }
+
+  /**
+   * StockAdjustment findFirst
+   */
+  export type StockAdjustmentFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockAdjustment
+     */
+    select?: StockAdjustmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockAdjustment
+     */
+    omit?: StockAdjustmentOmit<ExtArgs> | null
+    /**
+     * Filter, which StockAdjustment to fetch.
+     */
+    where?: StockAdjustmentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StockAdjustments to fetch.
+     */
+    orderBy?: StockAdjustmentOrderByWithRelationInput | StockAdjustmentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for StockAdjustments.
+     */
+    cursor?: StockAdjustmentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StockAdjustments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StockAdjustments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of StockAdjustments.
+     */
+    distinct?: StockAdjustmentScalarFieldEnum | StockAdjustmentScalarFieldEnum[]
+  }
+
+  /**
+   * StockAdjustment findFirstOrThrow
+   */
+  export type StockAdjustmentFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockAdjustment
+     */
+    select?: StockAdjustmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockAdjustment
+     */
+    omit?: StockAdjustmentOmit<ExtArgs> | null
+    /**
+     * Filter, which StockAdjustment to fetch.
+     */
+    where?: StockAdjustmentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StockAdjustments to fetch.
+     */
+    orderBy?: StockAdjustmentOrderByWithRelationInput | StockAdjustmentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for StockAdjustments.
+     */
+    cursor?: StockAdjustmentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StockAdjustments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StockAdjustments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of StockAdjustments.
+     */
+    distinct?: StockAdjustmentScalarFieldEnum | StockAdjustmentScalarFieldEnum[]
+  }
+
+  /**
+   * StockAdjustment findMany
+   */
+  export type StockAdjustmentFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockAdjustment
+     */
+    select?: StockAdjustmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockAdjustment
+     */
+    omit?: StockAdjustmentOmit<ExtArgs> | null
+    /**
+     * Filter, which StockAdjustments to fetch.
+     */
+    where?: StockAdjustmentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StockAdjustments to fetch.
+     */
+    orderBy?: StockAdjustmentOrderByWithRelationInput | StockAdjustmentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing StockAdjustments.
+     */
+    cursor?: StockAdjustmentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StockAdjustments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StockAdjustments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of StockAdjustments.
+     */
+    distinct?: StockAdjustmentScalarFieldEnum | StockAdjustmentScalarFieldEnum[]
+  }
+
+  /**
+   * StockAdjustment create
+   */
+  export type StockAdjustmentCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockAdjustment
+     */
+    select?: StockAdjustmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockAdjustment
+     */
+    omit?: StockAdjustmentOmit<ExtArgs> | null
+    /**
+     * The data needed to create a StockAdjustment.
+     */
+    data: XOR<StockAdjustmentCreateInput, StockAdjustmentUncheckedCreateInput>
+  }
+
+  /**
+   * StockAdjustment createMany
+   */
+  export type StockAdjustmentCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many StockAdjustments.
+     */
+    data: StockAdjustmentCreateManyInput | StockAdjustmentCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * StockAdjustment createManyAndReturn
+   */
+  export type StockAdjustmentCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockAdjustment
+     */
+    select?: StockAdjustmentSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockAdjustment
+     */
+    omit?: StockAdjustmentOmit<ExtArgs> | null
+    /**
+     * The data used to create many StockAdjustments.
+     */
+    data: StockAdjustmentCreateManyInput | StockAdjustmentCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * StockAdjustment update
+   */
+  export type StockAdjustmentUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockAdjustment
+     */
+    select?: StockAdjustmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockAdjustment
+     */
+    omit?: StockAdjustmentOmit<ExtArgs> | null
+    /**
+     * The data needed to update a StockAdjustment.
+     */
+    data: XOR<StockAdjustmentUpdateInput, StockAdjustmentUncheckedUpdateInput>
+    /**
+     * Choose, which StockAdjustment to update.
+     */
+    where: StockAdjustmentWhereUniqueInput
+  }
+
+  /**
+   * StockAdjustment updateMany
+   */
+  export type StockAdjustmentUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update StockAdjustments.
+     */
+    data: XOR<StockAdjustmentUpdateManyMutationInput, StockAdjustmentUncheckedUpdateManyInput>
+    /**
+     * Filter which StockAdjustments to update
+     */
+    where?: StockAdjustmentWhereInput
+    /**
+     * Limit how many StockAdjustments to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * StockAdjustment updateManyAndReturn
+   */
+  export type StockAdjustmentUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockAdjustment
+     */
+    select?: StockAdjustmentSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockAdjustment
+     */
+    omit?: StockAdjustmentOmit<ExtArgs> | null
+    /**
+     * The data used to update StockAdjustments.
+     */
+    data: XOR<StockAdjustmentUpdateManyMutationInput, StockAdjustmentUncheckedUpdateManyInput>
+    /**
+     * Filter which StockAdjustments to update
+     */
+    where?: StockAdjustmentWhereInput
+    /**
+     * Limit how many StockAdjustments to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * StockAdjustment upsert
+   */
+  export type StockAdjustmentUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockAdjustment
+     */
+    select?: StockAdjustmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockAdjustment
+     */
+    omit?: StockAdjustmentOmit<ExtArgs> | null
+    /**
+     * The filter to search for the StockAdjustment to update in case it exists.
+     */
+    where: StockAdjustmentWhereUniqueInput
+    /**
+     * In case the StockAdjustment found by the `where` argument doesn't exist, create a new StockAdjustment with this data.
+     */
+    create: XOR<StockAdjustmentCreateInput, StockAdjustmentUncheckedCreateInput>
+    /**
+     * In case the StockAdjustment was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<StockAdjustmentUpdateInput, StockAdjustmentUncheckedUpdateInput>
+  }
+
+  /**
+   * StockAdjustment delete
+   */
+  export type StockAdjustmentDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockAdjustment
+     */
+    select?: StockAdjustmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockAdjustment
+     */
+    omit?: StockAdjustmentOmit<ExtArgs> | null
+    /**
+     * Filter which StockAdjustment to delete.
+     */
+    where: StockAdjustmentWhereUniqueInput
+  }
+
+  /**
+   * StockAdjustment deleteMany
+   */
+  export type StockAdjustmentDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which StockAdjustments to delete
+     */
+    where?: StockAdjustmentWhereInput
+    /**
+     * Limit how many StockAdjustments to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * StockAdjustment without action
+   */
+  export type StockAdjustmentDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockAdjustment
+     */
+    select?: StockAdjustmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockAdjustment
+     */
+    omit?: StockAdjustmentOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -7897,7 +10208,9 @@ export namespace Prisma {
     email: 'email',
     password: 'password',
     name: 'name',
-    role: 'role'
+    role: 'role',
+    status: 'status',
+    createdAt: 'createdAt'
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -7921,6 +10234,33 @@ export namespace Prisma {
   };
 
   export type OrderItemScalarFieldEnum = (typeof OrderItemScalarFieldEnum)[keyof typeof OrderItemScalarFieldEnum]
+
+
+  export const ActivityLogScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    userName: 'userName',
+    action: 'action',
+    details: 'details',
+    createdAt: 'createdAt'
+  };
+
+  export type ActivityLogScalarFieldEnum = (typeof ActivityLogScalarFieldEnum)[keyof typeof ActivityLogScalarFieldEnum]
+
+
+  export const StockAdjustmentScalarFieldEnum: {
+    id: 'id',
+    productSku: 'productSku',
+    productName: 'productName',
+    oldStock: 'oldStock',
+    newStock: 'newStock',
+    reason: 'reason',
+    requestedBy: 'requestedBy',
+    status: 'status',
+    createdAt: 'createdAt'
+  };
+
+  export type StockAdjustmentScalarFieldEnum = (typeof StockAdjustmentScalarFieldEnum)[keyof typeof StockAdjustmentScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -8178,6 +10518,8 @@ export namespace Prisma {
     password?: StringFilter<"User"> | string
     name?: StringFilter<"User"> | string
     role?: StringFilter<"User"> | string
+    status?: StringFilter<"User"> | string
+    createdAt?: DateTimeFilter<"User"> | Date | string
   }
 
   export type UserOrderByWithRelationInput = {
@@ -8186,6 +10528,8 @@ export namespace Prisma {
     password?: SortOrder
     name?: SortOrder
     role?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -8197,6 +10541,8 @@ export namespace Prisma {
     password?: StringFilter<"User"> | string
     name?: StringFilter<"User"> | string
     role?: StringFilter<"User"> | string
+    status?: StringFilter<"User"> | string
+    createdAt?: DateTimeFilter<"User"> | Date | string
   }, "id" | "email">
 
   export type UserOrderByWithAggregationInput = {
@@ -8205,6 +10551,8 @@ export namespace Prisma {
     password?: SortOrder
     name?: SortOrder
     role?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
     _count?: UserCountOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
     _min?: UserMinOrderByAggregateInput
@@ -8219,6 +10567,8 @@ export namespace Prisma {
     password?: StringWithAggregatesFilter<"User"> | string
     name?: StringWithAggregatesFilter<"User"> | string
     role?: StringWithAggregatesFilter<"User"> | string
+    status?: StringWithAggregatesFilter<"User"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
   }
 
   export type OrderWhereInput = {
@@ -8324,6 +10674,137 @@ export namespace Prisma {
     orderId?: StringWithAggregatesFilter<"OrderItem"> | string
     productSku?: StringWithAggregatesFilter<"OrderItem"> | string
     quantity?: IntWithAggregatesFilter<"OrderItem"> | number
+  }
+
+  export type ActivityLogWhereInput = {
+    AND?: ActivityLogWhereInput | ActivityLogWhereInput[]
+    OR?: ActivityLogWhereInput[]
+    NOT?: ActivityLogWhereInput | ActivityLogWhereInput[]
+    id?: StringFilter<"ActivityLog"> | string
+    userId?: StringNullableFilter<"ActivityLog"> | string | null
+    userName?: StringFilter<"ActivityLog"> | string
+    action?: StringFilter<"ActivityLog"> | string
+    details?: StringFilter<"ActivityLog"> | string
+    createdAt?: DateTimeFilter<"ActivityLog"> | Date | string
+  }
+
+  export type ActivityLogOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    userName?: SortOrder
+    action?: SortOrder
+    details?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ActivityLogWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: ActivityLogWhereInput | ActivityLogWhereInput[]
+    OR?: ActivityLogWhereInput[]
+    NOT?: ActivityLogWhereInput | ActivityLogWhereInput[]
+    userId?: StringNullableFilter<"ActivityLog"> | string | null
+    userName?: StringFilter<"ActivityLog"> | string
+    action?: StringFilter<"ActivityLog"> | string
+    details?: StringFilter<"ActivityLog"> | string
+    createdAt?: DateTimeFilter<"ActivityLog"> | Date | string
+  }, "id">
+
+  export type ActivityLogOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    userName?: SortOrder
+    action?: SortOrder
+    details?: SortOrder
+    createdAt?: SortOrder
+    _count?: ActivityLogCountOrderByAggregateInput
+    _max?: ActivityLogMaxOrderByAggregateInput
+    _min?: ActivityLogMinOrderByAggregateInput
+  }
+
+  export type ActivityLogScalarWhereWithAggregatesInput = {
+    AND?: ActivityLogScalarWhereWithAggregatesInput | ActivityLogScalarWhereWithAggregatesInput[]
+    OR?: ActivityLogScalarWhereWithAggregatesInput[]
+    NOT?: ActivityLogScalarWhereWithAggregatesInput | ActivityLogScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ActivityLog"> | string
+    userId?: StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
+    userName?: StringWithAggregatesFilter<"ActivityLog"> | string
+    action?: StringWithAggregatesFilter<"ActivityLog"> | string
+    details?: StringWithAggregatesFilter<"ActivityLog"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"ActivityLog"> | Date | string
+  }
+
+  export type StockAdjustmentWhereInput = {
+    AND?: StockAdjustmentWhereInput | StockAdjustmentWhereInput[]
+    OR?: StockAdjustmentWhereInput[]
+    NOT?: StockAdjustmentWhereInput | StockAdjustmentWhereInput[]
+    id?: StringFilter<"StockAdjustment"> | string
+    productSku?: StringFilter<"StockAdjustment"> | string
+    productName?: StringFilter<"StockAdjustment"> | string
+    oldStock?: IntFilter<"StockAdjustment"> | number
+    newStock?: IntFilter<"StockAdjustment"> | number
+    reason?: StringFilter<"StockAdjustment"> | string
+    requestedBy?: StringFilter<"StockAdjustment"> | string
+    status?: StringFilter<"StockAdjustment"> | string
+    createdAt?: DateTimeFilter<"StockAdjustment"> | Date | string
+  }
+
+  export type StockAdjustmentOrderByWithRelationInput = {
+    id?: SortOrder
+    productSku?: SortOrder
+    productName?: SortOrder
+    oldStock?: SortOrder
+    newStock?: SortOrder
+    reason?: SortOrder
+    requestedBy?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type StockAdjustmentWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: StockAdjustmentWhereInput | StockAdjustmentWhereInput[]
+    OR?: StockAdjustmentWhereInput[]
+    NOT?: StockAdjustmentWhereInput | StockAdjustmentWhereInput[]
+    productSku?: StringFilter<"StockAdjustment"> | string
+    productName?: StringFilter<"StockAdjustment"> | string
+    oldStock?: IntFilter<"StockAdjustment"> | number
+    newStock?: IntFilter<"StockAdjustment"> | number
+    reason?: StringFilter<"StockAdjustment"> | string
+    requestedBy?: StringFilter<"StockAdjustment"> | string
+    status?: StringFilter<"StockAdjustment"> | string
+    createdAt?: DateTimeFilter<"StockAdjustment"> | Date | string
+  }, "id">
+
+  export type StockAdjustmentOrderByWithAggregationInput = {
+    id?: SortOrder
+    productSku?: SortOrder
+    productName?: SortOrder
+    oldStock?: SortOrder
+    newStock?: SortOrder
+    reason?: SortOrder
+    requestedBy?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+    _count?: StockAdjustmentCountOrderByAggregateInput
+    _avg?: StockAdjustmentAvgOrderByAggregateInput
+    _max?: StockAdjustmentMaxOrderByAggregateInput
+    _min?: StockAdjustmentMinOrderByAggregateInput
+    _sum?: StockAdjustmentSumOrderByAggregateInput
+  }
+
+  export type StockAdjustmentScalarWhereWithAggregatesInput = {
+    AND?: StockAdjustmentScalarWhereWithAggregatesInput | StockAdjustmentScalarWhereWithAggregatesInput[]
+    OR?: StockAdjustmentScalarWhereWithAggregatesInput[]
+    NOT?: StockAdjustmentScalarWhereWithAggregatesInput | StockAdjustmentScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"StockAdjustment"> | string
+    productSku?: StringWithAggregatesFilter<"StockAdjustment"> | string
+    productName?: StringWithAggregatesFilter<"StockAdjustment"> | string
+    oldStock?: IntWithAggregatesFilter<"StockAdjustment"> | number
+    newStock?: IntWithAggregatesFilter<"StockAdjustment"> | number
+    reason?: StringWithAggregatesFilter<"StockAdjustment"> | string
+    requestedBy?: StringWithAggregatesFilter<"StockAdjustment"> | string
+    status?: StringWithAggregatesFilter<"StockAdjustment"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"StockAdjustment"> | Date | string
   }
 
   export type CategoryCreateInput = {
@@ -8489,6 +10970,8 @@ export namespace Prisma {
     password: string
     name: string
     role?: string
+    status?: string
+    createdAt?: Date | string
   }
 
   export type UserUncheckedCreateInput = {
@@ -8497,6 +10980,8 @@ export namespace Prisma {
     password: string
     name: string
     role?: string
+    status?: string
+    createdAt?: Date | string
   }
 
   export type UserUpdateInput = {
@@ -8505,6 +10990,8 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type UserUncheckedUpdateInput = {
@@ -8513,6 +11000,8 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type UserCreateManyInput = {
@@ -8521,6 +11010,8 @@ export namespace Prisma {
     password: string
     name: string
     role?: string
+    status?: string
+    createdAt?: Date | string
   }
 
   export type UserUpdateManyMutationInput = {
@@ -8529,6 +11020,8 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type UserUncheckedUpdateManyInput = {
@@ -8537,6 +11030,8 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type OrderCreateInput = {
@@ -8637,6 +11132,153 @@ export namespace Prisma {
     orderId?: StringFieldUpdateOperationsInput | string
     productSku?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type ActivityLogCreateInput = {
+    id?: string
+    userId?: string | null
+    userName?: string
+    action: string
+    details: string
+    createdAt?: Date | string
+  }
+
+  export type ActivityLogUncheckedCreateInput = {
+    id?: string
+    userId?: string | null
+    userName?: string
+    action: string
+    details: string
+    createdAt?: Date | string
+  }
+
+  export type ActivityLogUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    userName?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    details?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ActivityLogUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    userName?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    details?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ActivityLogCreateManyInput = {
+    id?: string
+    userId?: string | null
+    userName?: string
+    action: string
+    details: string
+    createdAt?: Date | string
+  }
+
+  export type ActivityLogUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    userName?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    details?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ActivityLogUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    userName?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    details?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StockAdjustmentCreateInput = {
+    id?: string
+    productSku: string
+    productName: string
+    oldStock: number
+    newStock: number
+    reason: string
+    requestedBy: string
+    status?: string
+    createdAt?: Date | string
+  }
+
+  export type StockAdjustmentUncheckedCreateInput = {
+    id?: string
+    productSku: string
+    productName: string
+    oldStock: number
+    newStock: number
+    reason: string
+    requestedBy: string
+    status?: string
+    createdAt?: Date | string
+  }
+
+  export type StockAdjustmentUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    productSku?: StringFieldUpdateOperationsInput | string
+    productName?: StringFieldUpdateOperationsInput | string
+    oldStock?: IntFieldUpdateOperationsInput | number
+    newStock?: IntFieldUpdateOperationsInput | number
+    reason?: StringFieldUpdateOperationsInput | string
+    requestedBy?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StockAdjustmentUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    productSku?: StringFieldUpdateOperationsInput | string
+    productName?: StringFieldUpdateOperationsInput | string
+    oldStock?: IntFieldUpdateOperationsInput | number
+    newStock?: IntFieldUpdateOperationsInput | number
+    reason?: StringFieldUpdateOperationsInput | string
+    requestedBy?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StockAdjustmentCreateManyInput = {
+    id?: string
+    productSku: string
+    productName: string
+    oldStock: number
+    newStock: number
+    reason: string
+    requestedBy: string
+    status?: string
+    createdAt?: Date | string
+  }
+
+  export type StockAdjustmentUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    productSku?: StringFieldUpdateOperationsInput | string
+    productName?: StringFieldUpdateOperationsInput | string
+    oldStock?: IntFieldUpdateOperationsInput | number
+    newStock?: IntFieldUpdateOperationsInput | number
+    reason?: StringFieldUpdateOperationsInput | string
+    requestedBy?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StockAdjustmentUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    productSku?: StringFieldUpdateOperationsInput | string
+    productName?: StringFieldUpdateOperationsInput | string
+    oldStock?: IntFieldUpdateOperationsInput | number
+    newStock?: IntFieldUpdateOperationsInput | number
+    reason?: StringFieldUpdateOperationsInput | string
+    requestedBy?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -8867,30 +11509,6 @@ export namespace Prisma {
     _max?: NestedIntFilter<$PrismaModel>
   }
 
-  export type UserCountOrderByAggregateInput = {
-    id?: SortOrder
-    email?: SortOrder
-    password?: SortOrder
-    name?: SortOrder
-    role?: SortOrder
-  }
-
-  export type UserMaxOrderByAggregateInput = {
-    id?: SortOrder
-    email?: SortOrder
-    password?: SortOrder
-    name?: SortOrder
-    role?: SortOrder
-  }
-
-  export type UserMinOrderByAggregateInput = {
-    id?: SortOrder
-    email?: SortOrder
-    password?: SortOrder
-    name?: SortOrder
-    role?: SortOrder
-  }
-
   export type DateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -8900,6 +11518,50 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
+  }
+
+  export type UserCountOrderByAggregateInput = {
+    id?: SortOrder
+    email?: SortOrder
+    password?: SortOrder
+    name?: SortOrder
+    role?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type UserMaxOrderByAggregateInput = {
+    id?: SortOrder
+    email?: SortOrder
+    password?: SortOrder
+    name?: SortOrder
+    role?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type UserMinOrderByAggregateInput = {
+    id?: SortOrder
+    email?: SortOrder
+    password?: SortOrder
+    name?: SortOrder
+    role?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
   export type OrderCountOrderByAggregateInput = {
@@ -8921,20 +11583,6 @@ export namespace Prisma {
     customerName?: SortOrder
     status?: SortOrder
     createdAt?: SortOrder
-  }
-
-  export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedDateTimeFilter<$PrismaModel>
-    _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
   export type OrderScalarRelationFilter = {
@@ -8974,6 +11622,79 @@ export namespace Prisma {
 
   export type OrderItemSumOrderByAggregateInput = {
     quantity?: SortOrder
+  }
+
+  export type ActivityLogCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    userName?: SortOrder
+    action?: SortOrder
+    details?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ActivityLogMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    userName?: SortOrder
+    action?: SortOrder
+    details?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ActivityLogMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    userName?: SortOrder
+    action?: SortOrder
+    details?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type StockAdjustmentCountOrderByAggregateInput = {
+    id?: SortOrder
+    productSku?: SortOrder
+    productName?: SortOrder
+    oldStock?: SortOrder
+    newStock?: SortOrder
+    reason?: SortOrder
+    requestedBy?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type StockAdjustmentAvgOrderByAggregateInput = {
+    oldStock?: SortOrder
+    newStock?: SortOrder
+  }
+
+  export type StockAdjustmentMaxOrderByAggregateInput = {
+    id?: SortOrder
+    productSku?: SortOrder
+    productName?: SortOrder
+    oldStock?: SortOrder
+    newStock?: SortOrder
+    reason?: SortOrder
+    requestedBy?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type StockAdjustmentMinOrderByAggregateInput = {
+    id?: SortOrder
+    productSku?: SortOrder
+    productName?: SortOrder
+    oldStock?: SortOrder
+    newStock?: SortOrder
+    reason?: SortOrder
+    requestedBy?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type StockAdjustmentSumOrderByAggregateInput = {
+    oldStock?: SortOrder
+    newStock?: SortOrder
   }
 
   export type ProductCreateNestedManyWithoutCategoryInput = {
@@ -9154,6 +11875,10 @@ export namespace Prisma {
     deleteMany?: OrderItemScalarWhereInput | OrderItemScalarWhereInput[]
   }
 
+  export type DateTimeFieldUpdateOperationsInput = {
+    set?: Date | string
+  }
+
   export type OrderItemCreateNestedManyWithoutOrderInput = {
     create?: XOR<OrderItemCreateWithoutOrderInput, OrderItemUncheckedCreateWithoutOrderInput> | OrderItemCreateWithoutOrderInput[] | OrderItemUncheckedCreateWithoutOrderInput[]
     connectOrCreate?: OrderItemCreateOrConnectWithoutOrderInput | OrderItemCreateOrConnectWithoutOrderInput[]
@@ -9166,10 +11891,6 @@ export namespace Prisma {
     connectOrCreate?: OrderItemCreateOrConnectWithoutOrderInput | OrderItemCreateOrConnectWithoutOrderInput[]
     createMany?: OrderItemCreateManyOrderInputEnvelope
     connect?: OrderItemWhereUniqueInput | OrderItemWhereUniqueInput[]
-  }
-
-  export type DateTimeFieldUpdateOperationsInput = {
-    set?: Date | string
   }
 
   export type OrderItemUpdateManyWithoutOrderNestedInput = {
