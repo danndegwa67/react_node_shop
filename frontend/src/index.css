@@ -1,12 +1,19 @@
 :root {
-  --mhenik-crimson: #612940;
-  --mhenik-sky: #5FA8D3;
+  --mhenik-crimson: #3d3c3cb6;
+  --mhenik-sky: #ffffff;
   --mhenik-white: #FFFFFF;
   --mhenik-light-bg: #F8F9FA;
   --mhenik-dark: #1E1E24;
 
   --mhenik-translucent-white: rgba(255, 255, 255, 0.88);
 }
+
+
+*{
+  font-family: "Quicksand", sans-serif;
+  font-weight: 400;
+}
+
 
 /* 🔩 Repeating Nuts & Bolts Textured Canvas Pattern */
 .mhenik-pattern-canvas {
@@ -16,7 +23,7 @@
 
 /* 🛡️ Enhanced Smooth Rounded Utilities */
 .rounded-mhenik {
-  border-radius: 20px !important;
+  border-radius: 10px !important;
 }
 
 .card-mhenik-glass {
@@ -53,7 +60,7 @@
   transition: all 0.2s ease;
 }
 .btn-mhenik-secondary:hover {
-  background-color: #4B92BA;
+  background-color: #cbe1ee;
   color: var(--mhenik-dark);
 }
 
@@ -101,4 +108,117 @@
 .hover-lift:hover {
   transform: translateY(-5px);
   box-shadow: 0 10px 20px rgba(95, 168, 211, 0.15) !important;
+}
+
+/* 🏎️ Keyframes: Smooth Top-to-Bottom drop for the Shield Logo */
+@keyframes heroLogoDrop {
+  from {
+    opacity: 0;
+    transform: translateY(-40px); /* Keeps animation contained inside the wrapper bounds */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 📝 Keyframes: Smooth Left-to-Right slide for content elements */
+@keyframes heroTextSlide {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ⚡ Execution Classes */
+.animate-hero-logo {
+  animation: heroLogoDrop 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-hero-text-delayed {
+  opacity: 0; /* Prevents visual flash before the delay trigger activates */
+  /* Starts exactly at 0.45s as the logo finishes its main physical dropping curve */
+  animation: heroTextSlide 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: 0.55s;
+}
+
+/* ⚡ High-Performance Social Micro-Interactions */
+.social-link-item {
+  display: inline-block;
+  transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), color 0.2s ease;
+}
+
+.social-link-item i {
+  transition: color 0.2s ease;
+}
+
+/* 🎯 Brand Accent Shifting Rules on Hover */
+.social-link-item:hover {
+  transform: translateY(-3px);
+}
+
+.social-link-item:hover span {
+  color: #212529 !important; /* darkens text slightly */
+}
+
+/* Target individual classes for custom brand flare */
+.social-link-item:hover .bi-facebook { color: #1877F2 !important; }
+.social-link-item:hover .bi-youtube { color: #FF0000 !important; }
+.social-link-item:hover .bi-instagram { color: #E1306C !important; }
+.social-link-item:hover .bi-tiktok { color: #000000 !important; }
+.social-link-item:hover .bi-pinterest { color: #BD081C !important; }
+
+/* ⚡ High-Performance Feature Column Interactions */
+.feature-box {
+  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), 
+              box-shadow 0.3s cubic-bezier(0.25, 1, 0.5, 1), 
+              border-color 0.3s ease;
+  cursor: default;
+  border-left: 3px solid #cbd5e1; /* Default soft gray left border */
+  border-radius: 4px;
+  padding-left: 15px;
+}
+
+/* 🎯 Hover State: Smooth lift and deep focus highlight */
+.feature-box:hover {
+  transform: translateY(-4px); /* Hardware accelerated lift */
+  border-left-color: #4A1525;  /* Shifts to your brand primary color */
+  background-color: rgba(255, 255, 255, 0.7); /* Adds slight contrast depth */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
+}
+
+/* ⚡ Premium Micro-Interactions for Links and Buttons */
+.footer-link-item, 
+.footer-legal-item {
+  color: #64748b;
+  display: inline-block;
+  transition: color 0.2s cubic-bezier(0.25, 1, 0.5, 1), transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.footer-link-item:hover {
+  color: #4A1525 !important; /* Brand Primary Shift */
+  transform: translateX(4px); /* Subtle forward micro-nudge */
+}
+
+.footer-legal-item:hover {
+  color: #1e293b !important;
+  text-decoration: underline !important;
+}
+
+/* 🚀 Back to Top Lift and Focus Animation */
+.btn-back-to-top {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.btn-back-to-top:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(74, 21, 37, 0.25) !important;
+}
+
+.btn-back-to-top:active {
+  transform: translateY(-1px);
 }

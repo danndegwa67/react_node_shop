@@ -78,6 +78,9 @@ function Navbar() {
             <li className="nav-item">
               <Link to="/about" className="nav-link fw-semibold text-secondary px-1 custom-nav-link" onClick={closeMenu}>About</Link>
             </li>
+            <li className="nav-item">
+              <Link to="/contact" className="nav-link fw-semibold text-secondary px-1 custom-nav-link" onClick={closeMenu}>Contact Us</Link>
+            </li>
           </ul>
           <div className="d-flex align-items-center gap-3">
             <Link to="/cart" className="btn btn-light position-relative px-3 py-2 rounded-2 fw-semibold" style={{ border: '1px solid #5FA8D3', color: '#1E1E24' }} onClick={closeMenu}>
