@@ -28,8 +28,8 @@ function Footer() {
             </h6>
             <ul className="list-unstyled d-flex flex-column gap-2 small">
               <li><Link to="/shop" className="text-decoration-none text-white-50 hover-link">Shop Parts</Link></li>
-              <li><Link to="/search" className="text-decoration-none text-white-50 hover-link">Vehicle Search</Link></li>
-              <li><Link to="/categories" className="text-decoration-none text-white-50 hover-link">Categories</Link></li>
+              {/* <li><Link to="/search" className="text-decoration-none text-white-50 hover-link">Vehicle Search</Link></li> */}
+              {/* <li><Link to="/categories" className="text-decoration-none text-white-50 hover-link">Categories</Link></li> */}
             </ul>
           </div>
 
@@ -39,7 +39,7 @@ function Footer() {
               Company
             </h6>
             <ul className="list-unstyled d-flex flex-column gap-2 small">
-              <li><Link to="/about" className="text-decoration-none text-white-50 hover-link">About Us</Link></li>
+              {/* <li><Link to="/about" className="text-decoration-none text-white-50 hover-link">About Us</Link></li> */}
               <li><Link to="/contact" className="text-decoration-none text-white-50 hover-link">Contact Support</Link></li>
               
             </ul>

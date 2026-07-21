@@ -29,6 +29,11 @@ export type Vehicle = $Result.DefaultSelection<Prisma.$VehiclePayload>
  */
 export type Product = $Result.DefaultSelection<Prisma.$ProductPayload>
 /**
+ * Model InventoryTransaction
+ * 
+ */
+export type InventoryTransaction = $Result.DefaultSelection<Prisma.$InventoryTransactionPayload>
+/**
  * Model User
  * 
  */
@@ -204,6 +209,16 @@ export class PrismaClient<
     * ```
     */
   get product(): Prisma.ProductDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.inventoryTransaction`: Exposes CRUD operations for the **InventoryTransaction** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more InventoryTransactions
+    * const inventoryTransactions = await prisma.inventoryTransaction.findMany()
+    * ```
+    */
+  get inventoryTransaction(): Prisma.InventoryTransactionDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.user`: Exposes CRUD operations for the **User** model.
@@ -691,6 +706,7 @@ export namespace Prisma {
     Category: 'Category',
     Vehicle: 'Vehicle',
     Product: 'Product',
+    InventoryTransaction: 'InventoryTransaction',
     User: 'User',
     Order: 'Order',
     OrderItem: 'OrderItem',
@@ -711,7 +727,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "category" | "vehicle" | "product" | "user" | "order" | "orderItem" | "activityLog" | "stockAdjustment"
+      modelProps: "category" | "vehicle" | "product" | "inventoryTransaction" | "user" | "order" | "orderItem" | "activityLog" | "stockAdjustment"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -934,6 +950,80 @@ export namespace Prisma {
           count: {
             args: Prisma.ProductCountArgs<ExtArgs>
             result: $Utils.Optional<ProductCountAggregateOutputType> | number
+          }
+        }
+      }
+      InventoryTransaction: {
+        payload: Prisma.$InventoryTransactionPayload<ExtArgs>
+        fields: Prisma.InventoryTransactionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.InventoryTransactionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryTransactionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.InventoryTransactionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryTransactionPayload>
+          }
+          findFirst: {
+            args: Prisma.InventoryTransactionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryTransactionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.InventoryTransactionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryTransactionPayload>
+          }
+          findMany: {
+            args: Prisma.InventoryTransactionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryTransactionPayload>[]
+          }
+          create: {
+            args: Prisma.InventoryTransactionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryTransactionPayload>
+          }
+          createMany: {
+            args: Prisma.InventoryTransactionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.InventoryTransactionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryTransactionPayload>[]
+          }
+          delete: {
+            args: Prisma.InventoryTransactionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryTransactionPayload>
+          }
+          update: {
+            args: Prisma.InventoryTransactionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryTransactionPayload>
+          }
+          deleteMany: {
+            args: Prisma.InventoryTransactionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.InventoryTransactionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.InventoryTransactionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryTransactionPayload>[]
+          }
+          upsert: {
+            args: Prisma.InventoryTransactionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryTransactionPayload>
+          }
+          aggregate: {
+            args: Prisma.InventoryTransactionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateInventoryTransaction>
+          }
+          groupBy: {
+            args: Prisma.InventoryTransactionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<InventoryTransactionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.InventoryTransactionCountArgs<ExtArgs>
+            result: $Utils.Optional<InventoryTransactionCountAggregateOutputType> | number
           }
         }
       }
@@ -1418,6 +1508,7 @@ export namespace Prisma {
     category?: CategoryOmit
     vehicle?: VehicleOmit
     product?: ProductOmit
+    inventoryTransaction?: InventoryTransactionOmit
     user?: UserOmit
     order?: OrderOmit
     orderItem?: OrderItemOmit
@@ -1566,10 +1657,12 @@ export namespace Prisma {
 
   export type ProductCountOutputType = {
     orderItems: number
+    transactions: number
   }
 
   export type ProductCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     orderItems?: boolean | ProductCountOutputTypeCountOrderItemsArgs
+    transactions?: boolean | ProductCountOutputTypeCountTransactionsArgs
   }
 
   // Custom InputTypes
@@ -1588,6 +1681,13 @@ export namespace Prisma {
    */
   export type ProductCountOutputTypeCountOrderItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: OrderItemWhereInput
+  }
+
+  /**
+   * ProductCountOutputType without action
+   */
+  export type ProductCountOutputTypeCountTransactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InventoryTransactionWhereInput
   }
 
 
@@ -3726,11 +3826,15 @@ export namespace Prisma {
   export type ProductAvgAggregateOutputType = {
     sellingPrice: number | null
     stock: number | null
+    heldStock: number | null
+    reorderPoint: number | null
   }
 
   export type ProductSumAggregateOutputType = {
     sellingPrice: number | null
     stock: number | null
+    heldStock: number | null
+    reorderPoint: number | null
   }
 
   export type ProductMinAggregateOutputType = {
@@ -3739,8 +3843,13 @@ export namespace Prisma {
     position: string | null
     sellingPrice: number | null
     stock: number | null
+    heldStock: number | null
+    reorderPoint: number | null
+    condition: string | null
+    side: string | null
     category_id: string | null
     vehicle_id: string | null
+    createdAt: Date | null
   }
 
   export type ProductMaxAggregateOutputType = {
@@ -3749,8 +3858,13 @@ export namespace Prisma {
     position: string | null
     sellingPrice: number | null
     stock: number | null
+    heldStock: number | null
+    reorderPoint: number | null
+    condition: string | null
+    side: string | null
     category_id: string | null
     vehicle_id: string | null
+    createdAt: Date | null
   }
 
   export type ProductCountAggregateOutputType = {
@@ -3759,8 +3873,13 @@ export namespace Prisma {
     position: number
     sellingPrice: number
     stock: number
+    heldStock: number
+    reorderPoint: number
+    condition: number
+    side: number
     category_id: number
     vehicle_id: number
+    createdAt: number
     _all: number
   }
 
@@ -3768,11 +3887,15 @@ export namespace Prisma {
   export type ProductAvgAggregateInputType = {
     sellingPrice?: true
     stock?: true
+    heldStock?: true
+    reorderPoint?: true
   }
 
   export type ProductSumAggregateInputType = {
     sellingPrice?: true
     stock?: true
+    heldStock?: true
+    reorderPoint?: true
   }
 
   export type ProductMinAggregateInputType = {
@@ -3781,8 +3904,13 @@ export namespace Prisma {
     position?: true
     sellingPrice?: true
     stock?: true
+    heldStock?: true
+    reorderPoint?: true
+    condition?: true
+    side?: true
     category_id?: true
     vehicle_id?: true
+    createdAt?: true
   }
 
   export type ProductMaxAggregateInputType = {
@@ -3791,8 +3919,13 @@ export namespace Prisma {
     position?: true
     sellingPrice?: true
     stock?: true
+    heldStock?: true
+    reorderPoint?: true
+    condition?: true
+    side?: true
     category_id?: true
     vehicle_id?: true
+    createdAt?: true
   }
 
   export type ProductCountAggregateInputType = {
@@ -3801,8 +3934,13 @@ export namespace Prisma {
     position?: true
     sellingPrice?: true
     stock?: true
+    heldStock?: true
+    reorderPoint?: true
+    condition?: true
+    side?: true
     category_id?: true
     vehicle_id?: true
+    createdAt?: true
     _all?: true
   }
 
@@ -3898,8 +4036,13 @@ export namespace Prisma {
     position: string | null
     sellingPrice: number
     stock: number
+    heldStock: number
+    reorderPoint: number
+    condition: string
+    side: string
     category_id: string
     vehicle_id: string
+    createdAt: Date
     _count: ProductCountAggregateOutputType | null
     _avg: ProductAvgAggregateOutputType | null
     _sum: ProductSumAggregateOutputType | null
@@ -3927,11 +4070,17 @@ export namespace Prisma {
     position?: boolean
     sellingPrice?: boolean
     stock?: boolean
+    heldStock?: boolean
+    reorderPoint?: boolean
+    condition?: boolean
+    side?: boolean
     category_id?: boolean
     vehicle_id?: boolean
+    createdAt?: boolean
     category?: boolean | CategoryDefaultArgs<ExtArgs>
     vehicle?: boolean | VehicleDefaultArgs<ExtArgs>
     orderItems?: boolean | Product$orderItemsArgs<ExtArgs>
+    transactions?: boolean | Product$transactionsArgs<ExtArgs>
     _count?: boolean | ProductCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["product"]>
 
@@ -3941,8 +4090,13 @@ export namespace Prisma {
     position?: boolean
     sellingPrice?: boolean
     stock?: boolean
+    heldStock?: boolean
+    reorderPoint?: boolean
+    condition?: boolean
+    side?: boolean
     category_id?: boolean
     vehicle_id?: boolean
+    createdAt?: boolean
     category?: boolean | CategoryDefaultArgs<ExtArgs>
     vehicle?: boolean | VehicleDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["product"]>
@@ -3953,8 +4107,13 @@ export namespace Prisma {
     position?: boolean
     sellingPrice?: boolean
     stock?: boolean
+    heldStock?: boolean
+    reorderPoint?: boolean
+    condition?: boolean
+    side?: boolean
     category_id?: boolean
     vehicle_id?: boolean
+    createdAt?: boolean
     category?: boolean | CategoryDefaultArgs<ExtArgs>
     vehicle?: boolean | VehicleDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["product"]>
@@ -3965,15 +4124,21 @@ export namespace Prisma {
     position?: boolean
     sellingPrice?: boolean
     stock?: boolean
+    heldStock?: boolean
+    reorderPoint?: boolean
+    condition?: boolean
+    side?: boolean
     category_id?: boolean
     vehicle_id?: boolean
+    createdAt?: boolean
   }
 
-  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"sku" | "productName" | "position" | "sellingPrice" | "stock" | "category_id" | "vehicle_id", ExtArgs["result"]["product"]>
+  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"sku" | "productName" | "position" | "sellingPrice" | "stock" | "heldStock" | "reorderPoint" | "condition" | "side" | "category_id" | "vehicle_id" | "createdAt", ExtArgs["result"]["product"]>
   export type ProductInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     category?: boolean | CategoryDefaultArgs<ExtArgs>
     vehicle?: boolean | VehicleDefaultArgs<ExtArgs>
     orderItems?: boolean | Product$orderItemsArgs<ExtArgs>
+    transactions?: boolean | Product$transactionsArgs<ExtArgs>
     _count?: boolean | ProductCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ProductIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3991,6 +4156,7 @@ export namespace Prisma {
       category: Prisma.$CategoryPayload<ExtArgs>
       vehicle: Prisma.$VehiclePayload<ExtArgs>
       orderItems: Prisma.$OrderItemPayload<ExtArgs>[]
+      transactions: Prisma.$InventoryTransactionPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       sku: string
@@ -3998,8 +4164,13 @@ export namespace Prisma {
       position: string | null
       sellingPrice: number
       stock: number
+      heldStock: number
+      reorderPoint: number
+      condition: string
+      side: string
       category_id: string
       vehicle_id: string
+      createdAt: Date
     }, ExtArgs["result"]["product"]>
     composites: {}
   }
@@ -4397,6 +4568,7 @@ export namespace Prisma {
     category<T extends CategoryDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CategoryDefaultArgs<ExtArgs>>): Prisma__CategoryClient<$Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     vehicle<T extends VehicleDefaultArgs<ExtArgs> = {}>(args?: Subset<T, VehicleDefaultArgs<ExtArgs>>): Prisma__VehicleClient<$Result.GetResult<Prisma.$VehiclePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     orderItems<T extends Product$orderItemsArgs<ExtArgs> = {}>(args?: Subset<T, Product$orderItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OrderItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    transactions<T extends Product$transactionsArgs<ExtArgs> = {}>(args?: Subset<T, Product$transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4431,8 +4603,13 @@ export namespace Prisma {
     readonly position: FieldRef<"Product", 'String'>
     readonly sellingPrice: FieldRef<"Product", 'Float'>
     readonly stock: FieldRef<"Product", 'Int'>
+    readonly heldStock: FieldRef<"Product", 'Int'>
+    readonly reorderPoint: FieldRef<"Product", 'Int'>
+    readonly condition: FieldRef<"Product", 'String'>
+    readonly side: FieldRef<"Product", 'String'>
     readonly category_id: FieldRef<"Product", 'String'>
     readonly vehicle_id: FieldRef<"Product", 'String'>
+    readonly createdAt: FieldRef<"Product", 'DateTime'>
   }
     
 
@@ -4858,6 +5035,30 @@ export namespace Prisma {
   }
 
   /**
+   * Product.transactions
+   */
+  export type Product$transactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryTransaction
+     */
+    select?: InventoryTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryTransaction
+     */
+    omit?: InventoryTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryTransactionInclude<ExtArgs> | null
+    where?: InventoryTransactionWhereInput
+    orderBy?: InventoryTransactionOrderByWithRelationInput | InventoryTransactionOrderByWithRelationInput[]
+    cursor?: InventoryTransactionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: InventoryTransactionScalarFieldEnum | InventoryTransactionScalarFieldEnum[]
+  }
+
+  /**
    * Product without action
    */
   export type ProductDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4873,6 +5074,1163 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: ProductInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model InventoryTransaction
+   */
+
+  export type AggregateInventoryTransaction = {
+    _count: InventoryTransactionCountAggregateOutputType | null
+    _avg: InventoryTransactionAvgAggregateOutputType | null
+    _sum: InventoryTransactionSumAggregateOutputType | null
+    _min: InventoryTransactionMinAggregateOutputType | null
+    _max: InventoryTransactionMaxAggregateOutputType | null
+  }
+
+  export type InventoryTransactionAvgAggregateOutputType = {
+    quantityChange: number | null
+    previousStock: number | null
+    newStock: number | null
+  }
+
+  export type InventoryTransactionSumAggregateOutputType = {
+    quantityChange: number | null
+    previousStock: number | null
+    newStock: number | null
+  }
+
+  export type InventoryTransactionMinAggregateOutputType = {
+    id: string | null
+    productSku: string | null
+    type: string | null
+    quantityChange: number | null
+    previousStock: number | null
+    newStock: number | null
+    referenceId: string | null
+    actorName: string | null
+    createdAt: Date | null
+  }
+
+  export type InventoryTransactionMaxAggregateOutputType = {
+    id: string | null
+    productSku: string | null
+    type: string | null
+    quantityChange: number | null
+    previousStock: number | null
+    newStock: number | null
+    referenceId: string | null
+    actorName: string | null
+    createdAt: Date | null
+  }
+
+  export type InventoryTransactionCountAggregateOutputType = {
+    id: number
+    productSku: number
+    type: number
+    quantityChange: number
+    previousStock: number
+    newStock: number
+    referenceId: number
+    actorName: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type InventoryTransactionAvgAggregateInputType = {
+    quantityChange?: true
+    previousStock?: true
+    newStock?: true
+  }
+
+  export type InventoryTransactionSumAggregateInputType = {
+    quantityChange?: true
+    previousStock?: true
+    newStock?: true
+  }
+
+  export type InventoryTransactionMinAggregateInputType = {
+    id?: true
+    productSku?: true
+    type?: true
+    quantityChange?: true
+    previousStock?: true
+    newStock?: true
+    referenceId?: true
+    actorName?: true
+    createdAt?: true
+  }
+
+  export type InventoryTransactionMaxAggregateInputType = {
+    id?: true
+    productSku?: true
+    type?: true
+    quantityChange?: true
+    previousStock?: true
+    newStock?: true
+    referenceId?: true
+    actorName?: true
+    createdAt?: true
+  }
+
+  export type InventoryTransactionCountAggregateInputType = {
+    id?: true
+    productSku?: true
+    type?: true
+    quantityChange?: true
+    previousStock?: true
+    newStock?: true
+    referenceId?: true
+    actorName?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type InventoryTransactionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which InventoryTransaction to aggregate.
+     */
+    where?: InventoryTransactionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of InventoryTransactions to fetch.
+     */
+    orderBy?: InventoryTransactionOrderByWithRelationInput | InventoryTransactionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: InventoryTransactionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` InventoryTransactions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` InventoryTransactions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned InventoryTransactions
+    **/
+    _count?: true | InventoryTransactionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: InventoryTransactionAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: InventoryTransactionSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: InventoryTransactionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: InventoryTransactionMaxAggregateInputType
+  }
+
+  export type GetInventoryTransactionAggregateType<T extends InventoryTransactionAggregateArgs> = {
+        [P in keyof T & keyof AggregateInventoryTransaction]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateInventoryTransaction[P]>
+      : GetScalarType<T[P], AggregateInventoryTransaction[P]>
+  }
+
+
+
+
+  export type InventoryTransactionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InventoryTransactionWhereInput
+    orderBy?: InventoryTransactionOrderByWithAggregationInput | InventoryTransactionOrderByWithAggregationInput[]
+    by: InventoryTransactionScalarFieldEnum[] | InventoryTransactionScalarFieldEnum
+    having?: InventoryTransactionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: InventoryTransactionCountAggregateInputType | true
+    _avg?: InventoryTransactionAvgAggregateInputType
+    _sum?: InventoryTransactionSumAggregateInputType
+    _min?: InventoryTransactionMinAggregateInputType
+    _max?: InventoryTransactionMaxAggregateInputType
+  }
+
+  export type InventoryTransactionGroupByOutputType = {
+    id: string
+    productSku: string
+    type: string
+    quantityChange: number
+    previousStock: number
+    newStock: number
+    referenceId: string | null
+    actorName: string
+    createdAt: Date
+    _count: InventoryTransactionCountAggregateOutputType | null
+    _avg: InventoryTransactionAvgAggregateOutputType | null
+    _sum: InventoryTransactionSumAggregateOutputType | null
+    _min: InventoryTransactionMinAggregateOutputType | null
+    _max: InventoryTransactionMaxAggregateOutputType | null
+  }
+
+  type GetInventoryTransactionGroupByPayload<T extends InventoryTransactionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<InventoryTransactionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof InventoryTransactionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], InventoryTransactionGroupByOutputType[P]>
+            : GetScalarType<T[P], InventoryTransactionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type InventoryTransactionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    productSku?: boolean
+    type?: boolean
+    quantityChange?: boolean
+    previousStock?: boolean
+    newStock?: boolean
+    referenceId?: boolean
+    actorName?: boolean
+    createdAt?: boolean
+    product?: boolean | ProductDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["inventoryTransaction"]>
+
+  export type InventoryTransactionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    productSku?: boolean
+    type?: boolean
+    quantityChange?: boolean
+    previousStock?: boolean
+    newStock?: boolean
+    referenceId?: boolean
+    actorName?: boolean
+    createdAt?: boolean
+    product?: boolean | ProductDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["inventoryTransaction"]>
+
+  export type InventoryTransactionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    productSku?: boolean
+    type?: boolean
+    quantityChange?: boolean
+    previousStock?: boolean
+    newStock?: boolean
+    referenceId?: boolean
+    actorName?: boolean
+    createdAt?: boolean
+    product?: boolean | ProductDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["inventoryTransaction"]>
+
+  export type InventoryTransactionSelectScalar = {
+    id?: boolean
+    productSku?: boolean
+    type?: boolean
+    quantityChange?: boolean
+    previousStock?: boolean
+    newStock?: boolean
+    referenceId?: boolean
+    actorName?: boolean
+    createdAt?: boolean
+  }
+
+  export type InventoryTransactionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "productSku" | "type" | "quantityChange" | "previousStock" | "newStock" | "referenceId" | "actorName" | "createdAt", ExtArgs["result"]["inventoryTransaction"]>
+  export type InventoryTransactionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    product?: boolean | ProductDefaultArgs<ExtArgs>
+  }
+  export type InventoryTransactionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    product?: boolean | ProductDefaultArgs<ExtArgs>
+  }
+  export type InventoryTransactionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    product?: boolean | ProductDefaultArgs<ExtArgs>
+  }
+
+  export type $InventoryTransactionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "InventoryTransaction"
+    objects: {
+      product: Prisma.$ProductPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      productSku: string
+      type: string
+      quantityChange: number
+      previousStock: number
+      newStock: number
+      referenceId: string | null
+      actorName: string
+      createdAt: Date
+    }, ExtArgs["result"]["inventoryTransaction"]>
+    composites: {}
+  }
+
+  type InventoryTransactionGetPayload<S extends boolean | null | undefined | InventoryTransactionDefaultArgs> = $Result.GetResult<Prisma.$InventoryTransactionPayload, S>
+
+  type InventoryTransactionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<InventoryTransactionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: InventoryTransactionCountAggregateInputType | true
+    }
+
+  export interface InventoryTransactionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['InventoryTransaction'], meta: { name: 'InventoryTransaction' } }
+    /**
+     * Find zero or one InventoryTransaction that matches the filter.
+     * @param {InventoryTransactionFindUniqueArgs} args - Arguments to find a InventoryTransaction
+     * @example
+     * // Get one InventoryTransaction
+     * const inventoryTransaction = await prisma.inventoryTransaction.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends InventoryTransactionFindUniqueArgs>(args: SelectSubset<T, InventoryTransactionFindUniqueArgs<ExtArgs>>): Prisma__InventoryTransactionClient<$Result.GetResult<Prisma.$InventoryTransactionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one InventoryTransaction that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {InventoryTransactionFindUniqueOrThrowArgs} args - Arguments to find a InventoryTransaction
+     * @example
+     * // Get one InventoryTransaction
+     * const inventoryTransaction = await prisma.inventoryTransaction.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends InventoryTransactionFindUniqueOrThrowArgs>(args: SelectSubset<T, InventoryTransactionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__InventoryTransactionClient<$Result.GetResult<Prisma.$InventoryTransactionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first InventoryTransaction that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryTransactionFindFirstArgs} args - Arguments to find a InventoryTransaction
+     * @example
+     * // Get one InventoryTransaction
+     * const inventoryTransaction = await prisma.inventoryTransaction.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends InventoryTransactionFindFirstArgs>(args?: SelectSubset<T, InventoryTransactionFindFirstArgs<ExtArgs>>): Prisma__InventoryTransactionClient<$Result.GetResult<Prisma.$InventoryTransactionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first InventoryTransaction that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryTransactionFindFirstOrThrowArgs} args - Arguments to find a InventoryTransaction
+     * @example
+     * // Get one InventoryTransaction
+     * const inventoryTransaction = await prisma.inventoryTransaction.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends InventoryTransactionFindFirstOrThrowArgs>(args?: SelectSubset<T, InventoryTransactionFindFirstOrThrowArgs<ExtArgs>>): Prisma__InventoryTransactionClient<$Result.GetResult<Prisma.$InventoryTransactionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more InventoryTransactions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryTransactionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all InventoryTransactions
+     * const inventoryTransactions = await prisma.inventoryTransaction.findMany()
+     * 
+     * // Get first 10 InventoryTransactions
+     * const inventoryTransactions = await prisma.inventoryTransaction.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const inventoryTransactionWithIdOnly = await prisma.inventoryTransaction.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends InventoryTransactionFindManyArgs>(args?: SelectSubset<T, InventoryTransactionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a InventoryTransaction.
+     * @param {InventoryTransactionCreateArgs} args - Arguments to create a InventoryTransaction.
+     * @example
+     * // Create one InventoryTransaction
+     * const InventoryTransaction = await prisma.inventoryTransaction.create({
+     *   data: {
+     *     // ... data to create a InventoryTransaction
+     *   }
+     * })
+     * 
+     */
+    create<T extends InventoryTransactionCreateArgs>(args: SelectSubset<T, InventoryTransactionCreateArgs<ExtArgs>>): Prisma__InventoryTransactionClient<$Result.GetResult<Prisma.$InventoryTransactionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many InventoryTransactions.
+     * @param {InventoryTransactionCreateManyArgs} args - Arguments to create many InventoryTransactions.
+     * @example
+     * // Create many InventoryTransactions
+     * const inventoryTransaction = await prisma.inventoryTransaction.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends InventoryTransactionCreateManyArgs>(args?: SelectSubset<T, InventoryTransactionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many InventoryTransactions and returns the data saved in the database.
+     * @param {InventoryTransactionCreateManyAndReturnArgs} args - Arguments to create many InventoryTransactions.
+     * @example
+     * // Create many InventoryTransactions
+     * const inventoryTransaction = await prisma.inventoryTransaction.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many InventoryTransactions and only return the `id`
+     * const inventoryTransactionWithIdOnly = await prisma.inventoryTransaction.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends InventoryTransactionCreateManyAndReturnArgs>(args?: SelectSubset<T, InventoryTransactionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryTransactionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a InventoryTransaction.
+     * @param {InventoryTransactionDeleteArgs} args - Arguments to delete one InventoryTransaction.
+     * @example
+     * // Delete one InventoryTransaction
+     * const InventoryTransaction = await prisma.inventoryTransaction.delete({
+     *   where: {
+     *     // ... filter to delete one InventoryTransaction
+     *   }
+     * })
+     * 
+     */
+    delete<T extends InventoryTransactionDeleteArgs>(args: SelectSubset<T, InventoryTransactionDeleteArgs<ExtArgs>>): Prisma__InventoryTransactionClient<$Result.GetResult<Prisma.$InventoryTransactionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one InventoryTransaction.
+     * @param {InventoryTransactionUpdateArgs} args - Arguments to update one InventoryTransaction.
+     * @example
+     * // Update one InventoryTransaction
+     * const inventoryTransaction = await prisma.inventoryTransaction.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends InventoryTransactionUpdateArgs>(args: SelectSubset<T, InventoryTransactionUpdateArgs<ExtArgs>>): Prisma__InventoryTransactionClient<$Result.GetResult<Prisma.$InventoryTransactionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more InventoryTransactions.
+     * @param {InventoryTransactionDeleteManyArgs} args - Arguments to filter InventoryTransactions to delete.
+     * @example
+     * // Delete a few InventoryTransactions
+     * const { count } = await prisma.inventoryTransaction.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends InventoryTransactionDeleteManyArgs>(args?: SelectSubset<T, InventoryTransactionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more InventoryTransactions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryTransactionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many InventoryTransactions
+     * const inventoryTransaction = await prisma.inventoryTransaction.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends InventoryTransactionUpdateManyArgs>(args: SelectSubset<T, InventoryTransactionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more InventoryTransactions and returns the data updated in the database.
+     * @param {InventoryTransactionUpdateManyAndReturnArgs} args - Arguments to update many InventoryTransactions.
+     * @example
+     * // Update many InventoryTransactions
+     * const inventoryTransaction = await prisma.inventoryTransaction.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more InventoryTransactions and only return the `id`
+     * const inventoryTransactionWithIdOnly = await prisma.inventoryTransaction.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends InventoryTransactionUpdateManyAndReturnArgs>(args: SelectSubset<T, InventoryTransactionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryTransactionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one InventoryTransaction.
+     * @param {InventoryTransactionUpsertArgs} args - Arguments to update or create a InventoryTransaction.
+     * @example
+     * // Update or create a InventoryTransaction
+     * const inventoryTransaction = await prisma.inventoryTransaction.upsert({
+     *   create: {
+     *     // ... data to create a InventoryTransaction
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the InventoryTransaction we want to update
+     *   }
+     * })
+     */
+    upsert<T extends InventoryTransactionUpsertArgs>(args: SelectSubset<T, InventoryTransactionUpsertArgs<ExtArgs>>): Prisma__InventoryTransactionClient<$Result.GetResult<Prisma.$InventoryTransactionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of InventoryTransactions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryTransactionCountArgs} args - Arguments to filter InventoryTransactions to count.
+     * @example
+     * // Count the number of InventoryTransactions
+     * const count = await prisma.inventoryTransaction.count({
+     *   where: {
+     *     // ... the filter for the InventoryTransactions we want to count
+     *   }
+     * })
+    **/
+    count<T extends InventoryTransactionCountArgs>(
+      args?: Subset<T, InventoryTransactionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], InventoryTransactionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a InventoryTransaction.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryTransactionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends InventoryTransactionAggregateArgs>(args: Subset<T, InventoryTransactionAggregateArgs>): Prisma.PrismaPromise<GetInventoryTransactionAggregateType<T>>
+
+    /**
+     * Group by InventoryTransaction.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryTransactionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends InventoryTransactionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: InventoryTransactionGroupByArgs['orderBy'] }
+        : { orderBy?: InventoryTransactionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, InventoryTransactionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetInventoryTransactionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the InventoryTransaction model
+   */
+  readonly fields: InventoryTransactionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for InventoryTransaction.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__InventoryTransactionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    product<T extends ProductDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ProductDefaultArgs<ExtArgs>>): Prisma__ProductClient<$Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the InventoryTransaction model
+   */
+  interface InventoryTransactionFieldRefs {
+    readonly id: FieldRef<"InventoryTransaction", 'String'>
+    readonly productSku: FieldRef<"InventoryTransaction", 'String'>
+    readonly type: FieldRef<"InventoryTransaction", 'String'>
+    readonly quantityChange: FieldRef<"InventoryTransaction", 'Int'>
+    readonly previousStock: FieldRef<"InventoryTransaction", 'Int'>
+    readonly newStock: FieldRef<"InventoryTransaction", 'Int'>
+    readonly referenceId: FieldRef<"InventoryTransaction", 'String'>
+    readonly actorName: FieldRef<"InventoryTransaction", 'String'>
+    readonly createdAt: FieldRef<"InventoryTransaction", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * InventoryTransaction findUnique
+   */
+  export type InventoryTransactionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryTransaction
+     */
+    select?: InventoryTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryTransaction
+     */
+    omit?: InventoryTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryTransactionInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryTransaction to fetch.
+     */
+    where: InventoryTransactionWhereUniqueInput
+  }
+
+  /**
+   * InventoryTransaction findUniqueOrThrow
+   */
+  export type InventoryTransactionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryTransaction
+     */
+    select?: InventoryTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryTransaction
+     */
+    omit?: InventoryTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryTransactionInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryTransaction to fetch.
+     */
+    where: InventoryTransactionWhereUniqueInput
+  }
+
+  /**
+   * InventoryTransaction findFirst
+   */
+  export type InventoryTransactionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryTransaction
+     */
+    select?: InventoryTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryTransaction
+     */
+    omit?: InventoryTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryTransactionInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryTransaction to fetch.
+     */
+    where?: InventoryTransactionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of InventoryTransactions to fetch.
+     */
+    orderBy?: InventoryTransactionOrderByWithRelationInput | InventoryTransactionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for InventoryTransactions.
+     */
+    cursor?: InventoryTransactionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` InventoryTransactions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` InventoryTransactions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of InventoryTransactions.
+     */
+    distinct?: InventoryTransactionScalarFieldEnum | InventoryTransactionScalarFieldEnum[]
+  }
+
+  /**
+   * InventoryTransaction findFirstOrThrow
+   */
+  export type InventoryTransactionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryTransaction
+     */
+    select?: InventoryTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryTransaction
+     */
+    omit?: InventoryTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryTransactionInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryTransaction to fetch.
+     */
+    where?: InventoryTransactionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of InventoryTransactions to fetch.
+     */
+    orderBy?: InventoryTransactionOrderByWithRelationInput | InventoryTransactionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for InventoryTransactions.
+     */
+    cursor?: InventoryTransactionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` InventoryTransactions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` InventoryTransactions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of InventoryTransactions.
+     */
+    distinct?: InventoryTransactionScalarFieldEnum | InventoryTransactionScalarFieldEnum[]
+  }
+
+  /**
+   * InventoryTransaction findMany
+   */
+  export type InventoryTransactionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryTransaction
+     */
+    select?: InventoryTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryTransaction
+     */
+    omit?: InventoryTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryTransactionInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryTransactions to fetch.
+     */
+    where?: InventoryTransactionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of InventoryTransactions to fetch.
+     */
+    orderBy?: InventoryTransactionOrderByWithRelationInput | InventoryTransactionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing InventoryTransactions.
+     */
+    cursor?: InventoryTransactionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` InventoryTransactions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` InventoryTransactions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of InventoryTransactions.
+     */
+    distinct?: InventoryTransactionScalarFieldEnum | InventoryTransactionScalarFieldEnum[]
+  }
+
+  /**
+   * InventoryTransaction create
+   */
+  export type InventoryTransactionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryTransaction
+     */
+    select?: InventoryTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryTransaction
+     */
+    omit?: InventoryTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryTransactionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a InventoryTransaction.
+     */
+    data: XOR<InventoryTransactionCreateInput, InventoryTransactionUncheckedCreateInput>
+  }
+
+  /**
+   * InventoryTransaction createMany
+   */
+  export type InventoryTransactionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many InventoryTransactions.
+     */
+    data: InventoryTransactionCreateManyInput | InventoryTransactionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * InventoryTransaction createManyAndReturn
+   */
+  export type InventoryTransactionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryTransaction
+     */
+    select?: InventoryTransactionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryTransaction
+     */
+    omit?: InventoryTransactionOmit<ExtArgs> | null
+    /**
+     * The data used to create many InventoryTransactions.
+     */
+    data: InventoryTransactionCreateManyInput | InventoryTransactionCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryTransactionIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * InventoryTransaction update
+   */
+  export type InventoryTransactionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryTransaction
+     */
+    select?: InventoryTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryTransaction
+     */
+    omit?: InventoryTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryTransactionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a InventoryTransaction.
+     */
+    data: XOR<InventoryTransactionUpdateInput, InventoryTransactionUncheckedUpdateInput>
+    /**
+     * Choose, which InventoryTransaction to update.
+     */
+    where: InventoryTransactionWhereUniqueInput
+  }
+
+  /**
+   * InventoryTransaction updateMany
+   */
+  export type InventoryTransactionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update InventoryTransactions.
+     */
+    data: XOR<InventoryTransactionUpdateManyMutationInput, InventoryTransactionUncheckedUpdateManyInput>
+    /**
+     * Filter which InventoryTransactions to update
+     */
+    where?: InventoryTransactionWhereInput
+    /**
+     * Limit how many InventoryTransactions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * InventoryTransaction updateManyAndReturn
+   */
+  export type InventoryTransactionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryTransaction
+     */
+    select?: InventoryTransactionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryTransaction
+     */
+    omit?: InventoryTransactionOmit<ExtArgs> | null
+    /**
+     * The data used to update InventoryTransactions.
+     */
+    data: XOR<InventoryTransactionUpdateManyMutationInput, InventoryTransactionUncheckedUpdateManyInput>
+    /**
+     * Filter which InventoryTransactions to update
+     */
+    where?: InventoryTransactionWhereInput
+    /**
+     * Limit how many InventoryTransactions to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryTransactionIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * InventoryTransaction upsert
+   */
+  export type InventoryTransactionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryTransaction
+     */
+    select?: InventoryTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryTransaction
+     */
+    omit?: InventoryTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryTransactionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the InventoryTransaction to update in case it exists.
+     */
+    where: InventoryTransactionWhereUniqueInput
+    /**
+     * In case the InventoryTransaction found by the `where` argument doesn't exist, create a new InventoryTransaction with this data.
+     */
+    create: XOR<InventoryTransactionCreateInput, InventoryTransactionUncheckedCreateInput>
+    /**
+     * In case the InventoryTransaction was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<InventoryTransactionUpdateInput, InventoryTransactionUncheckedUpdateInput>
+  }
+
+  /**
+   * InventoryTransaction delete
+   */
+  export type InventoryTransactionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryTransaction
+     */
+    select?: InventoryTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryTransaction
+     */
+    omit?: InventoryTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryTransactionInclude<ExtArgs> | null
+    /**
+     * Filter which InventoryTransaction to delete.
+     */
+    where: InventoryTransactionWhereUniqueInput
+  }
+
+  /**
+   * InventoryTransaction deleteMany
+   */
+  export type InventoryTransactionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which InventoryTransactions to delete
+     */
+    where?: InventoryTransactionWhereInput
+    /**
+     * Limit how many InventoryTransactions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * InventoryTransaction without action
+   */
+  export type InventoryTransactionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryTransaction
+     */
+    select?: InventoryTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryTransaction
+     */
+    omit?: InventoryTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryTransactionInclude<ExtArgs> | null
   }
 
 
@@ -10196,11 +11554,31 @@ export namespace Prisma {
     position: 'position',
     sellingPrice: 'sellingPrice',
     stock: 'stock',
+    heldStock: 'heldStock',
+    reorderPoint: 'reorderPoint',
+    condition: 'condition',
+    side: 'side',
     category_id: 'category_id',
-    vehicle_id: 'vehicle_id'
+    vehicle_id: 'vehicle_id',
+    createdAt: 'createdAt'
   };
 
   export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
+
+
+  export const InventoryTransactionScalarFieldEnum: {
+    id: 'id',
+    productSku: 'productSku',
+    type: 'type',
+    quantityChange: 'quantityChange',
+    previousStock: 'previousStock',
+    newStock: 'newStock',
+    referenceId: 'referenceId',
+    actorName: 'actorName',
+    createdAt: 'createdAt'
+  };
+
+  export type InventoryTransactionScalarFieldEnum = (typeof InventoryTransactionScalarFieldEnum)[keyof typeof InventoryTransactionScalarFieldEnum]
 
 
   export const UserScalarFieldEnum: {
@@ -10445,11 +11823,17 @@ export namespace Prisma {
     position?: StringNullableFilter<"Product"> | string | null
     sellingPrice?: FloatFilter<"Product"> | number
     stock?: IntFilter<"Product"> | number
+    heldStock?: IntFilter<"Product"> | number
+    reorderPoint?: IntFilter<"Product"> | number
+    condition?: StringFilter<"Product"> | string
+    side?: StringFilter<"Product"> | string
     category_id?: StringFilter<"Product"> | string
     vehicle_id?: StringFilter<"Product"> | string
+    createdAt?: DateTimeFilter<"Product"> | Date | string
     category?: XOR<CategoryScalarRelationFilter, CategoryWhereInput>
     vehicle?: XOR<VehicleScalarRelationFilter, VehicleWhereInput>
     orderItems?: OrderItemListRelationFilter
+    transactions?: InventoryTransactionListRelationFilter
   }
 
   export type ProductOrderByWithRelationInput = {
@@ -10458,11 +11842,17 @@ export namespace Prisma {
     position?: SortOrderInput | SortOrder
     sellingPrice?: SortOrder
     stock?: SortOrder
+    heldStock?: SortOrder
+    reorderPoint?: SortOrder
+    condition?: SortOrder
+    side?: SortOrder
     category_id?: SortOrder
     vehicle_id?: SortOrder
+    createdAt?: SortOrder
     category?: CategoryOrderByWithRelationInput
     vehicle?: VehicleOrderByWithRelationInput
     orderItems?: OrderItemOrderByRelationAggregateInput
+    transactions?: InventoryTransactionOrderByRelationAggregateInput
   }
 
   export type ProductWhereUniqueInput = Prisma.AtLeast<{
@@ -10474,11 +11864,17 @@ export namespace Prisma {
     position?: StringNullableFilter<"Product"> | string | null
     sellingPrice?: FloatFilter<"Product"> | number
     stock?: IntFilter<"Product"> | number
+    heldStock?: IntFilter<"Product"> | number
+    reorderPoint?: IntFilter<"Product"> | number
+    condition?: StringFilter<"Product"> | string
+    side?: StringFilter<"Product"> | string
     category_id?: StringFilter<"Product"> | string
     vehicle_id?: StringFilter<"Product"> | string
+    createdAt?: DateTimeFilter<"Product"> | Date | string
     category?: XOR<CategoryScalarRelationFilter, CategoryWhereInput>
     vehicle?: XOR<VehicleScalarRelationFilter, VehicleWhereInput>
     orderItems?: OrderItemListRelationFilter
+    transactions?: InventoryTransactionListRelationFilter
   }, "sku">
 
   export type ProductOrderByWithAggregationInput = {
@@ -10487,8 +11883,13 @@ export namespace Prisma {
     position?: SortOrderInput | SortOrder
     sellingPrice?: SortOrder
     stock?: SortOrder
+    heldStock?: SortOrder
+    reorderPoint?: SortOrder
+    condition?: SortOrder
+    side?: SortOrder
     category_id?: SortOrder
     vehicle_id?: SortOrder
+    createdAt?: SortOrder
     _count?: ProductCountOrderByAggregateInput
     _avg?: ProductAvgOrderByAggregateInput
     _max?: ProductMaxOrderByAggregateInput
@@ -10505,8 +11906,90 @@ export namespace Prisma {
     position?: StringNullableWithAggregatesFilter<"Product"> | string | null
     sellingPrice?: FloatWithAggregatesFilter<"Product"> | number
     stock?: IntWithAggregatesFilter<"Product"> | number
+    heldStock?: IntWithAggregatesFilter<"Product"> | number
+    reorderPoint?: IntWithAggregatesFilter<"Product"> | number
+    condition?: StringWithAggregatesFilter<"Product"> | string
+    side?: StringWithAggregatesFilter<"Product"> | string
     category_id?: StringWithAggregatesFilter<"Product"> | string
     vehicle_id?: StringWithAggregatesFilter<"Product"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"Product"> | Date | string
+  }
+
+  export type InventoryTransactionWhereInput = {
+    AND?: InventoryTransactionWhereInput | InventoryTransactionWhereInput[]
+    OR?: InventoryTransactionWhereInput[]
+    NOT?: InventoryTransactionWhereInput | InventoryTransactionWhereInput[]
+    id?: StringFilter<"InventoryTransaction"> | string
+    productSku?: StringFilter<"InventoryTransaction"> | string
+    type?: StringFilter<"InventoryTransaction"> | string
+    quantityChange?: IntFilter<"InventoryTransaction"> | number
+    previousStock?: IntFilter<"InventoryTransaction"> | number
+    newStock?: IntFilter<"InventoryTransaction"> | number
+    referenceId?: StringNullableFilter<"InventoryTransaction"> | string | null
+    actorName?: StringFilter<"InventoryTransaction"> | string
+    createdAt?: DateTimeFilter<"InventoryTransaction"> | Date | string
+    product?: XOR<ProductScalarRelationFilter, ProductWhereInput>
+  }
+
+  export type InventoryTransactionOrderByWithRelationInput = {
+    id?: SortOrder
+    productSku?: SortOrder
+    type?: SortOrder
+    quantityChange?: SortOrder
+    previousStock?: SortOrder
+    newStock?: SortOrder
+    referenceId?: SortOrderInput | SortOrder
+    actorName?: SortOrder
+    createdAt?: SortOrder
+    product?: ProductOrderByWithRelationInput
+  }
+
+  export type InventoryTransactionWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: InventoryTransactionWhereInput | InventoryTransactionWhereInput[]
+    OR?: InventoryTransactionWhereInput[]
+    NOT?: InventoryTransactionWhereInput | InventoryTransactionWhereInput[]
+    productSku?: StringFilter<"InventoryTransaction"> | string
+    type?: StringFilter<"InventoryTransaction"> | string
+    quantityChange?: IntFilter<"InventoryTransaction"> | number
+    previousStock?: IntFilter<"InventoryTransaction"> | number
+    newStock?: IntFilter<"InventoryTransaction"> | number
+    referenceId?: StringNullableFilter<"InventoryTransaction"> | string | null
+    actorName?: StringFilter<"InventoryTransaction"> | string
+    createdAt?: DateTimeFilter<"InventoryTransaction"> | Date | string
+    product?: XOR<ProductScalarRelationFilter, ProductWhereInput>
+  }, "id">
+
+  export type InventoryTransactionOrderByWithAggregationInput = {
+    id?: SortOrder
+    productSku?: SortOrder
+    type?: SortOrder
+    quantityChange?: SortOrder
+    previousStock?: SortOrder
+    newStock?: SortOrder
+    referenceId?: SortOrderInput | SortOrder
+    actorName?: SortOrder
+    createdAt?: SortOrder
+    _count?: InventoryTransactionCountOrderByAggregateInput
+    _avg?: InventoryTransactionAvgOrderByAggregateInput
+    _max?: InventoryTransactionMaxOrderByAggregateInput
+    _min?: InventoryTransactionMinOrderByAggregateInput
+    _sum?: InventoryTransactionSumOrderByAggregateInput
+  }
+
+  export type InventoryTransactionScalarWhereWithAggregatesInput = {
+    AND?: InventoryTransactionScalarWhereWithAggregatesInput | InventoryTransactionScalarWhereWithAggregatesInput[]
+    OR?: InventoryTransactionScalarWhereWithAggregatesInput[]
+    NOT?: InventoryTransactionScalarWhereWithAggregatesInput | InventoryTransactionScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"InventoryTransaction"> | string
+    productSku?: StringWithAggregatesFilter<"InventoryTransaction"> | string
+    type?: StringWithAggregatesFilter<"InventoryTransaction"> | string
+    quantityChange?: IntWithAggregatesFilter<"InventoryTransaction"> | number
+    previousStock?: IntWithAggregatesFilter<"InventoryTransaction"> | number
+    newStock?: IntWithAggregatesFilter<"InventoryTransaction"> | number
+    referenceId?: StringNullableWithAggregatesFilter<"InventoryTransaction"> | string | null
+    actorName?: StringWithAggregatesFilter<"InventoryTransaction"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"InventoryTransaction"> | Date | string
   }
 
   export type UserWhereInput = {
@@ -10898,9 +12381,15 @@ export namespace Prisma {
     position?: string | null
     sellingPrice: number
     stock?: number
+    heldStock?: number
+    reorderPoint?: number
+    condition?: string
+    side?: string
+    createdAt?: Date | string
     category: CategoryCreateNestedOneWithoutProductsInput
     vehicle: VehicleCreateNestedOneWithoutProductsInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
+    transactions?: InventoryTransactionCreateNestedManyWithoutProductInput
   }
 
   export type ProductUncheckedCreateInput = {
@@ -10909,9 +12398,15 @@ export namespace Prisma {
     position?: string | null
     sellingPrice: number
     stock?: number
+    heldStock?: number
+    reorderPoint?: number
+    condition?: string
+    side?: string
     category_id: string
     vehicle_id: string
+    createdAt?: Date | string
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
+    transactions?: InventoryTransactionUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type ProductUpdateInput = {
@@ -10920,9 +12415,15 @@ export namespace Prisma {
     position?: NullableStringFieldUpdateOperationsInput | string | null
     sellingPrice?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
+    heldStock?: IntFieldUpdateOperationsInput | number
+    reorderPoint?: IntFieldUpdateOperationsInput | number
+    condition?: StringFieldUpdateOperationsInput | string
+    side?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneRequiredWithoutProductsNestedInput
     vehicle?: VehicleUpdateOneRequiredWithoutProductsNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
+    transactions?: InventoryTransactionUpdateManyWithoutProductNestedInput
   }
 
   export type ProductUncheckedUpdateInput = {
@@ -10931,9 +12432,15 @@ export namespace Prisma {
     position?: NullableStringFieldUpdateOperationsInput | string | null
     sellingPrice?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
+    heldStock?: IntFieldUpdateOperationsInput | number
+    reorderPoint?: IntFieldUpdateOperationsInput | number
+    condition?: StringFieldUpdateOperationsInput | string
+    side?: StringFieldUpdateOperationsInput | string
     category_id?: StringFieldUpdateOperationsInput | string
     vehicle_id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
+    transactions?: InventoryTransactionUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type ProductCreateManyInput = {
@@ -10942,8 +12449,13 @@ export namespace Prisma {
     position?: string | null
     sellingPrice: number
     stock?: number
+    heldStock?: number
+    reorderPoint?: number
+    condition?: string
+    side?: string
     category_id: string
     vehicle_id: string
+    createdAt?: Date | string
   }
 
   export type ProductUpdateManyMutationInput = {
@@ -10952,6 +12464,11 @@ export namespace Prisma {
     position?: NullableStringFieldUpdateOperationsInput | string | null
     sellingPrice?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
+    heldStock?: IntFieldUpdateOperationsInput | number
+    reorderPoint?: IntFieldUpdateOperationsInput | number
+    condition?: StringFieldUpdateOperationsInput | string
+    side?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ProductUncheckedUpdateManyInput = {
@@ -10960,8 +12477,96 @@ export namespace Prisma {
     position?: NullableStringFieldUpdateOperationsInput | string | null
     sellingPrice?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
+    heldStock?: IntFieldUpdateOperationsInput | number
+    reorderPoint?: IntFieldUpdateOperationsInput | number
+    condition?: StringFieldUpdateOperationsInput | string
+    side?: StringFieldUpdateOperationsInput | string
     category_id?: StringFieldUpdateOperationsInput | string
     vehicle_id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InventoryTransactionCreateInput = {
+    id?: string
+    type: string
+    quantityChange: number
+    previousStock: number
+    newStock: number
+    referenceId?: string | null
+    actorName: string
+    createdAt?: Date | string
+    product: ProductCreateNestedOneWithoutTransactionsInput
+  }
+
+  export type InventoryTransactionUncheckedCreateInput = {
+    id?: string
+    productSku: string
+    type: string
+    quantityChange: number
+    previousStock: number
+    newStock: number
+    referenceId?: string | null
+    actorName: string
+    createdAt?: Date | string
+  }
+
+  export type InventoryTransactionUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    quantityChange?: IntFieldUpdateOperationsInput | number
+    previousStock?: IntFieldUpdateOperationsInput | number
+    newStock?: IntFieldUpdateOperationsInput | number
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    actorName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    product?: ProductUpdateOneRequiredWithoutTransactionsNestedInput
+  }
+
+  export type InventoryTransactionUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    productSku?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    quantityChange?: IntFieldUpdateOperationsInput | number
+    previousStock?: IntFieldUpdateOperationsInput | number
+    newStock?: IntFieldUpdateOperationsInput | number
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    actorName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InventoryTransactionCreateManyInput = {
+    id?: string
+    productSku: string
+    type: string
+    quantityChange: number
+    previousStock: number
+    newStock: number
+    referenceId?: string | null
+    actorName: string
+    createdAt?: Date | string
+  }
+
+  export type InventoryTransactionUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    quantityChange?: IntFieldUpdateOperationsInput | number
+    previousStock?: IntFieldUpdateOperationsInput | number
+    newStock?: IntFieldUpdateOperationsInput | number
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    actorName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InventoryTransactionUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    productSku?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    quantityChange?: IntFieldUpdateOperationsInput | number
+    previousStock?: IntFieldUpdateOperationsInput | number
+    newStock?: IntFieldUpdateOperationsInput | number
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    actorName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type UserCreateInput = {
@@ -11394,6 +12999,17 @@ export namespace Prisma {
     not?: NestedIntFilter<$PrismaModel> | number
   }
 
+  export type DateTimeFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
+  }
+
   export type CategoryScalarRelationFilter = {
     is?: CategoryWhereInput
     isNot?: CategoryWhereInput
@@ -11410,6 +13026,12 @@ export namespace Prisma {
     none?: OrderItemWhereInput
   }
 
+  export type InventoryTransactionListRelationFilter = {
+    every?: InventoryTransactionWhereInput
+    some?: InventoryTransactionWhereInput
+    none?: InventoryTransactionWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -11419,19 +13041,30 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type InventoryTransactionOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type ProductCountOrderByAggregateInput = {
     sku?: SortOrder
     productName?: SortOrder
     position?: SortOrder
     sellingPrice?: SortOrder
     stock?: SortOrder
+    heldStock?: SortOrder
+    reorderPoint?: SortOrder
+    condition?: SortOrder
+    side?: SortOrder
     category_id?: SortOrder
     vehicle_id?: SortOrder
+    createdAt?: SortOrder
   }
 
   export type ProductAvgOrderByAggregateInput = {
     sellingPrice?: SortOrder
     stock?: SortOrder
+    heldStock?: SortOrder
+    reorderPoint?: SortOrder
   }
 
   export type ProductMaxOrderByAggregateInput = {
@@ -11440,8 +13073,13 @@ export namespace Prisma {
     position?: SortOrder
     sellingPrice?: SortOrder
     stock?: SortOrder
+    heldStock?: SortOrder
+    reorderPoint?: SortOrder
+    condition?: SortOrder
+    side?: SortOrder
     category_id?: SortOrder
     vehicle_id?: SortOrder
+    createdAt?: SortOrder
   }
 
   export type ProductMinOrderByAggregateInput = {
@@ -11450,13 +13088,20 @@ export namespace Prisma {
     position?: SortOrder
     sellingPrice?: SortOrder
     stock?: SortOrder
+    heldStock?: SortOrder
+    reorderPoint?: SortOrder
+    condition?: SortOrder
+    side?: SortOrder
     category_id?: SortOrder
     vehicle_id?: SortOrder
+    createdAt?: SortOrder
   }
 
   export type ProductSumOrderByAggregateInput = {
     sellingPrice?: SortOrder
     stock?: SortOrder
+    heldStock?: SortOrder
+    reorderPoint?: SortOrder
   }
 
   export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -11509,7 +13154,7 @@ export namespace Prisma {
     _max?: NestedIntFilter<$PrismaModel>
   }
 
-  export type DateTimeFilter<$PrismaModel = never> = {
+  export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
     notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -11517,7 +13162,63 @@ export namespace Prisma {
     lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
+  export type ProductScalarRelationFilter = {
+    is?: ProductWhereInput
+    isNot?: ProductWhereInput
+  }
+
+  export type InventoryTransactionCountOrderByAggregateInput = {
+    id?: SortOrder
+    productSku?: SortOrder
+    type?: SortOrder
+    quantityChange?: SortOrder
+    previousStock?: SortOrder
+    newStock?: SortOrder
+    referenceId?: SortOrder
+    actorName?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type InventoryTransactionAvgOrderByAggregateInput = {
+    quantityChange?: SortOrder
+    previousStock?: SortOrder
+    newStock?: SortOrder
+  }
+
+  export type InventoryTransactionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    productSku?: SortOrder
+    type?: SortOrder
+    quantityChange?: SortOrder
+    previousStock?: SortOrder
+    newStock?: SortOrder
+    referenceId?: SortOrder
+    actorName?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type InventoryTransactionMinOrderByAggregateInput = {
+    id?: SortOrder
+    productSku?: SortOrder
+    type?: SortOrder
+    quantityChange?: SortOrder
+    previousStock?: SortOrder
+    newStock?: SortOrder
+    referenceId?: SortOrder
+    actorName?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type InventoryTransactionSumOrderByAggregateInput = {
+    quantityChange?: SortOrder
+    previousStock?: SortOrder
+    newStock?: SortOrder
   }
 
   export type UserCountOrderByAggregateInput = {
@@ -11550,20 +13251,6 @@ export namespace Prisma {
     createdAt?: SortOrder
   }
 
-  export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedDateTimeFilter<$PrismaModel>
-    _max?: NestedDateTimeFilter<$PrismaModel>
-  }
-
   export type OrderCountOrderByAggregateInput = {
     id?: SortOrder
     customerName?: SortOrder
@@ -11588,11 +13275,6 @@ export namespace Prisma {
   export type OrderScalarRelationFilter = {
     is?: OrderWhereInput
     isNot?: OrderWhereInput
-  }
-
-  export type ProductScalarRelationFilter = {
-    is?: ProductWhereInput
-    isNot?: ProductWhereInput
   }
 
   export type OrderItemCountOrderByAggregateInput = {
@@ -11804,11 +13486,25 @@ export namespace Prisma {
     connect?: OrderItemWhereUniqueInput | OrderItemWhereUniqueInput[]
   }
 
+  export type InventoryTransactionCreateNestedManyWithoutProductInput = {
+    create?: XOR<InventoryTransactionCreateWithoutProductInput, InventoryTransactionUncheckedCreateWithoutProductInput> | InventoryTransactionCreateWithoutProductInput[] | InventoryTransactionUncheckedCreateWithoutProductInput[]
+    connectOrCreate?: InventoryTransactionCreateOrConnectWithoutProductInput | InventoryTransactionCreateOrConnectWithoutProductInput[]
+    createMany?: InventoryTransactionCreateManyProductInputEnvelope
+    connect?: InventoryTransactionWhereUniqueInput | InventoryTransactionWhereUniqueInput[]
+  }
+
   export type OrderItemUncheckedCreateNestedManyWithoutProductInput = {
     create?: XOR<OrderItemCreateWithoutProductInput, OrderItemUncheckedCreateWithoutProductInput> | OrderItemCreateWithoutProductInput[] | OrderItemUncheckedCreateWithoutProductInput[]
     connectOrCreate?: OrderItemCreateOrConnectWithoutProductInput | OrderItemCreateOrConnectWithoutProductInput[]
     createMany?: OrderItemCreateManyProductInputEnvelope
     connect?: OrderItemWhereUniqueInput | OrderItemWhereUniqueInput[]
+  }
+
+  export type InventoryTransactionUncheckedCreateNestedManyWithoutProductInput = {
+    create?: XOR<InventoryTransactionCreateWithoutProductInput, InventoryTransactionUncheckedCreateWithoutProductInput> | InventoryTransactionCreateWithoutProductInput[] | InventoryTransactionUncheckedCreateWithoutProductInput[]
+    connectOrCreate?: InventoryTransactionCreateOrConnectWithoutProductInput | InventoryTransactionCreateOrConnectWithoutProductInput[]
+    createMany?: InventoryTransactionCreateManyProductInputEnvelope
+    connect?: InventoryTransactionWhereUniqueInput | InventoryTransactionWhereUniqueInput[]
   }
 
   export type NullableStringFieldUpdateOperationsInput = {
@@ -11829,6 +13525,10 @@ export namespace Prisma {
     decrement?: number
     multiply?: number
     divide?: number
+  }
+
+  export type DateTimeFieldUpdateOperationsInput = {
+    set?: Date | string
   }
 
   export type CategoryUpdateOneRequiredWithoutProductsNestedInput = {
@@ -11861,6 +13561,20 @@ export namespace Prisma {
     deleteMany?: OrderItemScalarWhereInput | OrderItemScalarWhereInput[]
   }
 
+  export type InventoryTransactionUpdateManyWithoutProductNestedInput = {
+    create?: XOR<InventoryTransactionCreateWithoutProductInput, InventoryTransactionUncheckedCreateWithoutProductInput> | InventoryTransactionCreateWithoutProductInput[] | InventoryTransactionUncheckedCreateWithoutProductInput[]
+    connectOrCreate?: InventoryTransactionCreateOrConnectWithoutProductInput | InventoryTransactionCreateOrConnectWithoutProductInput[]
+    upsert?: InventoryTransactionUpsertWithWhereUniqueWithoutProductInput | InventoryTransactionUpsertWithWhereUniqueWithoutProductInput[]
+    createMany?: InventoryTransactionCreateManyProductInputEnvelope
+    set?: InventoryTransactionWhereUniqueInput | InventoryTransactionWhereUniqueInput[]
+    disconnect?: InventoryTransactionWhereUniqueInput | InventoryTransactionWhereUniqueInput[]
+    delete?: InventoryTransactionWhereUniqueInput | InventoryTransactionWhereUniqueInput[]
+    connect?: InventoryTransactionWhereUniqueInput | InventoryTransactionWhereUniqueInput[]
+    update?: InventoryTransactionUpdateWithWhereUniqueWithoutProductInput | InventoryTransactionUpdateWithWhereUniqueWithoutProductInput[]
+    updateMany?: InventoryTransactionUpdateManyWithWhereWithoutProductInput | InventoryTransactionUpdateManyWithWhereWithoutProductInput[]
+    deleteMany?: InventoryTransactionScalarWhereInput | InventoryTransactionScalarWhereInput[]
+  }
+
   export type OrderItemUncheckedUpdateManyWithoutProductNestedInput = {
     create?: XOR<OrderItemCreateWithoutProductInput, OrderItemUncheckedCreateWithoutProductInput> | OrderItemCreateWithoutProductInput[] | OrderItemUncheckedCreateWithoutProductInput[]
     connectOrCreate?: OrderItemCreateOrConnectWithoutProductInput | OrderItemCreateOrConnectWithoutProductInput[]
@@ -11875,8 +13589,32 @@ export namespace Prisma {
     deleteMany?: OrderItemScalarWhereInput | OrderItemScalarWhereInput[]
   }
 
-  export type DateTimeFieldUpdateOperationsInput = {
-    set?: Date | string
+  export type InventoryTransactionUncheckedUpdateManyWithoutProductNestedInput = {
+    create?: XOR<InventoryTransactionCreateWithoutProductInput, InventoryTransactionUncheckedCreateWithoutProductInput> | InventoryTransactionCreateWithoutProductInput[] | InventoryTransactionUncheckedCreateWithoutProductInput[]
+    connectOrCreate?: InventoryTransactionCreateOrConnectWithoutProductInput | InventoryTransactionCreateOrConnectWithoutProductInput[]
+    upsert?: InventoryTransactionUpsertWithWhereUniqueWithoutProductInput | InventoryTransactionUpsertWithWhereUniqueWithoutProductInput[]
+    createMany?: InventoryTransactionCreateManyProductInputEnvelope
+    set?: InventoryTransactionWhereUniqueInput | InventoryTransactionWhereUniqueInput[]
+    disconnect?: InventoryTransactionWhereUniqueInput | InventoryTransactionWhereUniqueInput[]
+    delete?: InventoryTransactionWhereUniqueInput | InventoryTransactionWhereUniqueInput[]
+    connect?: InventoryTransactionWhereUniqueInput | InventoryTransactionWhereUniqueInput[]
+    update?: InventoryTransactionUpdateWithWhereUniqueWithoutProductInput | InventoryTransactionUpdateWithWhereUniqueWithoutProductInput[]
+    updateMany?: InventoryTransactionUpdateManyWithWhereWithoutProductInput | InventoryTransactionUpdateManyWithWhereWithoutProductInput[]
+    deleteMany?: InventoryTransactionScalarWhereInput | InventoryTransactionScalarWhereInput[]
+  }
+
+  export type ProductCreateNestedOneWithoutTransactionsInput = {
+    create?: XOR<ProductCreateWithoutTransactionsInput, ProductUncheckedCreateWithoutTransactionsInput>
+    connectOrCreate?: ProductCreateOrConnectWithoutTransactionsInput
+    connect?: ProductWhereUniqueInput
+  }
+
+  export type ProductUpdateOneRequiredWithoutTransactionsNestedInput = {
+    create?: XOR<ProductCreateWithoutTransactionsInput, ProductUncheckedCreateWithoutTransactionsInput>
+    connectOrCreate?: ProductCreateOrConnectWithoutTransactionsInput
+    upsert?: ProductUpsertWithoutTransactionsInput
+    connect?: ProductWhereUniqueInput
+    update?: XOR<XOR<ProductUpdateToOneWithWhereWithoutTransactionsInput, ProductUpdateWithoutTransactionsInput>, ProductUncheckedUpdateWithoutTransactionsInput>
   }
 
   export type OrderItemCreateNestedManyWithoutOrderInput = {
@@ -12016,6 +13754,17 @@ export namespace Prisma {
     not?: NestedFloatFilter<$PrismaModel> | number
   }
 
+  export type NestedDateTimeFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
+  }
+
   export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
@@ -12076,17 +13825,6 @@ export namespace Prisma {
     _max?: NestedIntFilter<$PrismaModel>
   }
 
-  export type NestedDateTimeFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
-  }
-
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -12107,8 +13845,14 @@ export namespace Prisma {
     position?: string | null
     sellingPrice: number
     stock?: number
+    heldStock?: number
+    reorderPoint?: number
+    condition?: string
+    side?: string
+    createdAt?: Date | string
     vehicle: VehicleCreateNestedOneWithoutProductsInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
+    transactions?: InventoryTransactionCreateNestedManyWithoutProductInput
   }
 
   export type ProductUncheckedCreateWithoutCategoryInput = {
@@ -12117,8 +13861,14 @@ export namespace Prisma {
     position?: string | null
     sellingPrice: number
     stock?: number
+    heldStock?: number
+    reorderPoint?: number
+    condition?: string
+    side?: string
     vehicle_id: string
+    createdAt?: Date | string
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
+    transactions?: InventoryTransactionUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type ProductCreateOrConnectWithoutCategoryInput = {
@@ -12156,8 +13906,13 @@ export namespace Prisma {
     position?: StringNullableFilter<"Product"> | string | null
     sellingPrice?: FloatFilter<"Product"> | number
     stock?: IntFilter<"Product"> | number
+    heldStock?: IntFilter<"Product"> | number
+    reorderPoint?: IntFilter<"Product"> | number
+    condition?: StringFilter<"Product"> | string
+    side?: StringFilter<"Product"> | string
     category_id?: StringFilter<"Product"> | string
     vehicle_id?: StringFilter<"Product"> | string
+    createdAt?: DateTimeFilter<"Product"> | Date | string
   }
 
   export type ProductCreateWithoutVehicleInput = {
@@ -12166,8 +13921,14 @@ export namespace Prisma {
     position?: string | null
     sellingPrice: number
     stock?: number
+    heldStock?: number
+    reorderPoint?: number
+    condition?: string
+    side?: string
+    createdAt?: Date | string
     category: CategoryCreateNestedOneWithoutProductsInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
+    transactions?: InventoryTransactionCreateNestedManyWithoutProductInput
   }
 
   export type ProductUncheckedCreateWithoutVehicleInput = {
@@ -12176,8 +13937,14 @@ export namespace Prisma {
     position?: string | null
     sellingPrice: number
     stock?: number
+    heldStock?: number
+    reorderPoint?: number
+    condition?: string
+    side?: string
     category_id: string
+    createdAt?: Date | string
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
+    transactions?: InventoryTransactionUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type ProductCreateOrConnectWithoutVehicleInput = {
@@ -12260,6 +14027,38 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type InventoryTransactionCreateWithoutProductInput = {
+    id?: string
+    type: string
+    quantityChange: number
+    previousStock: number
+    newStock: number
+    referenceId?: string | null
+    actorName: string
+    createdAt?: Date | string
+  }
+
+  export type InventoryTransactionUncheckedCreateWithoutProductInput = {
+    id?: string
+    type: string
+    quantityChange: number
+    previousStock: number
+    newStock: number
+    referenceId?: string | null
+    actorName: string
+    createdAt?: Date | string
+  }
+
+  export type InventoryTransactionCreateOrConnectWithoutProductInput = {
+    where: InventoryTransactionWhereUniqueInput
+    create: XOR<InventoryTransactionCreateWithoutProductInput, InventoryTransactionUncheckedCreateWithoutProductInput>
+  }
+
+  export type InventoryTransactionCreateManyProductInputEnvelope = {
+    data: InventoryTransactionCreateManyProductInput | InventoryTransactionCreateManyProductInput[]
+    skipDuplicates?: boolean
+  }
+
   export type CategoryUpsertWithoutProductsInput = {
     update: XOR<CategoryUpdateWithoutProductsInput, CategoryUncheckedUpdateWithoutProductsInput>
     create: XOR<CategoryCreateWithoutProductsInput, CategoryUncheckedCreateWithoutProductsInput>
@@ -12330,6 +14129,117 @@ export namespace Prisma {
     quantity?: IntFilter<"OrderItem"> | number
   }
 
+  export type InventoryTransactionUpsertWithWhereUniqueWithoutProductInput = {
+    where: InventoryTransactionWhereUniqueInput
+    update: XOR<InventoryTransactionUpdateWithoutProductInput, InventoryTransactionUncheckedUpdateWithoutProductInput>
+    create: XOR<InventoryTransactionCreateWithoutProductInput, InventoryTransactionUncheckedCreateWithoutProductInput>
+  }
+
+  export type InventoryTransactionUpdateWithWhereUniqueWithoutProductInput = {
+    where: InventoryTransactionWhereUniqueInput
+    data: XOR<InventoryTransactionUpdateWithoutProductInput, InventoryTransactionUncheckedUpdateWithoutProductInput>
+  }
+
+  export type InventoryTransactionUpdateManyWithWhereWithoutProductInput = {
+    where: InventoryTransactionScalarWhereInput
+    data: XOR<InventoryTransactionUpdateManyMutationInput, InventoryTransactionUncheckedUpdateManyWithoutProductInput>
+  }
+
+  export type InventoryTransactionScalarWhereInput = {
+    AND?: InventoryTransactionScalarWhereInput | InventoryTransactionScalarWhereInput[]
+    OR?: InventoryTransactionScalarWhereInput[]
+    NOT?: InventoryTransactionScalarWhereInput | InventoryTransactionScalarWhereInput[]
+    id?: StringFilter<"InventoryTransaction"> | string
+    productSku?: StringFilter<"InventoryTransaction"> | string
+    type?: StringFilter<"InventoryTransaction"> | string
+    quantityChange?: IntFilter<"InventoryTransaction"> | number
+    previousStock?: IntFilter<"InventoryTransaction"> | number
+    newStock?: IntFilter<"InventoryTransaction"> | number
+    referenceId?: StringNullableFilter<"InventoryTransaction"> | string | null
+    actorName?: StringFilter<"InventoryTransaction"> | string
+    createdAt?: DateTimeFilter<"InventoryTransaction"> | Date | string
+  }
+
+  export type ProductCreateWithoutTransactionsInput = {
+    sku: string
+    productName: string
+    position?: string | null
+    sellingPrice: number
+    stock?: number
+    heldStock?: number
+    reorderPoint?: number
+    condition?: string
+    side?: string
+    createdAt?: Date | string
+    category: CategoryCreateNestedOneWithoutProductsInput
+    vehicle: VehicleCreateNestedOneWithoutProductsInput
+    orderItems?: OrderItemCreateNestedManyWithoutProductInput
+  }
+
+  export type ProductUncheckedCreateWithoutTransactionsInput = {
+    sku: string
+    productName: string
+    position?: string | null
+    sellingPrice: number
+    stock?: number
+    heldStock?: number
+    reorderPoint?: number
+    condition?: string
+    side?: string
+    category_id: string
+    vehicle_id: string
+    createdAt?: Date | string
+    orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
+  }
+
+  export type ProductCreateOrConnectWithoutTransactionsInput = {
+    where: ProductWhereUniqueInput
+    create: XOR<ProductCreateWithoutTransactionsInput, ProductUncheckedCreateWithoutTransactionsInput>
+  }
+
+  export type ProductUpsertWithoutTransactionsInput = {
+    update: XOR<ProductUpdateWithoutTransactionsInput, ProductUncheckedUpdateWithoutTransactionsInput>
+    create: XOR<ProductCreateWithoutTransactionsInput, ProductUncheckedCreateWithoutTransactionsInput>
+    where?: ProductWhereInput
+  }
+
+  export type ProductUpdateToOneWithWhereWithoutTransactionsInput = {
+    where?: ProductWhereInput
+    data: XOR<ProductUpdateWithoutTransactionsInput, ProductUncheckedUpdateWithoutTransactionsInput>
+  }
+
+  export type ProductUpdateWithoutTransactionsInput = {
+    sku?: StringFieldUpdateOperationsInput | string
+    productName?: StringFieldUpdateOperationsInput | string
+    position?: NullableStringFieldUpdateOperationsInput | string | null
+    sellingPrice?: FloatFieldUpdateOperationsInput | number
+    stock?: IntFieldUpdateOperationsInput | number
+    heldStock?: IntFieldUpdateOperationsInput | number
+    reorderPoint?: IntFieldUpdateOperationsInput | number
+    condition?: StringFieldUpdateOperationsInput | string
+    side?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    category?: CategoryUpdateOneRequiredWithoutProductsNestedInput
+    vehicle?: VehicleUpdateOneRequiredWithoutProductsNestedInput
+    orderItems?: OrderItemUpdateManyWithoutProductNestedInput
+  }
+
+  export type ProductUncheckedUpdateWithoutTransactionsInput = {
+    sku?: StringFieldUpdateOperationsInput | string
+    productName?: StringFieldUpdateOperationsInput | string
+    position?: NullableStringFieldUpdateOperationsInput | string | null
+    sellingPrice?: FloatFieldUpdateOperationsInput | number
+    stock?: IntFieldUpdateOperationsInput | number
+    heldStock?: IntFieldUpdateOperationsInput | number
+    reorderPoint?: IntFieldUpdateOperationsInput | number
+    condition?: StringFieldUpdateOperationsInput | string
+    side?: StringFieldUpdateOperationsInput | string
+    category_id?: StringFieldUpdateOperationsInput | string
+    vehicle_id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
+  }
+
   export type OrderItemCreateWithoutOrderInput = {
     id?: string
     quantity: number
@@ -12393,8 +14303,14 @@ export namespace Prisma {
     position?: string | null
     sellingPrice: number
     stock?: number
+    heldStock?: number
+    reorderPoint?: number
+    condition?: string
+    side?: string
+    createdAt?: Date | string
     category: CategoryCreateNestedOneWithoutProductsInput
     vehicle: VehicleCreateNestedOneWithoutProductsInput
+    transactions?: InventoryTransactionCreateNestedManyWithoutProductInput
   }
 
   export type ProductUncheckedCreateWithoutOrderItemsInput = {
@@ -12403,8 +14319,14 @@ export namespace Prisma {
     position?: string | null
     sellingPrice: number
     stock?: number
+    heldStock?: number
+    reorderPoint?: number
+    condition?: string
+    side?: string
     category_id: string
     vehicle_id: string
+    createdAt?: Date | string
+    transactions?: InventoryTransactionUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type ProductCreateOrConnectWithoutOrderItemsInput = {
@@ -12454,8 +14376,14 @@ export namespace Prisma {
     position?: NullableStringFieldUpdateOperationsInput | string | null
     sellingPrice?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
+    heldStock?: IntFieldUpdateOperationsInput | number
+    reorderPoint?: IntFieldUpdateOperationsInput | number
+    condition?: StringFieldUpdateOperationsInput | string
+    side?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneRequiredWithoutProductsNestedInput
     vehicle?: VehicleUpdateOneRequiredWithoutProductsNestedInput
+    transactions?: InventoryTransactionUpdateManyWithoutProductNestedInput
   }
 
   export type ProductUncheckedUpdateWithoutOrderItemsInput = {
@@ -12464,8 +14392,14 @@ export namespace Prisma {
     position?: NullableStringFieldUpdateOperationsInput | string | null
     sellingPrice?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
+    heldStock?: IntFieldUpdateOperationsInput | number
+    reorderPoint?: IntFieldUpdateOperationsInput | number
+    condition?: StringFieldUpdateOperationsInput | string
+    side?: StringFieldUpdateOperationsInput | string
     category_id?: StringFieldUpdateOperationsInput | string
     vehicle_id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    transactions?: InventoryTransactionUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type ProductCreateManyCategoryInput = {
@@ -12474,7 +14408,12 @@ export namespace Prisma {
     position?: string | null
     sellingPrice: number
     stock?: number
+    heldStock?: number
+    reorderPoint?: number
+    condition?: string
+    side?: string
     vehicle_id: string
+    createdAt?: Date | string
   }
 
   export type ProductUpdateWithoutCategoryInput = {
@@ -12483,8 +14422,14 @@ export namespace Prisma {
     position?: NullableStringFieldUpdateOperationsInput | string | null
     sellingPrice?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
+    heldStock?: IntFieldUpdateOperationsInput | number
+    reorderPoint?: IntFieldUpdateOperationsInput | number
+    condition?: StringFieldUpdateOperationsInput | string
+    side?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     vehicle?: VehicleUpdateOneRequiredWithoutProductsNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
+    transactions?: InventoryTransactionUpdateManyWithoutProductNestedInput
   }
 
   export type ProductUncheckedUpdateWithoutCategoryInput = {
@@ -12493,8 +14438,14 @@ export namespace Prisma {
     position?: NullableStringFieldUpdateOperationsInput | string | null
     sellingPrice?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
+    heldStock?: IntFieldUpdateOperationsInput | number
+    reorderPoint?: IntFieldUpdateOperationsInput | number
+    condition?: StringFieldUpdateOperationsInput | string
+    side?: StringFieldUpdateOperationsInput | string
     vehicle_id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
+    transactions?: InventoryTransactionUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type ProductUncheckedUpdateManyWithoutCategoryInput = {
@@ -12503,7 +14454,12 @@ export namespace Prisma {
     position?: NullableStringFieldUpdateOperationsInput | string | null
     sellingPrice?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
+    heldStock?: IntFieldUpdateOperationsInput | number
+    reorderPoint?: IntFieldUpdateOperationsInput | number
+    condition?: StringFieldUpdateOperationsInput | string
+    side?: StringFieldUpdateOperationsInput | string
     vehicle_id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ProductCreateManyVehicleInput = {
@@ -12512,7 +14468,12 @@ export namespace Prisma {
     position?: string | null
     sellingPrice: number
     stock?: number
+    heldStock?: number
+    reorderPoint?: number
+    condition?: string
+    side?: string
     category_id: string
+    createdAt?: Date | string
   }
 
   export type ProductUpdateWithoutVehicleInput = {
@@ -12521,8 +14482,14 @@ export namespace Prisma {
     position?: NullableStringFieldUpdateOperationsInput | string | null
     sellingPrice?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
+    heldStock?: IntFieldUpdateOperationsInput | number
+    reorderPoint?: IntFieldUpdateOperationsInput | number
+    condition?: StringFieldUpdateOperationsInput | string
+    side?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneRequiredWithoutProductsNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
+    transactions?: InventoryTransactionUpdateManyWithoutProductNestedInput
   }
 
   export type ProductUncheckedUpdateWithoutVehicleInput = {
@@ -12531,8 +14498,14 @@ export namespace Prisma {
     position?: NullableStringFieldUpdateOperationsInput | string | null
     sellingPrice?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
+    heldStock?: IntFieldUpdateOperationsInput | number
+    reorderPoint?: IntFieldUpdateOperationsInput | number
+    condition?: StringFieldUpdateOperationsInput | string
+    side?: StringFieldUpdateOperationsInput | string
     category_id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
+    transactions?: InventoryTransactionUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type ProductUncheckedUpdateManyWithoutVehicleInput = {
@@ -12541,13 +14514,29 @@ export namespace Prisma {
     position?: NullableStringFieldUpdateOperationsInput | string | null
     sellingPrice?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
+    heldStock?: IntFieldUpdateOperationsInput | number
+    reorderPoint?: IntFieldUpdateOperationsInput | number
+    condition?: StringFieldUpdateOperationsInput | string
+    side?: StringFieldUpdateOperationsInput | string
     category_id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type OrderItemCreateManyProductInput = {
     id?: string
     orderId: string
     quantity: number
+  }
+
+  export type InventoryTransactionCreateManyProductInput = {
+    id?: string
+    type: string
+    quantityChange: number
+    previousStock: number
+    newStock: number
+    referenceId?: string | null
+    actorName: string
+    createdAt?: Date | string
   }
 
   export type OrderItemUpdateWithoutProductInput = {
@@ -12566,6 +14555,39 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     orderId?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type InventoryTransactionUpdateWithoutProductInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    quantityChange?: IntFieldUpdateOperationsInput | number
+    previousStock?: IntFieldUpdateOperationsInput | number
+    newStock?: IntFieldUpdateOperationsInput | number
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    actorName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InventoryTransactionUncheckedUpdateWithoutProductInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    quantityChange?: IntFieldUpdateOperationsInput | number
+    previousStock?: IntFieldUpdateOperationsInput | number
+    newStock?: IntFieldUpdateOperationsInput | number
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    actorName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InventoryTransactionUncheckedUpdateManyWithoutProductInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    quantityChange?: IntFieldUpdateOperationsInput | number
+    previousStock?: IntFieldUpdateOperationsInput | number
+    newStock?: IntFieldUpdateOperationsInput | number
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    actorName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type OrderItemCreateManyOrderInput = {

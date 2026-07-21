@@ -39,7 +39,7 @@ function Navbar() {
   }, []);
 
   return (
-    <nav ref={navbarRef} className="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top py-3 border-bottom border-light">
+    <nav ref={navbarRef} className="navbar navbar-expand-lg navbar-light  shadow-sm  py-3  border-bottom border-light">
       <div className="container">
         <Link 
     to="/" 
@@ -57,7 +57,7 @@ function Navbar() {
         objectFit: 'contain'
       }} 
   /> */}
-  Mhenik Traders
+  Mhenik Traders 
 </Link>
         
         <button className="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
@@ -72,32 +72,33 @@ function Navbar() {
             <li className="nav-item">
               <Link to="/shop" className="nav-link fw-semibold text-secondary px-1 custom-nav-link" onClick={closeMenu}>Shop Parts</Link>
             </li>
-            <li className="nav-item">
+            {/* <li className="nav-item">
               <Link to="/vehicle-search" className="nav-link fw-semibold text-secondary px-1 custom-nav-link" onClick={closeMenu}>Vehicle Search</Link>
-            </li>
-            <li className="nav-item">
+            </li> */}
+            {/* <li className="nav-item">
               <Link to="/about" className="nav-link fw-semibold text-secondary px-1 custom-nav-link" onClick={closeMenu}>About</Link>
-            </li>
+            </li> */}
             <li className="nav-item">
               <Link to="/contact" className="nav-link fw-semibold text-secondary px-1 custom-nav-link" onClick={closeMenu}>Contact Us</Link>
             </li>
           </ul>
           <div className="d-flex align-items-center gap-3">
-            <Link to="/cart" className="btn btn-light position-relative px-3 py-2 rounded-2 fw-semibold" style={{ border: '1px solid #5FA8D3', color: '#1E1E24' }} onClick={closeMenu}>
-              🛒 Cart
+            <Link to="/cart" className="btn btn-light position-relative px-3 py-2 rounded-mhenik fw-semibold" style={{ border: '1px solid #5FA8D3', color: '#1E1E24' }} onClick={closeMenu}>
+               Cart
               {cartCount > 0 && (
                 <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill text-white" style={{ backgroundColor: '#612940' }}>
                   {cartCount}
                 </span>
               )}
             </Link>
-            <Link to="/orders" className="btn px-3 py-2 rounded-2 font-monospace small fw-bold btn-mhenik-primary" onClick={closeMenu}>
+            <Link to="/orders" className="btn px-3 py-2 rounded-mhenik font-monospace small fw-bold btn-mhenik-primary" onClick={closeMenu}>
               My Requests
             </Link>
           </div>
         </div>
       </div>
     </nav>
+    
   );
 }
 

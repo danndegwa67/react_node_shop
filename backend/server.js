@@ -23,7 +23,7 @@ const connectionString = process.env.DATABASE_URL || "postgresql://postgres:mhen
 const adapter = new PrismaPg({ connectionString });
 const prisma = new PrismaClient({ adapter });
 
-// 🕵️‍♂️ Robust System Audit Logging Utility
+// 🕵️‍♂️ System Audit Logging Utility
 async function createAuditLog(userId, userName, action, details) {
   try {
     const safeUserId = String(userId || "system-id");
@@ -45,6 +45,26 @@ async function createAuditLog(userId, userName, action, details) {
     console.log(`[AUDIT SUCCESS] Event [${safeAction}] committed safely to PostgreSQL.`);
   } catch (err) {
     console.error(`[AUDIT CRASH] Critical logger loop failure:`, err.message);
+  }
+}
+
+// 📜 Module 3: Transaction Ledger Entry Logger Helper
+async function recordInventoryTransaction(tx, { sku, type, change, prevStock, newStock, refId, actor }) {
+  try {
+    const db = tx || prisma;
+    await db.inventoryTransaction.create({
+      data: {
+        productSku: sku,
+        type: type,
+        quantityChange: change,
+        previousStock: prevStock,
+        newStock: newStock,
+        referenceId: String(refId || ''),
+        actorName: actor || 'System Operator'
+      }
+    });
+  } catch (err) {
+    console.error("[LEDGER CRASH] Failed to record transaction entry:", err.message);
   }
 }
 
@@ -156,6 +176,7 @@ app.get(['/api/admin/inventory', '/api/products'], async (req, res) => {
 
     const safeInventory = inventory.map(p => ({
       ...p,
+      availableStock: Math.max(0, p.stock - p.heldStock),
       category: p.category ? p.category : { id: p.category_id || "cat_01", name: "General Spares" },
       vehicle: p.vehicle ? p.vehicle : { id: p.vehicle_id || "veh_01", make: "Universal", model: "Fit" }
     }));
@@ -171,12 +192,14 @@ app.post('/api/admin/incoming-stock', authenticateStaff, async (req, res) => {
   try {
     const { 
       sku, productName, position, sellingPrice, stockAmount, 
-      categoryId, categoryName, vehicleId, make, model 
+      categoryId, categoryName, vehicleId, make, model,
+      condition, side, reorderPoint
     } = req.body;
 
     const cleanSku = String(sku).replace(/[\r\n\s]/g, '').trim();
     const cleanPrice = parseFloat(sellingPrice);
     const cleanStock = parseInt(stockAmount, 10);
+    const cleanReorder = parseInt(reorderPoint || 3, 10);
 
     if (!cleanSku || isNaN(cleanPrice) || isNaN(cleanStock)) {
       return res.status(400).json({ 
@@ -199,20 +222,41 @@ app.post('/api/admin/incoming-stock', authenticateStaff, async (req, res) => {
       create: { id: cleanVehId, make: make || "Generic", model: model || "Universal" }
     });
 
+    const existingProduct = await prisma.product.findUnique({ where: { sku: cleanSku } });
+    const prevStock = existingProduct ? existingProduct.stock : 0;
+    const newStock = prevStock + cleanStock;
+
     const product = await prisma.product.upsert({
       where: { sku: cleanSku },
       update: {
         stock: { increment: cleanStock },
-        sellingPrice: cleanPrice
+        sellingPrice: cleanPrice,
+        reorderPoint: cleanReorder,
+        condition: condition || existingProduct?.condition || "OEM_GENUINE",
+        side: side || existingProduct?.side || "UNIVERSAL"
       },
       create: {
         sku: cleanSku,
         productName,
         sellingPrice: cleanPrice,
         stock: cleanStock,
+        reorderPoint: cleanReorder,
+        condition: condition || "OEM_GENUINE",
+        side: side || "UNIVERSAL",
         category: { connect: { id: cleanCatId } },
         vehicle: { connect: { id: cleanVehId } }
       }
+    });
+
+    // Record Ledger Entry
+    await recordInventoryTransaction(null, {
+      sku: cleanSku,
+      type: "INBOUND_CARGO",
+      change: cleanStock,
+      prevStock: prevStock,
+      newStock: newStock,
+      refId: "CARGO_INGEST",
+      actor: req.user.name
     });
 
     await createAuditLog(
@@ -262,6 +306,17 @@ app.patch('/api/admin/decrement-stock/:sku', authenticateStaff, async (req, res)
       data: { stock: { decrement: 1 } }
     });
 
+    // Record Ledger Entry
+    await recordInventoryTransaction(null, {
+      sku: product.sku,
+      type: "SCAN_DEPARTURE",
+      change: -1,
+      prevStock: product.stock,
+      newStock: updatedProduct.stock,
+      refId: "BARCODE_SCAN",
+      actor: req.user.name
+    });
+
     await createAuditLog(
       req.user.id, 
       req.user.name, 
@@ -280,8 +335,60 @@ app.patch('/api/admin/decrement-stock/:sku', authenticateStaff, async (req, res)
 });
 
 // =========================================================================
-// 🛒 FIXED PUBLIC CLIENT AVAILABILITY CHANNELS (Writes to BOTH registers)
+// 🛒 PUBLIC CLIENT ORDERS & HOLD RESERVATIONS
 // =========================================================================
+
+app.post('/api/orders', async (req, res) => {
+  const { customerName, items } = req.body; // items: [{ sku, quantity }]
+
+  try {
+    for (const item of items) {
+      const product = await prisma.product.findUnique({ where: { sku: item.sku } });
+      const available = product ? product.stock - product.heldStock : 0;
+      if (available < item.quantity) {
+        return res.status(400).json({ 
+          message: `Reservation error: SKU [${item.sku}] has insufficient available inventory.` 
+        });
+      }
+    }
+
+    const newOrder = await prisma.$transaction(async (tx) => {
+      const order = await tx.order.create({
+        data: {
+          customerName,
+          status: 'PENDING',
+          items: {
+            create: items.map(i => ({ productSku: i.sku, quantity: i.quantity }))
+          }
+        }
+      });
+
+      for (const item of items) {
+        const prod = await tx.product.findUnique({ where: { sku: item.sku } });
+        await tx.product.update({
+          where: { sku: item.sku },
+          data: { heldStock: { increment: item.quantity } }
+        });
+
+        await recordInventoryTransaction(tx, {
+          sku: item.sku,
+          type: "ORDER_HOLD",
+          change: 0,
+          prevStock: prod.stock,
+          newStock: prod.stock,
+          refId: order.id,
+          actor: customerName || "Online Customer"
+        });
+      }
+
+      return order;
+    });
+
+    return res.status(201).json(newOrder);
+  } catch (err) {
+    return res.status(500).json({ message: "Order creation and hold reservation failed." });
+  }
+});
 
 app.post('/api/client/adjustments/request', async (req, res) => {
   const { productSku, productName, oldStock, newStock, reason, requestedBy } = req.body;
@@ -294,7 +401,6 @@ app.post('/api/client/adjustments/request', async (req, res) => {
     const exactProduct = await prisma.product.findUnique({ where: { sku: productSku } });
     const baselineStock = exactProduct ? exactProduct.stock : parseInt(oldStock || 0, 10);
 
-    // 1. Write record to stockAdjustment database registers for client tracking history[cite: 1]
     const adjustment = await prisma.stockAdjustment.create({
       data: {
         productSku,
@@ -307,12 +413,10 @@ app.post('/api/client/adjustments/request', async (req, res) => {
       }
     });
 
-    // 🚀 2. DUAL WRITE INTEGRITY FIX: Log inside the Orders table so it populates the Admin Orders Pane instantly!
-    // Extract a safe name out from the device signature tag
     const clientNameExcerpt = String(requestedBy).split(' (')[0];
     await prisma.order.create({
       data: {
-        id: adjustment.id, // Enforce key alignment across components
+        id: adjustment.id, 
         customerName: `${clientNameExcerpt} [Metadata: ${reason.split(' | ')[0] || 'No Phone'}]`,
         status: "PENDING",
         items: {
@@ -350,7 +454,7 @@ app.get('/api/client/adjustments', async (req, res) => {
 });
 
 // =========================================================================
-// ⚖️ CLIENT AVAILABILITY ADJUSTMENTS REDUCTION CHANNEL
+// ⚖️ ADMIN ADJUSTMENT RESOLUTION & CONCURRENT LOCK CHECK
 // =========================================================================
 
 app.patch('/api/admin/adjustments/:id/status', authenticateStaff, async (req, res) => {
@@ -359,26 +463,31 @@ app.patch('/api/admin/adjustments/:id/status', authenticateStaff, async (req, re
 
   try {
     const targetRequest = await prisma.stockAdjustment.findUnique({ where: { id } });
-    if (!targetRequest) return res.status(404).json({ message: "Request item entry not found." });
-
-    if (targetRequest.status !== "PENDING" && targetRequest.status !== "APPROVED") {
-      return res.status(400).json({ message: "This request cannot be transitioned further from this route." });
+    if (!targetRequest) {
+      return res.status(404).json({ message: "Request item entry not found." });
     }
 
-    if (status === "APPROVED" && targetRequest.status === "PENDING") {
-      const associatedProduct = await prisma.product.findUnique({ where: { sku: targetRequest.productSku } });
-      if (!associatedProduct || associatedProduct.stock < targetRequest.newStock) {
-        return res.status(400).json({ message: "Insufficient inventory parameters to proceed with allocation assignment." });
-      }
+    if (targetRequest.status !== "PENDING") {
+      return res.status(400).json({ message: "This request has already been processed." });
     }
 
-    if (status === "DISPATCHED") {
-      if (targetRequest.status !== "APPROVED") {
-        return res.status(400).json({ message: "Manifest must be allocated/approved prior to loading counter dispatch tracking." });
-      }
+    if (status === "APPROVED") {
+      const prod = await prisma.product.findUnique({ where: { sku: targetRequest.productSku } });
+      const prevStock = prod ? prod.stock : targetRequest.oldStock;
+
       await prisma.product.update({
         where: { sku: targetRequest.productSku },
-        data: { stock: { decrement: targetRequest.newStock } }
+        data: { stock: targetRequest.newStock }
+      });
+
+      await recordInventoryTransaction(null, {
+        sku: targetRequest.productSku,
+        type: "ADJUSTMENT_CORRECTION",
+        change: targetRequest.newStock - prevStock,
+        prevStock: prevStock,
+        newStock: targetRequest.newStock,
+        refId: id,
+        actor: req.user.name
       });
     }
 
@@ -387,20 +496,22 @@ app.patch('/api/admin/adjustments/:id/status', authenticateStaff, async (req, re
       data: { status }
     });
 
-    // Mirror status tracking directly down into your order registers as well
-    try {
-      await prisma.order.update({ where: { id }, data: { status } });
-    } catch(e) { console.log("Prisma sync skipped."); }
+    await createAuditLog(
+      req.user.id, 
+      req.user.name, 
+      `ADJUSTMENT_${status}`, 
+      `Adjustment target ${id.slice(0, 8)} marked ${status}. Stock set to ${targetRequest.newStock}.`
+    );
 
-    await createAuditLog(req.user.id, req.user.name, `ADJUSTMENT_${status}`, `Adjustment record target ${id.slice(0,8)} marked ${status}.`);
     return res.status(200).json(updatedAdjustment);
   } catch (error) {
+    console.error("Adjustment processing error:", error);
     return res.status(500).json({ message: "Failed processing status adjustment mutation tracking." });
   }
 });
 
 // =========================================================================
-// 📋 THE UNBROKEN THREE-STEP ORDERS SUBSYSTEM (WITH LIVE SCAN-OUT VERIFICATION)
+// 📋 ORDERS SUBSYSTEM & DISPATCH VERIFICATION
 // =========================================================================
 
 app.get('/api/admin/orders', authenticateStaff, async (req, res) => {
@@ -414,82 +525,175 @@ app.get('/api/admin/orders', authenticateStaff, async (req, res) => {
 
 app.patch('/api/admin/orders/:id/status', authenticateStaff, async (req, res) => {
   const { id } = req.params;
-  const { status, verifiedSku } = req.body; // Expects: "APPROVED", "DISPATCHED", or "DISAPPROVED"
+  const { status, verifiedSku } = req.body; // Accepts: 'APPROVED', 'DISPATCHED', 'REJECTED', 'CANCELLED', 'DISAPPROVED'
 
   try {
     const originalOrder = await prisma.order.findUnique({ 
       where: { id }, 
       include: { items: { include: { product: true } } } 
     });
-    if (!originalOrder) return res.status(404).json({ message: "Target order reference index missing." });
+
+    if (!originalOrder) {
+      return res.status(404).json({ message: "Target order reference index missing." });
+    }
 
     if (originalOrder.status === status) {
       return res.status(400).json({ message: `Order manifest is already marked as ${status}.` });
     }
 
-    // 🛑 STEP A: ALLOCATION RESERVATION GATES
+    // ---------------------------------------------------------------------
+    // 🛑 STEP 1: ALLOCATION / APPROVAL GATE
+    // ---------------------------------------------------------------------
     if (status === "APPROVED") {
       const insufficientStockItems = [];
       for (const line of originalOrder.items) {
         const liveProduct = line.product;
-        if (!liveProduct || liveProduct.stock < line.quantity) {
+        const available = liveProduct ? (liveProduct.stock - liveProduct.heldStock) : 0;
+        if (!liveProduct || available < line.quantity) {
           insufficientStockItems.push({
             name: liveProduct ? liveProduct.productName : `SKU: ${line.productSku}`,
-            available: liveProduct ? liveProduct.stock : 0
+            available
           });
         }
       }
 
       if (insufficientStockItems.length > 0) {
-        const detailsMsg = insufficientStockItems.map(item => `"${item.name}" (Only ${item.available} physically in stock)`).join(", ");
-        return res.status(400).json({ message: `Allocation Aborted: Insufficient stock to approve reservation. Missing: ${detailsMsg}` });
+        const detailsMsg = insufficientStockItems
+          .map(item => `"${item.name}" (Only ${item.available} available)`)
+          .join(", ");
+        return res.status(400).json({ 
+          message: `Allocation Aborted: Insufficient available stock. Missing: ${detailsMsg}` 
+        });
       }
     }
 
-    // 🚚 STEP B: SCAN-OUT INTERACTION VERIFICATION
+    // ---------------------------------------------------------------------
+    // 🚚 STEP 2: DISPATCH VERIFICATION & PHYSICAL DEDUCTION
+    // ---------------------------------------------------------------------
     if (status === "DISPATCHED") {
       if (originalOrder.status !== "APPROVED") {
-        return res.status(400).json({ message: "Operational Violation: Manifest must be APPROVED and allocated prior to counter dispatch." });
+        return res.status(400).json({ 
+          message: "Operational Violation: Manifest must be APPROVED prior to counter dispatch." 
+        });
       }
 
-      // Find the primary barcode SKU expected for this specific order
       const targetSku = originalOrder.items[0]?.productSku;
-      
-      // Force hardware peripheral validation strings to pass through safely[cite: 1]
       const cleanInputSku = String(verifiedSku || '').replace(/[\r\n\s]/g, '').trim();
       const cleanTargetSku = String(targetSku || '').replace(/[\r\n\s]/g, '').trim();
 
       if (!cleanInputSku || cleanInputSku !== cleanTargetSku) {
         return res.status(400).json({ 
-          message: `Scan Mismatch: Scanned SKU code [${cleanInputSku || 'BLANK'}] does not match expected container item [${cleanTargetSku}].` 
+          message: `Scan Mismatch: Scanned SKU code [${cleanInputSku || 'BLANK'}] does not match expected item [${cleanTargetSku}].` 
         });
       }
 
-      // Deduct counts permanently out of inventory registers
-      for (const line of originalOrder.items) {
-        await prisma.product.update({
-          where: { sku: line.productSku },
-          data: { stock: { decrement: line.quantity } }
-        });
-      }
+      // Execute dispatch update inside a single atomic transaction
+      await prisma.$transaction(async (tx) => {
+        for (const line of originalOrder.items) {
+          const prod = await tx.product.findUnique({ where: { sku: line.productSku } });
+          const prevStock = prod ? prod.stock : 0;
+          const newStock = Math.max(0, prevStock - line.quantity);
+          const newHeld = Math.max(0, (prod?.heldStock || 0) - line.quantity);
+
+          await tx.product.update({
+            where: { sku: line.productSku },
+            data: { 
+              stock: newStock,
+              heldStock: newHeld
+            }
+          });
+
+          await recordInventoryTransaction(tx, {
+            sku: line.productSku,
+            type: "ORDER_DISPATCH",
+            change: -line.quantity,
+            prevStock: prevStock,
+            newStock: newStock,
+            refId: id,
+            actor: req.user.name
+          });
+        }
+
+        await tx.order.update({ where: { id }, data: { status: "DISPATCHED" } });
+      });
+
+      try {
+        await prisma.stockAdjustment.update({ where: { id }, data: { status: "DISPATCHED" } });
+      } catch (e) {}
+
+      await createAuditLog(
+        req.user.id, 
+        req.user.name, 
+        "ORDER_DISPATCHED", 
+        `Order reference ${id.slice(0, 8)} verified and dispatched.`
+      );
+
+      return res.status(200).json({ message: "Order dispatched successfully." });
     }
 
-    // 🔄 STEP C: STOCK ROLLBACK SAFETY
-    if (status === "DISAPPROVED" && originalOrder.status === "DISPATCHED") {
-      for (const line of originalOrder.items) {
-        await prisma.product.update({ where: { sku: line.productSku }, data: { stock: { increment: line.quantity } } });
-      }
+    // ---------------------------------------------------------------------
+    // ❌ STEP 3: REJECTION / CANCELLATION & STOCK HOLD RELEASE
+    // ---------------------------------------------------------------------
+    if (status === "REJECTED" || status === "DISAPPROVED" || status === "CANCELLED") {
+      const finalStatus = "REJECTED";
+
+      await prisma.$transaction(async (tx) => {
+        for (const line of originalOrder.items) {
+          const prod = await tx.product.findUnique({ where: { sku: line.productSku } });
+          if (prod && prod.heldStock > 0) {
+            const newHeld = Math.max(0, prod.heldStock - line.quantity);
+            await tx.product.update({
+              where: { sku: line.productSku },
+              data: { heldStock: newHeld }
+            });
+
+            await recordInventoryTransaction(tx, {
+              sku: line.productSku,
+              type: "RELEASE_HOLD",
+              change: 0,
+              prevStock: prod.stock,
+              newStock: prod.stock,
+              refId: id,
+              actor: req.user.name
+            });
+          }
+        }
+
+        await tx.order.update({ where: { id }, data: { status: finalStatus } });
+      });
+
+      try {
+        await prisma.stockAdjustment.update({ where: { id }, data: { status: finalStatus } });
+      } catch (e) {}
+
+      await createAuditLog(
+        req.user.id, 
+        req.user.name, 
+        `ORDER_${finalStatus}`, 
+        `Order reference ${id.slice(0, 8)} rejected/canceled by operator.`
+      );
+
+      return res.status(200).json({ message: `Order marked as ${finalStatus} and held stock released.` });
     }
 
+    // ---------------------------------------------------------------------
+    // ⚙️ DEFAULT TRANSITION (e.g., APPROVED)
+    // ---------------------------------------------------------------------
     const updatedOrder = await prisma.order.update({ where: { id }, data: { status } });
     
-    // Propagate state sync down to adjustments logs as well
     try {
       await prisma.stockAdjustment.update({ where: { id }, data: { status } });
     } catch(e) {}
 
-    await createAuditLog(req.user.id, req.user.name, `ORDER_${status}`, `Order reference ${id.slice(0, 8)} updated to status: ${status}.`);
+    await createAuditLog(
+      req.user.id, 
+      req.user.name, 
+      `ORDER_${status}`, 
+      `Order reference ${id.slice(0, 8)} updated to status: ${status}.`
+    );
+
     return res.status(200).json({ message: `Order transitioned successfully to ${status}.`, updatedOrder });
+
   } catch (error) {
     console.error("[CRASH] Order status router collapse:", error);
     return res.status(500).json({ message: "Failed processing status verification engine loop." });
@@ -565,12 +769,36 @@ app.get('/api/admin/logs', authenticateStaff, requireAdminRole, async (req, res)
   }
 });
 
-// Original Staff Stock Corrections Endpoint
+// 📜 Module 3: Ledger Transactions API Endpoint
+app.get('/api/admin/transactions', authenticateStaff, requireAdminRole, async (req, res) => {
+  try {
+    const txs = await prisma.inventoryTransaction.findMany({
+      include: { product: true },
+      orderBy: { createdAt: 'desc' },
+      take: 100
+    });
+    return res.status(200).json(txs);
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to load ledger transactions." });
+  }
+});
+
 app.post('/api/admin/adjustments/request', authenticateStaff, async (req, res) => {
   const { productSku, productName, oldStock, newStock, reason } = req.body;
   if (!productSku || oldStock === undefined || newStock === undefined) return res.status(400).json({ message: "Missing required parameters." });
 
   try {
+    // 🔐 Module 5: Concurrent Adjustment Lock check
+    const existingPending = await prisma.stockAdjustment.findFirst({
+      where: { productSku, status: "PENDING" }
+    });
+
+    if (existingPending) {
+      return res.status(400).json({ 
+        message: "Lock active: A stock recount adjustment for this SKU is already pending approval." 
+      });
+    }
+
     const adjustment = await prisma.stockAdjustment.create({
       data: { productSku, productName, oldStock: parseInt(oldStock), newStock: parseInt(newStock), reason: reason || "Recount correction.", requestedBy: req.user.name, status: "PENDING" }
     });
@@ -586,25 +814,6 @@ app.get('/api/admin/adjustments', authenticateStaff, async (req, res) => {
     return res.status(200).json(adjustments);
   } catch (error) {
     return res.status(500).json({ message: "Failed to fetch adjustment requests." });
-  }
-});
-
-app.patch('/api/admin/adjustments/:id/resolve', authenticateStaff, requireAdminRole, async (req, res) => {
-  const { id } = req.params;
-  const { decision } = req.body;
-
-  try {
-    const request = await prisma.stockAdjustment.findUnique({ where: { id } });
-    if (!request || request.status !== "PENDING") return res.status(400).json({ message: "Request processed or missing." });
-
-    const updatedRequest = await prisma.stockAdjustment.update({ where: { id }, data: { status: decision } });
-
-    if (decision === "APPROVED") {
-      await prisma.product.update({ where: { sku: request.productSku }, data: { stock: request.newStock } });
-    }
-    return res.status(200).json({ message: `Adjustment execution completed.`, updatedRequest });
-  } catch (error) {
-    return res.status(500).json({ message: "Error executing backend adjustment loop overwrite." });
   }
 });
 

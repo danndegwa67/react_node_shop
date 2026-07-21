@@ -23,7 +23,7 @@
 
 /* 🛡️ Enhanced Smooth Rounded Utilities */
 .rounded-mhenik {
-  border-radius: 10px !important;
+  border-radius: 30px !important;
 }
 
 .card-mhenik-glass {
@@ -45,6 +45,7 @@
 .btn-mhenik-primary {
   background-color: var(--mhenik-crimson);
   color: var(--mhenik-white);
+  /* border-radius: 30px; */
   border: none;
   transition: all 0.2s ease;
 }
@@ -91,10 +92,25 @@
   height: 2px;
   bottom: -2px;
   left: 0;
-  background-color: var(--mhenik-sky); /* Underline matches your fresh sky blue palette */
+  background-color: var(--mhenik-crimson); /* Underline matches your fresh sky blue palette */
   transform-origin: bottom right;
   transition: transform 0.25s ease-out;
 }
+.navbar-line-80 {
+  position: relative;
+}
+
+.navbar-line-80::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%; /* Controls the line length */
+  height: 1px;
+  background-color: rgba(0, 0, 0, 0.15); /* Light transparent line */
+}
+
 
 .custom-nav-link:hover::after {
   transform: scaleX(1);

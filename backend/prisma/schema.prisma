@@ -21,55 +21,74 @@ model Vehicle {
 }
 
 model Product {
-  sku          String      @id
+  sku          String                 @id
   productName  String
   position     String?  
   sellingPrice Float
-  stock        Int         @default(0)
+  stock        Int                    @default(0)
+  heldStock    Int                    @default(0)    // 🔒 Module 1: Reserved Stock Hold
+  reorderPoint Int                    @default(3)    // 🚨 Module 2: Low-Stock Threshold Trigger
+  condition    String                 @default("OEM_GENUINE") // 🧩 Module 4: OEM_GENUINE, AFTERMARKET, USED, REFURBISHED
+  side         String                 @default("UNIVERSAL")   // 🧩 Module 4: UNIVERSAL, LEFT_LH, RIGHT_RH, FRONT, REAR, PAIR
   category_id  String
-  category     Category    @relation(fields: [category_id], references: [id], onDelete: Restrict)
+  category     Category               @relation(fields: [category_id], references: [id], onDelete: Restrict)
   vehicle_id   String
-  vehicle      Vehicle     @relation(fields: [vehicle_id], references: [id], onDelete: Restrict)
-  orderItems   OrderItem[] // Relates to order processing
-  createdAt    DateTime @default(now())
+  vehicle      Vehicle                @relation(fields: [vehicle_id], references: [id], onDelete: Restrict)
+  orderItems   OrderItem[]            // Relates to order processing
+  transactions InventoryTransaction[] // 📜 Module 3: Stock Movement Ledger History
+  createdAt    DateTime               @default(now())
 }
 
-// 👥 New Table: Employee access controls
+// 📜 Module 3: Immutable Inventory Ledger Table
+model InventoryTransaction {
+  id             String   @id @default(uuid())
+  productSku     String
+  product        Product  @relation(fields: [productSku], references: [sku], onDelete: Cascade)
+  type           String   // INBOUND_CARGO, ORDER_DISPATCH, ADJUSTMENT_CORRECTION, ORDER_HOLD, RELEASE_HOLD
+  quantityChange Int
+  previousStock  Int
+  newStock       Int
+  referenceId    String?  // Associated Order or Adjustment ID
+  actorName      String
+  createdAt      DateTime @default(now())
+}
+
+// 👥 Employee access controls
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
   password  String   
   name      String
   role      String   @default("employee") 
-  status    String   @default("PENDING")  // 👈 Ensure this exact line is present
+  status    String   @default("PENDING")
   createdAt DateTime @default(now())
 }
 
-// 📦 New Table: Customer/Invoice Orders requiring approval
+// 📦 Customer/Invoice Orders requiring approval
 model Order {
-  id          String      @id @default(uuid())
+  id           String      @id @default(uuid())
   customerName String
-  status      String      @default("PENDING") // PENDING, APPROVED, DISAPPROVED, DEPARTED
-  createdAt   DateTime    @default(now())
-  items       OrderItem[]
+  status       String      @default("PENDING") // PENDING, APPROVED, DISAPPROVED, DISPATCHED
+  createdAt    DateTime    @default(now())
+  items        OrderItem[]
 }
 
-// ⛓️ Join Table: Products inside an order
+// 📋 Join Table: Products inside an order
 model OrderItem {
-  id        String  @id @default(uuid())
-  orderId   String
-  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  id         String  @id @default(uuid())
+  orderId    String
+  order      Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   productSku String
-  product   Product @relation(fields: [productSku], references: [sku])
-  quantity  Int
+  product    Product @relation(fields: [productSku], references: [sku])
+  quantity   Int
 }
 
 model ActivityLog {
   id        String   @id @default(uuid())
   userId    String? 
   userName  String   @default("System / Scanner")
-  action    String   // e.g., "APPROVED_ORDER", "SCAN_DEPARTURE", "REGISTER_USER"
-  details   String   // e.g., "Approved order ref: MT-2026-4821"
+  action    String   
+  details   String   
   createdAt DateTime @default(now())
 }
 
@@ -80,7 +99,7 @@ model StockAdjustment {
   oldStock     Int
   newStock     Int
   reason       String
-  requestedBy  String   // Name of staff member who initiated it
+  requestedBy  String   
   status       String   @default("PENDING") // PENDING, APPROVED, REJECTED
   createdAt    DateTime @default(now())
 }

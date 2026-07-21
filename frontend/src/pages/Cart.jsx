@@ -101,10 +101,10 @@ export default function Cart() {
       </div>
 
       {cartItems.length === 0 ? (
-        <div className="card border-0 shadow-sm p-5 text-center bg-white rounded-3">
+        <div className="card border-0 shadow-sm p-5 text-center bg-white rounded-mhenik">
           <div className="fs-1 mb-3">🛒</div>
           <h4 className="text-muted fw-bold">Your Cart is Empty</h4>
-          <button type="button" className="btn btn-mhenik-primary px-4 py-2 fw-bold" onClick={() => navigate('/shop')}>
+          <button type="button" className="btn btn-mhenik-primary rounded-mhenik px-4 py-2 fw-bold" onClick={() => navigate('/shop')}>
             Return to Catalog
           </button>
         </div>
@@ -114,30 +114,30 @@ export default function Cart() {
           <div className="col-lg-8">
             {showForm ? (
               /* Contact Detail Form Layer */
-              <div className="card border-0 shadow-sm p-4 bg-white rounded-3">
+              <div className="card border-0 shadow-sm p-4 bg-white rounded-mhenik">
                 <h5 className="fw-bold text-dark mb-3 font-monospace text-uppercase">📞 Contact Details</h5>
                 <form onSubmit={processRequestCheckout}>
                   <div className="mb-3">
                     <label className="form-label small fw-bold text-muted text-uppercase">Your Name</label>
-                    <input type="text" className="form-control" required value={customerName} onChange={e => setCustomerName(e.target.value)} placeholder="e.g., Joshua Ochieng" />
+                    <input type="text" className="form-control rounded-mhenik" required value={customerName} onChange={e => setCustomerName(e.target.value)} placeholder="e.g., Joshua Ochieng" />
                   </div>
                   <div className="mb-3">
                     <label className="form-label small fw-bold text-muted text-uppercase">Phone Number (For Call / WhatsApp)</label>
-                    <input type="tel" className="form-control" required value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} placeholder="e.g., +254 7XX XXX XXX" />
+                    <input type="tel" className="form-control rounded-mhenik" required value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} placeholder="e.g., +254 7XX XXX XXX" />
                   </div>
                   <div className="mb-4">
                     <label className="form-label small fw-bold text-muted text-uppercase">Your Location / Town (Optional)</label>
-                    <input type="text" className="form-control" value={customerLocation} onChange={e => setCustomerLocation(e.target.value)} placeholder="e.g., Nairobi CBD, Kisumu, Mombasa" />
+                    <input type="text" className="form-control rounded-mhenik" value={customerLocation} onChange={e => setCustomerLocation(e.target.value)} placeholder="e.g., Nairobi CBD, Kisumu, Mombasa" />
                   </div>
                   <div className="d-flex gap-2">
-                    <button type="button" className="btn btn-light fw-bold px-4" onClick={() => setShowForm(false)}>← Back to Cart</button>
-                    <button type="submit" className="btn btn-success fw-bold px-4 flex-grow-1">Confirm and Submit Request</button>
+                    <button type="button" className="btn btn-light rounded-mhenik fw-bold px-4" onClick={() => setShowForm(false)}>← Back to Cart</button>
+                    <button type="submit" className="btn btn-success rounded-mhenik fw-bold px-4 flex-grow-1">Confirm and Submit Request</button>
                   </div>
                 </form>
               </div>
             ) : (
               /* Core Parts Table List */
-              <div className="card border-0 shadow-sm p-4 bg-white rounded-3">
+              <div className="card border-0 rounded-mhenik shadow-sm p-4 bg-white rounded-3">
                 <div className="table-responsive">
                   <table className="table align-middle mb-0">
                     <thead className="table-light text-secondary small">
@@ -159,14 +159,14 @@ export default function Cart() {
                           <td className="text-muted">Ksh {item.price.toLocaleString()}</td>
                           <td className="text-center">
                             <div className="btn-group btn-group-sm border shadow-xs">
-                              <button type="button" className="btn btn-light px-2" onClick={() => updateQty(item.sku, -1)}>-</button>
+                              <button type="button" className="btn rounded-mhenik btn-light px-2" onClick={() => updateQty(item.sku, -1)}>-</button>
                               <span className="px-3 py-1 bg-white text-dark font-monospace fw-bold">{item.qty}</span>
-                              <button type="button" className="btn btn-light px-2" onClick={() => updateQty(item.sku, 1)}>+</button>
+                              <button type="button" className="btn rounded-mhenik btn-light px-2" onClick={() => updateQty(item.sku, 1)}>+</button>
                             </div>
                           </td>
                           <td className="text-end fw-semibold text-dark">Ksh {(item.price * item.qty).toLocaleString()}</td>
                           <td className="text-center">
-                            <button type="button" className="btn btn-sm btn-link text-danger p-0 text-decoration-none fw-bold" onClick={() => removeItem(item.sku)}>Remove</button>
+                            <button type="button" className="btn btn-sm btn-link rounded-mhenik text-danger p-0 text-decoration-none fw-bold" onClick={() => removeItem(item.sku)}>Remove</button>
                           </td>
                         </tr>
                       ))}
@@ -193,14 +193,14 @@ export default function Cart() {
               {!showForm && (
                 <button 
                   type="button" 
-                  className="btn btn-mhenik-primary w-100 fw-bold py-3 shadow-sm mb-2"
+                  className="btn btn-mhenik-primary rounded-mhenik w-100 fw-bold py-3 shadow-sm mb-2"
                   onClick={() => setShowForm(true)}
                 >
                   Place Availability Request →
                 </button>
               )}
               
-              <button type="button" className="btn btn-outline-secondary w-100 btn-sm mt-1" onClick={() => navigate('/shop')}>
+              <button type="button" className="btn  rounded-mhenik btn-outline-secondary w-100 btn-sm mt-1" onClick={() => navigate('/shop')}>
                 ← Continue Sourcing
               </button>
             </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
-import { Html5QrcodeScanner } from 'html5-qrcode'; // 📷 Ensure 'npm install html5-qrcode' has been run
+import { Html5QrcodeScanner } from 'html5-qrcode';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('orders');
@@ -9,18 +9,23 @@ export default function AdminDashboard() {
   const [orders, setOrders] = useState([]);
   const [users, setUsers] = useState([]);
   const [logs, setLogs] = useState([]); 
+  const [transactions, setTransactions] = useState([]);
   const [adjustments, setAdjustments] = useState([]);
   const [staff, setStaff] = useState({ name: '', role: '' });
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({ sku: '', productName: '', position: '', sellingPrice: '', stockAmount: '', categoryId: '', categoryName: '', vehicleId: '', make: '', model: '' });
-  const [generatedQR, setGeneratedQR] = useState('');
+  const [form, setForm] = useState({ 
+    sku: '', productName: '', position: '', sellingPrice: '', stockAmount: '', 
+    categoryId: '', categoryName: '', vehicleId: '', make: '', model: '',
+    condition: 'OEM_GENUINE', side: 'UNIVERSAL', reorderPoint: 3
+  });
 
-  // 🔍 Inventory Filter States
+  // 🚨 Module 2 Filter & Search States
   const [invSearchSku, setInvSearchSku] = useState('');
   const [invSearchName, setInvSearchName] = useState('');
   const [invSearchVehicle, setInvSearchVehicle] = useState('');
   const [invSearchCategory, setInvSearchCategory] = useState('');
+  const [showLowStockOnly, setShowLowStockOnly] = useState(false);
 
   // 🔍 Log Filtering States
   const [logSearchAction, setLogSearchAction] = useState('');
@@ -29,7 +34,6 @@ export default function AdminDashboard() {
   const [logEndDate, setLogEndDate] = useState('');
 
   const [logCurrentPage, setLogCurrentPage] = useState(1);
-  const [logPaginationMeta, setLogPaginationMeta] = useState({ totalPages: 1, totalRecords: 0, hasNextPage: false });
 
   // ✏️ Edit Request State
   const [editingProduct, setEditingProduct] = useState(null);
@@ -38,7 +42,7 @@ export default function AdminDashboard() {
 
   // 📷 ADVANCED MULTI-ITEM SCANNER AGGREGATION STATES
   const [activeScanOrder, setActiveScanOrder] = useState(null);
-  const [scanProgressMap, setScanProgressMap] = useState({}); // Format: { '3161': 2, '1155': 1 }
+  const [scanProgressMap, setScanProgressMap] = useState({});
   const [manualSkuInput, setManualSkuInput] = useState('');
   const [scannerInstance, setScannerInstance] = useState(null);
 
@@ -59,6 +63,7 @@ export default function AdminDashboard() {
     
     if (profile.role === 'admin') {
       fetchData('/api/admin/users', setUsers);
+      fetchData('/api/admin/transactions', setTransactions);
       setLogCurrentPage(1);
     }
   }, [navigate]);
@@ -98,7 +103,6 @@ export default function AdminDashboard() {
     .then(resData => {
       if (resData && resData.logs) {
         setLogs(resData.logs);
-        setLogPaginationMeta(resData.pagination);
       }
     })
     .catch(err => console.error("Logs pagination pipeline exception:", err));
@@ -112,37 +116,13 @@ export default function AdminDashboard() {
       body: JSON.stringify(form)
     })
     .then(() => { 
-      setGeneratedQR(form.sku); 
       fetchData('/api/admin/inventory', setInventory); 
-      if (staff.role === 'admin') fetchPaginatedLogs(logCurrentPage);
+      if (staff.role === 'admin') {
+        fetchPaginatedLogs(logCurrentPage);
+        fetchData('/api/admin/transactions', setTransactions);
+      }
       alert('Allocation logged successfully!'); 
     });
-  };
-
-  const handleOrderDecision = (orderId, decision, barcodeInput = '') => {
-    fetch(`http://localhost:5000/api/admin/orders/${orderId}/status`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('mhenik_staff_token')}` },
-      body: JSON.stringify({ 
-        status: decision,
-        verifiedSku: barcodeInput 
-      })
-    })
-    .then(async (res) => {
-      const data = await res.json();
-      if (!res.ok) {
-        alert(data.message || "Failed to update order status.");
-        return;
-      }
-      alert(`Manifest updated successfully to ${decision}!`);
-      setActiveScanOrderId(null);
-      setScannedBarcodeFieldValue('');
-      fetchData('/api/admin/orders', setOrders);
-      fetchData('/api/admin/adjustments', setAdjustments);
-      fetchData('/api/admin/inventory', setInventory);
-      if (staff.role === 'admin') fetchPaginatedLogs(logCurrentPage);
-    })
-    .catch(err => console.error("Order decision handler error:", err));
   };
 
   const submitCorrectionRequest = (e) => {
@@ -164,7 +144,12 @@ export default function AdminDashboard() {
         reason: correctionReason
       })
     })
-    .then(() => {
+    .then(async (res) => {
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.message || "Failed to submit correction request.");
+        return;
+      }
       alert("Adjustment request forwarded to admin backlog.");
       setEditingProduct(null);
       setCorrectionTargetQty('');
@@ -174,44 +159,53 @@ export default function AdminDashboard() {
     });
   };
 
-  const resolveAdjustment = (id, decision, barcodeInput = '') => {
+  const resolveAdjustment = (id, decision) => {
     fetch(`http://localhost:5000/api/admin/adjustments/${id}/status`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('mhenik_staff_token')}` },
-      body: JSON.stringify({ status: decision, verifiedSku: barcodeInput }) 
+      headers: { 
+        'Content-Type': 'application/json', 
+        'Authorization': `Bearer ${localStorage.getItem('mhenik_staff_token')}` 
+      },
+      body: JSON.stringify({ status: decision })
     })
     .then(async (res) => {
       const data = await res.json();
       if (!res.ok) {
-        alert(data.message || "Fulfillment Error: Action aborted.");
+        alert(`Error (${res.status}): ${data.message || 'Failed to update adjustment'}`);
         return;
       }
-      alert(`Success: Marked as ${decision}!`);
-      closeScanLifecycle();
+      alert(`Adjustment ${decision.toLowerCase()} successfully!`);
       fetchData('/api/admin/adjustments', setAdjustments);
-      fetchData('/api/admin/orders', setOrders);
       fetchData('/api/admin/inventory', setInventory);
-      if (staff.role === 'admin') fetchPaginatedLogs(logCurrentPage);
+      if (staff.role === 'admin') fetchData('/api/admin/transactions', setTransactions);
     })
-    .catch(err => console.error("Database connection resolution failure:", err));
+    .catch(err => {
+      console.error("Adjustment error:", err);
+      alert("Network error updating adjustment.");
+    });
   };
-
   const handleIAMAction = (endpoint, body) => {
     fetch(`http://localhost:5000${endpoint}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('mhenik_staff_token')}` },
+      headers: { 
+        'Content-Type': 'application/json', 
+        'Authorization': `Bearer ${localStorage.getItem('mhenik_staff_token')}` 
+      },
       body: JSON.stringify(body)
     })
-    .then(() => {
+    .then(async (res) => {
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.message || "IAM Action failed.");
+        return;
+      }
+      alert(data.message || "User credentials updated successfully!");
       fetchData('/api/admin/users', setUsers);
       if (staff.role === 'admin') fetchPaginatedLogs(logCurrentPage);
-    });
+    })
+    .catch(err => console.error("IAM Action Error:", err));
   };
-
-  // =========================================================================
-  // 📷 CAMERA INTEGRATION & CHECKLIST COMPLIANCE ENGINE
-  // =========================================================================
-  
+  // 📷 CAMERA INTEGRATION ENGINE
   const startOrderScanLifecycle = (order) => {
     setActiveScanOrder(order);
     const initialProgress = {};
@@ -224,7 +218,7 @@ export default function AdminDashboard() {
       const scanner = new Html5QrcodeScanner("order-modal-camera-viewport", { fps: 15, qrbox: 220 }, false);
       scanner.render((skuText) => {
         registerScannedSkuValue(skuText.trim(), order.items);
-      }, (error) => { /* tracing placeholder */ });
+      }, (error) => { /* quiet tracing */ });
       setScannerInstance(scanner);
     }, 200);
   };
@@ -286,19 +280,24 @@ export default function AdminDashboard() {
         closeScanLifecycle();
         fetchData('/api/admin/orders', setOrders);
         fetchData('/api/admin/inventory', setInventory);
+        if (staff.role === 'admin') fetchData('/api/admin/transactions', setTransactions);
       })
       .catch(err => console.error(err));
   };
 
-  const handleOrderApproval = (orderId) => {
+  const handleOrderApproval = (orderId, decision = 'APPROVED') => {
     fetch(`http://localhost:5000/api/admin/orders/${orderId}/status`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('mhenik_staff_token')}` },
-      body: JSON.stringify({ status: 'APPROVED' })
+      headers: { 
+        'Content-Type': 'application/json', 
+        'Authorization': `Bearer ${localStorage.getItem('mhenik_staff_token')}` 
+      },
+      body: JSON.stringify({ status: decision })
     })
     .then(async (res) => {
       const data = await res.json();
-      if (!res.ok) { alert(data.message || "Failed allocation."); return; }
+      if (!res.ok) { alert(data.message || "Failed processing order status update."); return; }
+      alert(`Order successfully marked as ${decision}!`);
       fetchData('/api/admin/orders', setOrders);
       fetchData('/api/admin/adjustments', setAdjustments);
     });
@@ -313,108 +312,134 @@ export default function AdminDashboard() {
     return matchesAction && matchesActor && matchesStart && matchesEnd;
   });
 
-  const theme = {
-    bgPattern: 'radial-gradient(circle at top left, #fdfbfb 0%, #ebedee 100%)',
-    dotPattern: 'radial-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 0)',
-    primaryColor: '#4A1525', 
-    accentColor: '#80263E',
-    shadowLight: '0 4px 20px rgba(0, 0, 0, 0.05)',
-    shadowCard: '0 10px 30px rgba(0, 0, 0, 0.08)',
-    transitionSmooth: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
-    cardBg: 'rgba(255, 255, 255, 0.92)'
-  };
+  // 🔔 DYNAMIC UNTOUCHED & LOW-STOCK COUNTS
+  const pendingOrdersCount = orders.filter(o => o.status === 'PENDING' || o.status === 'APPROVED').length;
+  const pendingAdjustmentsCount = adjustments.filter(a => a.status === 'PENDING').length;
+  const pendingUsersCount = users.filter(u => u.status === 'PENDING').length;
+  const lowStockCount = inventory.filter(p => (p.stock - p.heldStock) <= (p.reorderPoint || 3)).length;
 
-  const tabsAvailable = ['records', 'incoming', 'orders', 'adjustments', staff.role === 'admin' ? 'staff' : null, staff.role === 'admin' ? 'logs' : null].filter(Boolean);
+  const tabList = [
+    { id: 'records', label: 'RECORDS' },
+    { id: 'incoming', label: 'INCOMING' },
+    { id: 'orders', label: 'ORDERS', count: pendingOrdersCount },
+    { id: 'adjustments', label: 'ADJUSTMENTS', count: pendingAdjustmentsCount },
+    staff.role === 'admin' ? { id: 'staff', label: 'STAFF', count: pendingUsersCount } : null,
+    staff.role === 'admin' ? { id: 'ledger', label: 'LEDGER' } : null,
+    staff.role === 'admin' ? { id: 'logs', label: 'LOGS' } : null
+  ].filter(Boolean);
 
   return (
-    <div style={{ padding: '4vw 20px', background: theme.bgPattern, backgroundImage: `${theme.dotPattern}, ${theme.bgPattern}`, backgroundSize: '24px 24px, 100% 100%', minHeight: '100vh', color: '#334155', fontFamily: 'sans-serif' }}>
+    <div className="container-fluid p-2 p-md-4 min-vh-100" style={{ background: '#f8fafc', maxWidth: '100vw', overflowX: 'hidden' }}>
       
-      <style>{`
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .tab-btn { transition: ${theme.transitionSmooth}; }
-        .tab-btn:hover { color: ${theme.primaryColor} !important; background: rgba(74, 21, 37, 0.04) !important; }
-        .interactive-row { transition: ${theme.transitionSmooth}; }
-        .interactive-row:hover { background-color: rgba(74, 21, 37, 0.02) !important; }
-        .form-input { transition: ${theme.transitionSmooth}; width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; background: '#fff'; }
-        .form-input:focus { border-color: ${theme.accentColor} !important; box-shadow: 0 0 0 3px rgba(128, 38, 62, 0.15) !important; outline: none; }
-        .primary-action-btn { transition: ${theme.transitionSmooth}; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; border: none; cursor: pointer; }
-        .primary-action-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(74, 21, 37, 0.25) !important; }
-        .desktop-table { display: table; width: 100%; table-layout: fixed; border-collapse: collapse; }
-        .grid-filters { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; background: rgba(255, 255, 255, 0.5); padding: 15px; borderRadius: '12px'; }
-        @media (max-width: 900px) { .grid-filters { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 650px) { .desktop-table { display: none; } .grid-filters { grid-template-columns: 1fr; } }
-      `}</style>
-
       {/* HEADER SECTION PANEL */}
-      <div style={{ background: theme.cardBg, backdropFilter: 'blur(10px)', padding: '25px 30px', borderRadius: '16px', boxShadow: theme.shadowCard, marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
-        <div>
-          <h1 style={{ margin: 0, fontWeight: '800', color: theme.primaryColor, fontSize: '24px' }}>Mhenik Operations Hub</h1>
-          <p style={{ color: '#64748b', margin: '6px 0 0 0', fontSize: '14px' }}>Operator: <span style={{fontWeight:'700', color: theme.accentColor}}>{staff.name}</span> <span style={{fontSize: '11px', background: 'rgba(74, 21, 37, 0.1)', color: theme.primaryColor, padding: '3px 8px', borderRadius: '12px', fontWeight: 'bold'}}>{staff.role?.toUpperCase()}</span></p>
+      <div className="card border-0 shadow-sm p-3 rounded-mhenik mb-3 bg-white">
+        <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <div>
+            <h1 className="h5 text-dark fw-bold mb-1">Mhenik Operations Hub</h1>
+            <p className="text-muted small mb-0">
+              Operator: <strong className="text-dark">{staff.name}</strong> 
+              <span className="badge bg-primary bg-opacity-10 text-primary rounded-mhenik ms-2">{staff.role?.toUpperCase()}</span>
+            </p>
+          </div>
+          <button onClick={() => { localStorage.clear(); navigate('/admin/auth'); }} className="btn btn-outline-danger btn-sm fw-bold rounded-mhenik">Logout</button>
         </div>
-        <button onClick={() => { localStorage.clear(); navigate('/admin/auth'); }} className="primary-action-btn" style={{ padding: '12px 20px', background: '#fff', color: '#ef4444', border:'1px solid #fca5a5', borderRadius: '10px', fontWeight: '600' }}>Logout</button>
       </div>
 
-      {/* NAVIGATION TABS */}
-      <div style={{ display: 'flex', gap: '8px', background: 'rgba(255,255,255,0.6)', padding: '6px', borderRadius: '12px', marginBottom: '30px', maxWidth: 'fit-content', boxShadow: theme.shadowLight }}>
-        {tabsAvailable.map(tab => (
-          <button key={tab} onClick={() => setActiveTab(tab)} className="tab-btn" style={{ padding: '10px 24px', border: 'none', borderRadius: '8px', background: activeTab === tab ? theme.primaryColor : 'transparent', color: activeTab === tab ? '#fff' : '#64748b', fontWeight: '600', fontSize: '13px', cursor: 'pointer' }}>
-            {tab.toUpperCase()}
-          </button>
-        ))}
+      {/* 📱 COMPACT STYLED MOBILE DROPDOWN / DESKTOP BUTTON STRIP */}
+      <div className="card border-0 shadow-sm p-2 rounded-mhenik mb-3 bg-white">
+        {/* Mobile Dropdown View */}
+        <div className="d-block d-md-none">
+          <div className="d-flex align-items-center gap-2">
+            <label className="form-label small fw-bold text-muted mb-0 text-nowrap" style={{ fontSize: '12px' }}>Module:</label>
+            <select 
+              className="form-select form-select-sm fw-bold rounded-mhenik border-secondary-subtle"
+              style={{ fontSize: '13px', backgroundPosition: 'right 0.5rem center' }}
+              value={activeTab}
+              onChange={(e) => setActiveTab(e.target.value)}
+            >
+              {tabList.map(tab => (
+                <option key={tab.id} value={tab.id}>
+                  {tab.label} {tab.count > 0 ? `(${tab.count} UNTOUCHED)` : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Desktop Button Strip */}
+        <div className="d-none d-md-flex gap-2 flex-wrap">
+          {tabList.map(tab => (
+            <button 
+              key={tab.id} 
+              onClick={() => setActiveTab(tab.id)} 
+              className={`btn btn-sm fw-bold rounded-mhenik px-3 py-2 transition-all ${
+                activeTab === tab.id ? 'btn-primary' : 'btn-light text-secondary'
+              }`}
+            >
+              {tab.label}
+              {tab.count > 0 && (
+                <span className="badge bg-danger ms-2 rounded-mhenik">{tab.count}</span>
+              )}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* =========================================================================
-          📷 CHECKLIST CAMERA MODAL OVERLAY VIEWPORT
-          ========================================================================= */}
+      {/* 📷 CHECKLIST CAMERA MODAL OVERLAY VIEWPORT */}
       {activeScanOrder && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(6px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 2000, padding: '20px' }}>
-          <div style={{ background: '#fff', width: '100%', maxWidth: '850px', borderRadius: '20px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
-            <div style={{ background: '#0f172a', padding: '20px 25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-75 d-flex align-items-center justify-content-center p-2" style={{ zIndex: 1050 }}>
+          <div className="card border-0 shadow-lg rounded-mhenik bg-white w-100" style={{ maxWidth: '800px', maxHeight: '90vh', overflow: 'hidden' }}>
+            <div className="bg-dark text-white p-3 d-flex justify-content-between align-items-center">
               <div>
-                <h4 style={{ margin: 0, color: '#fff', fontWeight: '700', fontSize: '16px', fontFamily: 'monospace' }}>📦 DISPATCH COUNTER VERIFICATION</h4>
-                <span style={{ color: '#94a3b8', fontSize: '12px' }}>Manifest ID: #{activeScanOrder.id.slice(0, 12).toUpperCase()}</span>
+                <h6 className="fw-bold mb-0 font-monospace">DISPATCH COUNTER VERIFICATION</h6>
+                <span className="small text-muted">Manifest ID: #{activeScanOrder.id.slice(0, 12).toUpperCase()}</span>
               </div>
-              <button onClick={closeScanLifecycle} style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '20px', cursor: 'pointer' }}>✕</button>
+              <button onClick={closeScanLifecycle} className="btn text-white p-0 fs-5">✕</button>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', overflowY: 'auto', padding: '25px', gap: '20px' }}>
-              <div>
-                <h6 style={{ fontWeight: 'bold', margin: '0 0 10px 0', fontSize: '13px', textTransform: 'uppercase', color: '#475569' }}>📷 Active Viewfinder Feed</h6>
-                <div id="order-modal-camera-viewport" style={{ width: '100%', borderRadius: '12px', overflow: 'hidden', border: '2px dashed #cbd5e1', background: '#f8fafc' }}></div>
-                <div style={{ marginTop: '15px' }}>
-                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#64748b', marginBottom: '4px' }}>SKU OVERRIDE / BARCODE GUN EMULATION INPUT</label>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <input type="text" className="form-input" placeholder="Scan parameter or type..." value={manualSkuInput} onChange={e => setManualSkuInput(e.target.value)} style={{ padding: '8px 12px', fontSize: '13px' }} />
-                    <button onClick={() => { registerScannedSkuValue(manualSkuInput, activeScanOrder.items); setManualSkuInput(''); }} style={{ background: '#4A1525', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '8px', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer' }}>Verify</button>
+            
+            <div className="p-3 overflow-y-auto" style={{ maxHeight: 'calc(90vh - 60px)' }}>
+              <div className="row g-3">
+                <div className="col-12 col-md-6">
+                  <h6 className="fw-bold text-muted small text-uppercase mb-2">Viewfinder Feed</h6>
+                  <div id="order-modal-camera-viewport" className="rounded-mhenik border border-dashed bg-light p-2"></div>
+                  
+                  <div className="mt-3">
+                    <label className="form-label small fw-bold text-muted">MANUAL SKU OVERRIDE</label>
+                    <div className="input-group">
+                      <input type="text" className="form-control form-control-sm rounded-mhenik" placeholder="Scan or type SKU..." value={manualSkuInput} onChange={e => setManualSkuInput(e.target.value)} />
+                      <button onClick={() => { registerScannedSkuValue(manualSkuInput, activeScanOrder.items); setManualSkuInput(''); }} className="btn btn-sm btn-dark rounded-mhenik fw-bold">Verify</button>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                <div>
-                  <h6 style={{ fontWeight: 'bold', margin: '0 0 12px 0', fontSize: '13px', textTransform: 'uppercase', color: '#475569' }}>📋 Manifest Progress Checklist</h6>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {activeScanOrder.items?.map(item => {
-                      const scannedCount = scanProgressMap[item.productSku] || 0;
-                      const lineComplete = scannedCount === item.quantity;
-                      return (
-                        <div key={item.productSku} style={{ padding: '12px 15px', borderRadius: '12px', border: lineComplete ? '1px solid #bbf7d0' : '1px solid #e2e8f0', background: lineComplete ? '#f0fdf4' : '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <div>
-                            <span style={{ display: 'block', fontWeight: 'bold', color: '#1e293b', fontSize: '14px' }}>{item.product?.productName || 'Genuine Replacement Spare'}</span>
-                            <span style={{ fontSize: '11px', color: '#64748b', fontFamily: 'monospace' }}>SKU: {item.productSku}</span>
+
+                <div className="col-12 col-md-6 d-flex flex-column justify-content-between">
+                  <div>
+                    <h6 className="fw-bold text-muted small text-uppercase mb-2">📋 Manifest Progress</h6>
+                    <div className="d-flex flex-column gap-2">
+                      {activeScanOrder.items?.map(item => {
+                        const scannedCount = scanProgressMap[item.productSku] || 0;
+                        const lineComplete = scannedCount === item.quantity;
+                        return (
+                          <div key={item.productSku} className={`p-2 rounded-mhenik border d-flex justify-content-between align-items-center ${lineComplete ? 'bg-success bg-opacity-10 border-success' : 'bg-white'}`}>
+                            <div>
+                              <strong className="d-block small text-dark">{item.product?.productName || 'Genuine Spare'}</strong>
+                              <span className="font-monospace text-muted" style={{ fontSize: '11px' }}>SKU: {item.productSku}</span>
+                            </div>
+                            <div className="text-end">
+                              <span className={`fw-bold small ${lineComplete ? 'text-success' : 'text-dark'}`}>{scannedCount} / {item.quantity}</span>
+                              <span className={`d-block fw-bold ${lineComplete ? 'text-success' : 'text-warning'}`} style={{ fontSize: '10px' }}>{lineComplete ? '✓ SECURED' : '⏳ PENDING'}</span>
+                            </div>
                           </div>
-                          <div style={{ textAlign: 'right' }}>
-                            <span style={{ fontSize: '15px', fontWeight: 'bold', color: lineComplete ? '#16a34a' : '#0f172a' }}>{scannedCount} / {item.quantity}</span>
-                            <span style={{ display: 'block', fontSize: '10px', fontWeight: 'bold', color: lineComplete ? '#16a34a' : '#f59e0b' }}>{lineComplete ? '✓ SECURED' : '⏳ PENDING'}</span>
-                          </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-                <div style={{ marginTop: '25px', borderTop: '1px solid #e2e8f0', paddingTop: '15px' }}>
-                  <button onClick={commitBulkDispatchedManifest} disabled={!verifyAllLinesFullyScanned()} style={{ width: '100%', padding: '14px', border: 'none', borderRadius: '10px', background: verifyAllLinesFullyScanned() ? '#16a34a' : '#e2e8f0', color: verifyAllLinesFullyScanned() ? '#fff' : '#94a3b8', fontWeight: 'bold', fontSize: '14px', cursor: verifyAllLinesFullyScanned() ? 'pointer' : 'not-allowed' }}>
-                    {verifyAllLinesFullyScanned() ? '🚀 Finalize Warehouse Dispatch' : '🔒 Verification Scans Incomplete'}
-                  </button>
+
+                  <div className="mt-3 pt-2 border-top">
+                    <button onClick={commitBulkDispatchedManifest} disabled={!verifyAllLinesFullyScanned()} className={`btn w-100 rounded-mhenik fw-bold ${verifyAllLinesFullyScanned() ? 'btn-success' : 'btn-light text-muted'}`}>
+                      {verifyAllLinesFullyScanned() ? '🚀 Finalize Warehouse Dispatch' : '🔒 Verification Scans Incomplete'}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -422,120 +447,182 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* ADJUSTMENT CORRECTIONS CONFIGURATION MODAL */}
-      {editingProduct && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '20px' }}>
-          <form onSubmit={submitCorrectionRequest} style={{ background: '#fff', padding: '25px', borderRadius: '16px', boxShadow: theme.shadowCard, width: '100%', maxWidth: '450px' }}>
-            <h4 style={{ margin: '0 0 5px 0', color: theme.primaryColor, fontSize: '18px', fontWeight: '700' }}>Request Stock Correction</h4>
-            <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 20px 0' }}>Item: <strong>{editingProduct.productName}</strong></p>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '6px' }}>Current Count: {editingProduct.stock} units</label>
-            <input className="form-input" type="number" required placeholder="Enter corrected count..." value={correctionTargetQty} onChange={e => setCorrectionTargetQty(e.target.value)} style={{ marginBottom: '15px' }} />
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '6px' }}>Justification Reason</label>
-            <textarea className="form-input" required placeholder="Reason for change..." value={correctionReason} onChange={e => setCorrectionReason(e.target.value)} style={{ minHeight: '80px', marginBottom: '20px', fontFamily: 'sans-serif' }} />
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-              <button type="button" onClick={() => setEditingProduct(null)} style={{ padding: '10px 18px', background: '#f1f5f9', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}>Cancel</button>
-              <button type="submit" style={{ padding: '10px 18px', background: theme.primaryColor, color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}>Submit</button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* TAB CONTAINER 1: RECORDS (LIVE INVENTORY) */}
+      {/* TAB 1: LIVE INVENTORY */}
       {activeTab === 'records' && (
-        <div className="animate-fade-in" style={{ background: theme.cardBg, backdropFilter: 'blur(10px)', borderRadius: '16px', padding: '30px', boxShadow: theme.shadowCard }}>
-          <h3 style={{ margin: '0 0 4px 0', fontSize: '20px', fontWeight: '700', color: theme.primaryColor }}>Live Inventory Matrix ({inventory.length} items)</h3>
-          <p style={{ color: '#64748b', fontSize: '13px', margin: '0 0 20px 0' }}>Comprehensive stock levels index across warehouse branches.</p>
-          <div className="grid-filters">
-            <input className="form-input" placeholder="Filter SKU..." value={invSearchSku} onChange={e => setInvSearchSku(e.target.value)} />
-            <input className="form-input" placeholder="Designation..." value={invSearchName} onChange={e => setInvSearchName(e.target.value)} />
-            <input className="form-input" placeholder="Vehicle range..." value={invSearchVehicle} onChange={e => setInvSearchVehicle(e.target.value)} />
-            <input className="form-input" placeholder="Category..." value={invSearchCategory} onChange={e => setInvSearchCategory(e.target.value)} />
+        <div className="card border-0 shadow-sm p-3 rounded-mhenik bg-white">
+          <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+            <div>
+              <h3 className="h6 fw-bold text-dark mb-0">Live Inventory Matrix ({inventory.length} items)</h3>
+              <p className="text-muted small mb-0">Stock level index across branches.</p>
+            </div>
+            
+            {/* 🚨 Module 2: Low-Stock Alert Toggle Button */}
+            <button 
+              onClick={() => setShowLowStockOnly(!showLowStockOnly)} 
+              className={`btn btn-sm rounded-mhenik fw-bold ${showLowStockOnly ? 'btn-danger' : 'btn-outline-danger'}`}
+            >
+              ⚠️ Low Stock Filter {lowStockCount > 0 && <span className="badge bg-white text-danger ms-1">{lowStockCount}</span>}
+            </button>
           </div>
-          <div style={{ width: '100%', overflowX: 'auto' }}>
-            <table className="desktop-table">
-              <thead>
-                <tr style={{ background: 'rgba(74, 21, 37, 0.03)', textAlign: 'left', borderBottom: '2px solid #e2e8f0' }}>
-                  <th style={{ padding: '16px 12px', fontSize: '13px', color: theme.primaryColor, width: '10%' }}>SKU</th>
-                  <th style={{ padding: '16px 12px', fontSize: '13px', color: theme.primaryColor, width: '30%' }}>Component Designation</th>
-                  <th style={{ padding: '16px 12px', fontSize: '13px', color: theme.primaryColor, width: '20%' }}>Vehicle Range</th>
-                  <th style={{ padding: '16px 12px', fontSize: '13px', color: theme.primaryColor, width: '15%' }}>Category</th>
-                  <th style={{ padding: '16px 12px', fontSize: '13px', color: theme.primaryColor, width: '10%' }}>Price</th>
-                  <th style={{ padding: '16px 12px', fontSize: '13px', color: theme.primaryColor, width: '15%' }}>Stock Level</th>
-                  <th style={{ padding: '16px 12px', fontSize: '13px', color: theme.primaryColor, textAlign: 'right', width: '10%' }}>Actions</th>
+          
+          <div className="row g-2 mb-3">
+            <div className="col-6 col-md-3"><input className="form-control form-control-sm rounded-mhenik" placeholder="Filter SKU..." value={invSearchSku} onChange={e => setInvSearchSku(e.target.value)} /></div>
+            <div className="col-6 col-md-3"><input className="form-control form-control-sm rounded-mhenik" placeholder="Designation..." value={invSearchName} onChange={e => setInvSearchName(e.target.value)} /></div>
+            <div className="col-6 col-md-3"><input className="form-control form-control-sm rounded-mhenik" placeholder="Vehicle..." value={invSearchVehicle} onChange={e => setInvSearchVehicle(e.target.value)} /></div>
+            <div className="col-6 col-md-3"><input className="form-control form-control-sm rounded-mhenik" placeholder="Category..." value={invSearchCategory} onChange={e => setInvSearchCategory(e.target.value)} /></div>
+          </div>
+          
+          <div className="table-responsive">
+            <table className="table table-hover align-middle mb-0" style={{ minWidth: '650px' }}>
+              <thead className="table-light">
+                <tr>
+                  <th>SKU</th>
+                  <th>Designation</th>
+                  <th>Vehicle / Fits</th>
+                  <th>Attributes</th>
+                  <th>Price</th>
+                  <th>Stock Levels</th>
+                  <th className="text-end">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {inventory
-                  .filter(p => String(p.sku).includes(invSearchSku) && p.productName.toLowerCase().includes(invSearchName.toLowerCase()) && `${p.vehicle?.make} ${p.vehicle?.model}`.toLowerCase().includes(invSearchVehicle.toLowerCase()) && p.category?.name.toLowerCase().includes(invSearchCategory.toLowerCase()))
-                  .map(prod => (
-                    <tr key={prod.sku} className="interactive-row" style={{ borderBottom: '1px solid #e2e8f0' }}>
-                      <td style={{ padding: '16px 12px', fontWeight: 'bold', fontFamily: 'monospace' }}>{prod.sku}</td>
-                      <td style={{ padding: '16px 12px', fontWeight: '600', wordWrap: 'break-word' }}>{prod.productName}</td>
-                      <td style={{ padding: '16px 12px', color: '#475569' }}>{prod.vehicle?.make} {prod.vehicle?.model}</td>
-                      <td style={{ padding: '16px 12px' }}><span style={{ background: '#f1f5f9', padding: '4px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: '600' }}>{prod.category?.name}</span></td>
-                      <td style={{ padding: '16px 12px', fontWeight: 'bold', color: theme.accentColor }}>KES {prod.sellingPrice?.toLocaleString()}</td>
-                      <td style={{ padding: '16px 12px', fontWeight: 'bold', color: prod.stock < 5 ? '#ef4444' : '#22c55e' }}>{prod.stock} units</td>
-                      <td style={{ padding: '16px 12px', textAlign: 'right' }}>
-                        <button onClick={() => setEditingProduct(prod)} style={{ background: '#fff', color: theme.primaryColor, border: `1px solid ${theme.primaryColor}`, padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '12px' }}>Edit</button>
-                      </td>
-                    </tr>
-                  ))}
+                  .filter(p => {
+                    const matchesSearch = String(p.sku).includes(invSearchSku) && 
+                      p.productName.toLowerCase().includes(invSearchName.toLowerCase()) && 
+                      `${p.vehicle?.make} ${p.vehicle?.model}`.toLowerCase().includes(invSearchVehicle.toLowerCase()) && 
+                      p.category?.name.toLowerCase().includes(invSearchCategory.toLowerCase());
+                    
+                    const isLow = (p.stock - p.heldStock) <= (p.reorderPoint || 3);
+                    return showLowStockOnly ? (matchesSearch && isLow) : matchesSearch;
+                  })
+                  .map(prod => {
+                    // 🔐 Module 5: Concurrent Adjustment Lock check
+                    const isAdjustmentPending = adjustments.some(a => a.productSku === prod.sku && a.status === 'PENDING');
+                    const availableStock = Math.max(0, prod.stock - prod.heldStock);
+
+                    return (
+                      <tr key={prod.sku}>
+                        <td className="fw-bold font-monospace">{prod.sku}</td>
+                        <td className="fw-semibold text-break">{prod.productName}</td>
+                        <td className="text-muted small">{prod.vehicle?.make} {prod.vehicle?.model}</td>
+                        {/* 🧩 Module 4: Condition & Side Badges */}
+                        <td>
+                          <span className="badge bg-light text-dark border rounded-mhenik me-1" style={{ fontSize: '10px' }}>{prod.condition || 'OEM'}</span>
+                          <span className="badge bg-secondary bg-opacity-10 text-secondary rounded-mhenik" style={{ fontSize: '10px' }}>{prod.side || 'UNI'}</span>
+                        </td>
+                        <td className="fw-bold text-success">KES {prod.sellingPrice?.toLocaleString()}</td>
+                        {/* 🔒 Module 1: Physical vs Held Stock Breakdown */}
+                        <td>
+                          <span className={`fw-bold d-block ${availableStock <= (prod.reorderPoint || 3) ? 'text-danger' : 'text-success'}`}>
+                            {availableStock} avail ({prod.stock} total)
+                          </span>
+                          {prod.heldStock > 0 && (
+                            <span className="badge bg-warning text-dark rounded-mhenik mt-1" style={{ fontSize: '9px' }}>
+                              🔒 {prod.heldStock} held
+                            </span>
+                          )}
+                        </td>
+                        <td className="text-end">
+                          {isAdjustmentPending ? (
+                            <span className="badge bg-warning text-dark rounded-mhenik" style={{ fontSize: '10px' }}>⏳ Adjustment Locked</span>
+                          ) : (
+                            <button onClick={() => setEditingProduct(prod)} className="btn btn-sm btn-outline-dark rounded-mhenik">Edit</button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
           </div>
         </div>
       )}
 
-      {/* TAB CONTAINER 2: INCOMING Cargo Supply Log */}
+      {/* TAB 2: INCOMING INGESTION */}
       {activeTab === 'incoming' && (
-        <div className="animate-fade-in" style={{ display: 'flex', gap: '35px', flexWrap: 'wrap' }}>
-          <form onSubmit={handleIncomingStock} style={{ flex: 2, minWidth: '280px', background: theme.cardBg, padding: '30px', borderRadius: '16px', boxShadow: theme.shadowCard }}>
-            <h3 style={{ margin: '0 0 15px 0' }}>Log Incoming Supply Cargo</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
-              {Object.keys(form).map((key) => (
-                <div key={key}>
-                  <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', marginBottom: '6px' }}>{key.replace(/([A-Z])/g, ' $1')}</label>
-                  <input className="form-input" type={key === 'sellingPrice' || key === 'stockAmount' ? 'number' : 'text'} required value={form[key]} onChange={e => setForm({...form, [key]: e.target.value})} />
-                </div>
-              ))}
+        <div className="card border-0 shadow-sm p-3 rounded-mhenik bg-white">
+          <h3 className="h6 fw-bold text-dark mb-3">Log Incoming Supply Cargo</h3>
+          <form onSubmit={handleIncomingStock} className="row g-3">
+            {Object.keys(form).map((key) => (
+              <div key={key} className="col-12 col-md-4">
+                <label className="form-label small fw-bold text-muted text-uppercase">{key.replace(/([A-Z])/g, ' $1')}</label>
+                {key === 'condition' ? (
+                  <select className="form-select rounded-mhenik" value={form.condition} onChange={e => setForm({...form, condition: e.target.value})}>
+                    <option value="OEM_GENUINE">OEM Genuine</option>
+                    <option value="AFTERMARKET">Aftermarket</option>
+                    <option value="USED">Used / RefurbISHED</option>
+                  </select>
+                ) : key === 'side' ? (
+                  <select className="form-select rounded-mhenik" value={form.side} onChange={e => setForm({...form, side: e.target.value})}>
+                    <option value="UNIVERSAL">Universal</option>
+                    <option value="LEFT_LH">Left (LH / Driver)</option>
+                    <option value="RIGHT_RH">Right (RH / Passenger)</option>
+                    <option value="FRONT">Front Pair</option>
+                    <option value="REAR">Rear Pair</option>
+                  </select>
+                ) : (
+                  <input 
+                    className="form-control rounded-mhenik" 
+                    type={key === 'sellingPrice' || key === 'stockAmount' || key === 'reorderPoint' ? 'number' : 'text'} 
+                    min={key === 'sellingPrice' || key === 'stockAmount' || key === 'reorderPoint' ? 0 : undefined} 
+                    required 
+                    value={form[key]} 
+                    onChange={e => setForm({...form, [key]: e.target.value})} 
+                  />
+                )}
+              </div>
+            ))}
+            <div className="col-12">
+              <button type="submit" className="btn btn-primary rounded-mhenik w-100 py-2 fw-bold">Inbound Ingestion</button>
             </div>
-            <button type="submit" className="primary-action-btn" style={{ marginTop: '25px', padding: '14px', background: theme.primaryColor, color: '#fff', border: 'none', width: '100%', fontWeight:'700', borderRadius: '10px' }}>Inbound Ingestion</button>
           </form>
         </div>
       )}
 
-      {/* TAB CONTAINER 3: ORDERS LIFECYCLE MANAGEMENT */}
+      {/* TAB 3: ORDERS QUEUE */}
       {activeTab === 'orders' && (
-        <div className="animate-fade-in" style={{ background: theme.cardBg, borderRadius: '16px', padding: '30px', boxShadow: theme.shadowCard }}>
-          <h3 style={{ margin: '0 0 4px 0', fontSize: '20px', color: theme.primaryColor, fontWeight: '700' }}>Order Verification Queue</h3>
-          <p style={{ color: '#64748b', fontSize: '13px', margin: '0 0 20px 0' }}>Review client-side cart requests and dispatch allocations.</p>
+        <div className="card border-0 shadow-sm p-3 rounded-mhenik bg-white">
+          <h3 className="h6 fw-bold text-dark mb-1">Order Verification Queue</h3>
+          <p className="text-muted small mb-3">Review client-side cart requests.</p>
           
-          {orders.length === 0 ? <p style={{ color: '#aaa', padding: '20px', textAlign: 'center' }}>No manifests queued.</p> : orders.map(order => (
-            <div key={order.id} style={{ border: '1px solid #e2e8f0', padding: '20px', marginBottom: '15px', borderRadius: '12px', background: '#fff', boxShadow: theme.shadowLight }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
-                <div>
-                  <strong style={{ fontSize: '15px', color: theme.primaryColor }}>Client: {order.customerName}</strong>
-                  <div style={{ marginTop: '6px' }}>
+          {orders.length === 0 ? <p className="text-center text-muted py-3">No manifests queued.</p> : orders.map(order => (
+            <div key={order.id} className="card border p-3 mb-2 rounded-mhenik shadow-xs bg-light">
+              <div className="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                <div style={{ maxWidth: '100%' }}>
+                  <strong className="text-dark d-block text-break">Client: {order.customerName}</strong>
+                  <div className="d-flex flex-wrap gap-1 mt-1">
                     {order.items?.map((item, index) => (
-                      <span key={index} className="badge bg-light text-dark border me-2 font-monospace" style={{ fontSize: '12px', padding: '4px 8px' }}>
+                      <span key={index} className="badge bg-white text-dark border font-monospace rounded-mhenik">
                         SKU: {item.productSku} (x{item.quantity})
                       </span>
                     ))}
                   </div>
                 </div>
-                <span style={{ fontWeight: 'bold', fontSize: '12px', padding: '6px 12px', borderRadius: '12px', background: order.status === 'PENDING' ? '#ffedd5' : order.status === 'APPROVED' ? '#e0f2fe' : '#dcfce7', color: order.status === 'PENDING' ? '#ea580c' : order.status === 'APPROVED' ? '#0369a1' : '#15803d' }}>
+                <span className={`badge rounded-mhenik ${order.status === 'PENDING' ? 'bg-warning text-dark' : 'bg-success text-white'}`}>
                   {order.status?.toUpperCase()}
                 </span>
               </div>
               
-              <div style={{ marginTop: '15px', display: 'flex', gap: '10px' }}>
-                {order.status === 'PENDING' && (
-                  <button onClick={() => handleOrderApproval(order.id)} style={{ background: '#0284c7', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}>
-                    Approve Allocation Hold
-                  </button>
-                )}
+              <div className="mt-2 d-flex gap-2 flex-wrap">
+              {order.status === 'PENDING' && (
+  <div className="d-flex gap-2">
+    <button 
+      onClick={() => handleOrderApproval(order.id, 'APPROVED')} 
+      className="btn btn-sm btn-primary rounded-mhenik fw-bold"
+    >
+      Approve Allocation Hold
+    </button>
+    <button 
+      onClick={() => handleOrderApproval(order.id, 'REJECTED')} 
+      className="btn btn-sm btn-outline-danger rounded-mhenik fw-bold"
+    >
+      Deny Order
+    </button>
+  </div>
+)}
                 {order.status === 'APPROVED' && (
-                  <button onClick={() => startOrderScanLifecycle(order)} style={{ background: '#16a34a', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}>
+                  <button onClick={() => startOrderScanLifecycle(order)} className="btn btn-sm btn-success rounded-mhenik fw-bold">
                     📷 Verify Barcode to Dispatch
                   </button>
                 )}
@@ -545,39 +632,39 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* =========================================================================
-          📋 TAB CONTAINER 4: ADJUSTMENTS & CORRECTIONS BACKLOG VIEWPORT
-          ========================================================================= */}
+      {/* TAB 4: ADJUSTMENTS */}
       {activeTab === 'adjustments' && (
-        <div className="animate-fade-in" style={{ background: theme.cardBg, backdropFilter: 'blur(10px)', borderRadius: '16px', padding: '30px', boxShadow: theme.shadowCard }}>
-          <h3>Stock Level Adjustment Approvals</h3>
-          <p style={{ color: '#64748b', fontSize: '14px', margin: '0 0 25px 0' }}>Review count corrections or technical inventory recount requests.</p>
+        <div className="card border-0 shadow-sm p-3 rounded-mhenik bg-white" style={{ maxWidth: '100%' }}>
+          <h3 className="h6 fw-bold text-dark mb-1">Stock Level Adjustment Approvals</h3>
+          <p className="text-muted small mb-3">Review count corrections or technical inventory recount requests.</p>
           
-          {adjustments.length === 0 ? <p style={{ textAlign: 'center', color: '#aaa', padding: '30px' }}>No inventory count corrections requested.</p> : adjustments.map(req => (
-            <div key={req.id} style={{ border: '1px solid #e2e8f0', background: '#fff', padding: '20px', borderRadius: '12px', marginBottom: '15px', boxShadow: theme.shadowLight }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '15px' }}>
-                <div style={{ flex: 1, minWidth: '200px' }}>
-                  <strong style={{ fontSize: '15px', color: theme.primaryColor }}>{req.productName} (SKU: {req.productSku})</strong>
-                  <p style={{ fontSize: '13px', margin: '6px 0 0 0', color: '#475569' }}>
-                    Proposed count change: <span style={{ textDecoration: 'line-through', color: '#ef4444' }}>{req.oldStock}</span> ➔ <span style={{ color: '#22c55e', fontWeight: 'bold' }}>{req.newStock} units</span>
+          {adjustments.length === 0 ? <p className="text-center text-muted py-3">No inventory count corrections requested.</p> : adjustments.map(req => (
+            <div key={req.id} className="card border p-3 mb-2 rounded-mhenik shadow-xs bg-light" style={{ maxWidth: '100%', overflow: 'hidden' }}>
+              <div className="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                <div className="flex-grow-1" style={{ minWidth: 0 }}>
+                  <strong className="text-dark d-block text-break" style={{ fontSize: '13px' }}>
+                    {req.productName} (SKU: {req.productSku})
+                  </strong>
+                  <p className="small text-muted mb-1" style={{ fontSize: '12px' }}>
+                    Count: <span className="text-danger text-decoration-line-through">{req.oldStock}</span> ➔ <strong className="text-success">{req.newStock} units</strong>
                   </p>
-                  <p style={{ fontSize: '12px', color: '#64748b', margin: '4px 0 0 0' }}>Requested By: <strong>{req.requestedBy}</strong></p>
-                  <p style={{ fontSize: '12px', color: '#475569', margin: '4px 0 0 0', fontStyle: 'italic' }}>Details: "{req.reason}"</p>
+                  <p className="small text-muted mb-1" style={{ fontSize: '11px' }}>By: <strong>{req.requestedBy}</strong></p>
+                  <p className="small text-muted fst-italic mb-0 text-break" style={{ fontSize: '11px' }}>Details: "{req.reason}"</p>
                 </div>
-                <div style={{ minWidth: 'fit-content' }}>
+                
+                <div className="mt-1">
                   {req.status === 'PENDING' ? (
                     staff.role === 'admin' ? (
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <button onClick={() => resolveAdjustment(req.id, 'APPROVED')} style={{ background: '#22c55e', color: '#fff', border: 'none', padding: '8px 14px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '12px' }}>Approve Hold</button>
-                        <button onClick={() => resolveAdjustment(req.id, 'REJECTED')} style={{ background: '#fff', color: '#ef4444', border: '1px solid #fca5a5', padding: '8px 14px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '12px' }}>Deny</button>
+                      <div className="d-flex gap-1">
+                        <button onClick={() => resolveAdjustment(req.id, 'APPROVED')} className="btn btn-sm btn-success rounded-mhenik fw-bold px-2 py-1" style={{ fontSize: '12px' }}>Approve</button>
+                        <button onClick={() => resolveAdjustment(req.id, 'REJECTED')} className="btn btn-sm btn-outline-danger rounded-mhenik fw-bold px-2 py-1" style={{ fontSize: '12px' }}>Deny</button>
                       </div>
-                    ) : <span style={{ color: '#f59e0b', fontWeight: 'bold', fontSize: '13px' }}>Awaiting Admin Review</span>
-                  ) : req.status === 'APPROVED' ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'flex-end' }}>
-                      <span className="badge bg-info text-white mb-1" style={{ fontSize: '11px', padding: '4px 8px', borderRadius: '4px' }}>ALLOCATED</span>
-                      <button onClick={() => resolveAdjustment(req.id, 'DISPATCHED')} style={{ background: '#4A1525', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '11px' }}>🚚 Complete Dispatch</button>
-                    </div>
-                  ) : <span style={{ fontWeight: 'bold', color: req.status === 'DISPATCHED' ? '#16a34a' : '#ef4444', fontSize: '13px' }}>{req.status}</span>}
+                    ) : <span className="badge bg-warning text-dark rounded-mhenik">Awaiting Admin Review</span>
+                  ) : (
+                    <span className={`badge rounded-mhenik ${req.status === 'APPROVED' ? 'bg-success' : 'bg-danger'}`}>
+                      {req.status}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -585,42 +672,120 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* =========================================================================
-          👥 TAB CONTAINER 5: IAM STAFF ROLES & CREDENTIAL VALIDATIONS
-          ========================================================================= */}
-      {activeTab === 'staff' && staff.role === 'admin' && (
-        <div className="animate-fade-in" style={{ background: theme.cardBg, borderRadius: '16px', padding: '30px', boxShadow: theme.shadowCard }}>
-          <h3>IAM Employee Verification Controls Hub</h3>
-          <p style={{ color: '#64748b', fontSize: '13px', margin: '0 0 20px 0' }}>Activate newly registered staff accounts or manage organizational visibility clearances.</p>
-          <div style={{ width: '100%', overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '15px' }}>
-              <thead>
-                <tr style={{ background: 'rgba(74, 21, 37, 0.03)', textAlign: 'left', borderBottom: '1px solid #e2e8f0' }}>
-                  <th style={{ padding: '16px' }}>User Name</th>
-                  <th style={{ padding: '16px' }}>Email</th>
-                  <th style={{ padding: '16px' }}>Role</th>
-                  <th style={{ padding: '16px' }}>Status</th>
-                  <th style={{ padding: '16px', textAlign: 'right' }}>Actions</th>
+      {/* TAB 5: IAM STAFF ROLES */}
+{activeTab === 'staff' && staff.role === 'admin' && (
+  <div className="card border-0 shadow-sm p-3 rounded-mhenik bg-white">
+    <h3 className="h6 fw-bold text-dark mb-1">IAM Employee Verification Controls</h3>
+    <p className="text-muted small mb-3">Activate newly registered staff accounts or manage organizational clearances.</p>
+    
+    <div className="table-responsive">
+      <table className="table table-hover align-middle mb-0" style={{ minWidth: '550px' }}>
+        <thead className="table-light">
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th className="text-end">Account Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {users.map(u => (
+            <tr key={u.id}>
+              <td className="fw-bold">{u.name}</td>
+              <td className="small text-muted">{u.email}</td>
+              <td>
+                <span className={`badge rounded-mhenik ${u.role === 'admin' ? 'bg-danger bg-opacity-10 text-danger' : 'bg-secondary bg-opacity-10 text-secondary'}`}>
+                  {u.role.toUpperCase()}
+                </span>
+              </td>
+              <td>
+                <span className={`fw-bold small ${u.status === 'APPROVED' ? 'text-success' : u.status === 'SUSPENDED' ? 'text-danger' : 'text-warning'}`}>
+                  {u.status}
+                </span>
+              </td>
+              <td className="text-end">
+                {u.email === "joshuaochieng21@gmail.com" ? (
+                  <span className="badge bg-light text-muted border rounded-mhenik font-monospace">🔒 Immutable Admin</span>
+                ) : (
+                  <div className="d-flex gap-1 justify-content-end flex-wrap">
+                    {/* Status Toggle Buttons */}
+                    {u.status === 'PENDING' && (
+                      <button 
+                        onClick={() => handleIAMAction(`/api/admin/users/${u.id}/status`, { status: 'APPROVED' })} 
+                        className="btn btn-xs btn-success rounded-mhenik fw-bold px-2 py-1" style={{ fontSize: '11px' }}
+                      >
+                        Activate
+                      </button>
+                    )}
+                    {u.status === 'APPROVED' && (
+                      <button 
+                        onClick={() => handleIAMAction(`/api/admin/users/${u.id}/status`, { status: 'SUSPENDED' })} 
+                        className="btn btn-xs btn-outline-danger rounded-mhenik fw-bold px-2 py-1" style={{ fontSize: '11px' }}
+                      >
+                        Suspend
+                      </button>
+                    )}
+                    {u.status === 'SUSPENDED' && (
+                      <button 
+                        onClick={() => handleIAMAction(`/api/admin/users/${u.id}/status`, { status: 'APPROVED' })} 
+                        className="btn btn-xs btn-outline-success rounded-mhenik fw-bold px-2 py-1" style={{ fontSize: '11px' }}
+                      >
+                        Reactivate
+                      </button>
+                    )}
+
+                    {/* Role Toggle Button */}
+                    <button 
+                      onClick={() => handleIAMAction(`/api/admin/users/${u.id}/role`, { role: u.role === 'admin' ? 'employee' : 'admin' })} 
+                      className="btn btn-xs btn-light text-dark border rounded-mhenik fw-bold px-2 py-1" style={{ fontSize: '11px' }}
+                    >
+                      Set as {u.role === 'admin' ? 'Staff' : 'Admin'}
+                    </button>
+                  </div>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+)}
+
+      {/* 📜 Module 3 TAB 6: INVENTORY TRANSACTION LEDGER */}
+      {activeTab === 'ledger' && staff.role === 'admin' && (
+        <div className="card border-0 shadow-sm p-3 rounded-mhenik bg-white">
+          <h3 className="h6 fw-bold text-dark mb-1">Stock Movement Transaction Ledger</h3>
+          <p className="text-muted small mb-3">Immutable tracking history of physical stock changes and holds.</p>
+          
+          <div className="table-responsive" style={{ maxHeight: '420px', overflowY: 'auto' }}>
+            <table className="table table-hover align-middle mb-0" style={{ minWidth: '550px' }}>
+              <thead className="table-light sticky-top">
+                <tr>
+                  <th>Timestamp</th>
+                  <th>SKU</th>
+                  <th>Type</th>
+                  <th>Change</th>
+                  <th>Balance</th>
+                  <th>Actor</th>
                 </tr>
               </thead>
               <tbody>
-                {users.map(u => (
-                  <tr key={u.id} className="interactive-row" style={{ borderBottom: '1px solid #e2e8f0' }}>
-                    <td style={{ padding: '16px', fontWeight: '700' }}>{u.name}</td>
-                    <td style={{ padding: '16px' }}>{u.email}</td>
-                    <td style={{ padding: '16px' }}><span style={{ background: u.role === 'admin' ? '#fef2f2' : '#f1f5f9', color: u.role === 'admin' ? '#ef4444' : '#475569', padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: '700' }}>{u.role.toUpperCase()}</span></td>
-                    <td style={{ padding: '16px', fontWeight: '700', color: u.status === 'APPROVED' ? '#22c55e' : '#f59e0b' }}>{u.status}</td>
-                    <td style={{ padding: '16px', textAlign: 'right' }}>
-                      {u.email === "joshuaochieng21@gmail.com" ? (
-                        <span style={{ fontSize: '11px', color: '#64748b', fontStyle: 'italic', background: '#f1f5f9', padding: '6px 12px', borderRadius: '6px', border: '1px dashed #cbd5e1' }}>🔒 Immutable Root Account</span>
-                      ) : (
-                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-                          {u.status === 'PENDING' && <button onClick={() => handleIAMAction(`/api/admin/users/${u.id}/status`, { status: 'APPROVED' })} style={{ background: '#22c55e', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>Activate</button>}
-                          {u.status === 'APPROVED' && <button onClick={() => handleIAMAction(`/api/admin/users/${u.id}/status`, { status: 'SUSPENDED' })} style={{ background: '#fff', color: '#64748b', border: '1px solid #cbd5e1', padding: '6px 12px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>Suspend</button>}
-                          {u.role === 'employee' ? <button onClick={() => handleIAMAction(`/api/admin/users/${u.id}/role`, { role: 'admin' })} style={{ background: '#fff', color: theme.primaryColor, border: `1px solid ${theme.primaryColor}`, padding: '6px 12px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>Promote</button> : <button onClick={() => handleIAMAction(`/api/admin/users/${u.id}/role`, { role: 'employee' })} style={{ background: '#fff', color: '#64748b', border: '1px solid #cbd5e1', padding: '6px 12px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>Demote</button>}
-                        </div>
-                      )}
+                {transactions.map(tx => (
+                  <tr key={tx.id}>
+                    <td className="font-monospace text-muted small">{new Date(tx.createdAt).toLocaleString()}</td>
+                    <td className="fw-bold font-monospace">{tx.productSku}</td>
+                    <td>
+                      <span className={`badge rounded-mhenik ${tx.quantityChange > 0 ? 'bg-success' : tx.quantityChange < 0 ? 'bg-danger' : 'bg-primary'}`}>
+                        {tx.type}
+                      </span>
                     </td>
+                    <td className={`fw-bold ${tx.quantityChange > 0 ? 'text-success' : tx.quantityChange < 0 ? 'text-danger' : 'text-muted'}`}>
+                      {tx.quantityChange > 0 ? `+${tx.quantityChange}` : tx.quantityChange}
+                    </td>
+                    <td className="small text-muted">{tx.previousStock} ➔ <strong>{tx.newStock} u</strong></td>
+                    <td className="small fw-bold">{tx.actorName}</td>
                   </tr>
                 ))}
               </tbody>
@@ -629,38 +794,62 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* =========================================================================
-          📊 TAB CONTAINER 6: SYSTEM SECURITY AUDIT Trails REGISTER
-          ========================================================================= */}
+      {/* TAB 7: AUDIT LOGS */}
       {activeTab === 'logs' && staff.role === 'admin' && (
-        <div className="animate-fade-in" style={{ background: theme.cardBg, borderRadius: '16px', padding: '30px', boxShadow: theme.shadowCard }}>
-          <h3>System Audit Trails & Ledger History Log</h3>
-          <p style={{ color: '#64748b', fontSize: '13px', margin: '0 0 20px 0' }}>Monitors database writes, scanners, and inventory changes sequentially.</p>
+        <div className="card border-0 shadow-sm p-3 rounded-mhenik bg-white">
+          <h3 className="h6 fw-bold text-dark mb-1">System Security Audit Register</h3>
+          <p className="text-muted small mb-3">Monitors database writes and stock scans sequentially.</p>
           
-          <div className="grid-filters">
-            <input className="form-input" placeholder="Event Class Type..." value={logSearchAction} onChange={e => setLogSearchAction(e.target.value)} />
-            <input className="form-input" placeholder="Operator Actor..." value={logSearchActor} onChange={e => setLogSearchActor(e.target.value)} />
-            <input className="form-input" type="date" value={logStartDate} onChange={e => setLogStartDate(e.target.value)} />
-            <input className="form-input" type="date" value={logEndDate} onChange={e => setLogEndDate(e.target.value)} />
+          <div className="row g-2 mb-3">
+            <div className="col-6 col-md-3"><input className="form-control form-control-sm rounded-mhenik" placeholder="Action..." value={logSearchAction} onChange={e => setLogSearchAction(e.target.value)} /></div>
+            <div className="col-6 col-md-3"><input className="form-control form-control-sm rounded-mhenik" placeholder="Actor..." value={logSearchActor} onChange={e => setLogSearchActor(e.target.value)} /></div>
+            <div className="col-6 col-md-3"><input className="form-control form-control-sm rounded-mhenik" type="date" value={logStartDate} onChange={e => setLogStartDate(e.target.value)} /></div>
+            <div className="col-6 col-md-3"><input className="form-control form-control-sm rounded-mhenik" type="date" value={logEndDate} onChange={e => setLogEndDate(e.target.value)} /></div>
           </div>
 
-          <div style={{ maxHeight: '420px', overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: '12px' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', background: '#fff', minWidth: '600px' }}>
-              <thead style={{ position: 'sticky', top: 0, background: '#f8f9fa', borderBottom: '1px solid #e2e8f0', zIndex: 5 }}>
-                <tr style={{ textAlign: 'left' }}><th style={{ padding: '14px' }}>Timestamp</th><th>Authorized Actor</th><th>Event Class</th><th>Transaction Details</th></tr>
+          <div className="table-responsive" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+            <table className="table table-hover align-middle mb-0" style={{ minWidth: '500px' }}>
+              <thead className="table-light sticky-top">
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Actor</th>
+                  <th>Class</th>
+                  <th>Details</th>
+                </tr>
               </thead>
               <tbody>
                 {filteredLogs.map(log => (
-                  <tr key={log.id} style={{ borderBottom: '1px solid #e2e8f0', fontSize: '13px' }}>
-                    <td style={{ padding: '14px', color: '#64748b', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{new Date(log.createdAt).toLocaleString()}</td>
-                    <td style={{ fontWeight: 'bold', padding: '14px' }}>{log.userName}</td>
-                    <td style={{ padding: '14px' }}><span style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '10px', fontWeight: '800', background: log.action.includes('INGEST') || log.action.includes('APPROVED') ? '#f0fdf4' : '#f1f5f9', color: log.action.includes('INGEST') || log.action.includes('APPROVED') ? '#16a34a' : '#475569' }}>{log.action}</span></td>
-                    <td style={{ color: '#334155', padding: '14px' }}>{log.details}</td>
+                  <tr key={log.id}>
+                    <td className="font-monospace text-muted small">{new Date(log.createdAt).toLocaleString()}</td>
+                    <td className="fw-bold small">{log.userName}</td>
+                    <td><span className="badge bg-light text-dark border rounded-mhenik" style={{ fontSize: '10px' }}>{log.action}</span></td>
+                    <td className="small text-break">{log.details}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {/* EDIT MODAL DIALOG */}
+      {editingProduct && (
+        <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center p-3" style={{ zIndex: 1050 }}>
+          <form onSubmit={submitCorrectionRequest} className="card border-0 shadow-lg p-4 rounded-mhenik bg-white w-100" style={{ maxWidth: '420px' }}>
+            <h4 className="h5 fw-bold text-dark mb-1">Request Stock Correction</h4>
+            <p className="small text-muted mb-3">Item: <strong>{editingProduct.productName}</strong></p>
+            
+            <label className="form-label small fw-bold">Current Count: {editingProduct.stock} units</label>
+            <input className="form-control rounded-mhenik mb-3" type="number" min={0} required placeholder="Enter corrected count..." value={correctionTargetQty} onChange={e => setCorrectionTargetQty(e.target.value)} />
+            
+            <label className="form-label small fw-bold">Justification Reason</label>
+            <textarea className="form-control rounded-mhenik mb-3" required placeholder="Reason for change..." value={correctionReason} onChange={e => setCorrectionReason(e.target.value)} rows="3" />
+            
+            <div className="d-flex justify-content-end gap-2">
+              <button type="button" onClick={() => setEditingProduct(null)} className="btn btn-light rounded-mhenik fw-bold">Cancel</button>
+              <button type="submit" className="btn btn-primary rounded-mhenik fw-bold">Submit</button>
+            </div>
+          </form>
         </div>
       )}
 

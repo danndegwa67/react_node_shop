@@ -16,7 +16,7 @@ function Home() {
       <img 
         src="/logo.png" 
         alt="Mhenik Traders Shield Logo" 
-        className="img-fluid py-2"
+        className="img-fluid py-2 rounded-mhenik"
         style={{ 
           maxHeight: '360px', 
           objectFit: 'contain',
@@ -37,7 +37,7 @@ function Home() {
       <p className="lead text-light mb-4 fs-5 opacity-90 lh-base">
         Your trusted source for genuine automotive spare parts, mechanical components, and heavy-duty vehicle accessories.
       </p>
-      <Link to="/shop" className="btn btn-mhenik-secondary btn-lg fw-bold px-5 py-3 shadow-sm text-dark text-uppercase tracking-wide rounded-3">
+      <Link to="/shop" className="btn btn-mhenik-secondary rounded-mhenik btn-lg fw-bold px-5 py-3 shadow-sm text-dark text-uppercase tracking-wide rounded-3">
         Explore Inventory (4,000+ Items)
       </Link>
     </div>
@@ -110,7 +110,7 @@ function Home() {
       
 
       {/* 🗺️ LOCATION GEOLOCATION MAP CONTAINER */}
-<section className="card border-0 shadow-sm p-3 p-md-4 mt-5 mb-5 bg-white rounded-3">
+<section className="card border-0 rounded-mhenik shadow-sm p-3 p-md-4 mt-5 mb-5 bg-white rounded-3">
   <div className="container-fluid">
     
     {/* Minor sub-header context matching your typography */}
@@ -147,7 +147,7 @@ function Home() {
 </section>
 
 {/* 🌐 SOCIAL MEDIA ENGAGEMENT FOOTER STRIP */}
-<section className="card border-0 shadow-sm p-4 p-md-5 mt-5 mb-5 bg-white text-center rounded-3 ">
+<section className="card border-0 rounded-mhenik shadow-sm p-4 p-md-5 mt-5 mb-1 bg-white text-center rounded-3 ">
         <div className="container">
           
           {/* Headings Matching Design */}

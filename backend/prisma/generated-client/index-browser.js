@@ -137,8 +137,25 @@ exports.Prisma.ProductScalarFieldEnum = {
   position: 'position',
   sellingPrice: 'sellingPrice',
   stock: 'stock',
+  heldStock: 'heldStock',
+  reorderPoint: 'reorderPoint',
+  condition: 'condition',
+  side: 'side',
   category_id: 'category_id',
-  vehicle_id: 'vehicle_id'
+  vehicle_id: 'vehicle_id',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.InventoryTransactionScalarFieldEnum = {
+  id: 'id',
+  productSku: 'productSku',
+  type: 'type',
+  quantityChange: 'quantityChange',
+  previousStock: 'previousStock',
+  newStock: 'newStock',
+  referenceId: 'referenceId',
+  actorName: 'actorName',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.UserScalarFieldEnum = {
@@ -206,6 +223,7 @@ exports.Prisma.ModelName = {
   Category: 'Category',
   Vehicle: 'Vehicle',
   Product: 'Product',
+  InventoryTransaction: 'InventoryTransaction',
   User: 'User',
   Order: 'Order',
   OrderItem: 'OrderItem',
