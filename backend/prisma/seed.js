@@ -1,80 +1,116 @@
-require('dotenv').config();
-const { PrismaClient } = require('./generated-client');
-const { PrismaPg } = require('@prisma/adapter-pg');
-
-// Initialize the direct PostgreSQL connection string
-const connectionString = process.env.DATABASE_URL || "postgresql://postgres:mhenik123@localhost:5432/mhenik_inventory?schema=public";
-
-// Construct the mandatory Prisma 7 driver adapter 
-const adapter = new PrismaPg({ connectionString });
-
-// Instantiate your client explicitly passing the adapter framework config
-const prisma = new PrismaClient({ adapter });
-
 const fs = require('fs');
 const path = require('path');
-const csv = require('csv-parser');
+const { PrismaClient } = require('./generated-client');
+const { PrismaPg } = require('@prisma/adapter-pg');
+require('dotenv').config();
 
-async function main() {
-  console.log("🚀 Starting data migration pipeline stream...");
-  
-  const csvFilePath = path.join(__dirname, '../mock_products.csv');
-  const processingRows = [];
+const connectionString = process.env.DATABASE_URL || "postgresql://postgres:mhenik123@localhost:5432/mhenik_inventory?schema=public";
+const adapter = new PrismaPg({ connectionString });
+const prisma = new PrismaClient({ adapter });
 
-  fs.createReadStream(csvFilePath)
-    .pipe(csv())
-    .on('data', (row) => {
-      const promise = (async () => {
-        try {
-          // 1. Seed Parent Categories
-          await prisma.category.upsert({
-            where: { id: row.category_id },
-            update: { name: row.Category },
-            create: { id: row.category_id, name: row.Category }
-          });
+async function seedDatabase() {
+  console.log("🚀 Starting Inventory Data Ingestion Pipeline...");
 
-          // 2. Seed Parent Vehicles
-          await prisma.vehicle.upsert({
-            where: { id: row.vehicle_id },
-            update: { make: row.Make, model: row.Model },
-            create: { id: row.vehicle_id, make: row.Make, model: row.Model }
-          });
+  const jsonPath = path.join(__dirname, '../inventory.json');
+  if (!fs.existsSync(jsonPath)) {
+    console.error("❌ Error: inventory.json file not found in backend directory!");
+    process.exit(1);
+  }
 
-          // 3. Seed Master Inventory Records
-          await prisma.product.upsert({
-            where: { sku: row.SKU },
-            update: {
-              productName: row.Product_Name,
-              position: row.Position || null,
-              sellingPrice: parseFloat(row.Selling_Price) || 0,
-              category_id: row.category_id,
-              vehicle_id: row.vehicle_id
-            },
-            create: {
-              sku: row.SKU,
-              productName: row.Product_Name,
-              position: row.Position || null,
-              sellingPrice: parseFloat(row.Selling_Price) || 0,
-              category_id: row.category_id,
-              vehicle_id: row.vehicle_id,
-              stock: 12 // Initial testing stock numbers
-            }
-          });
-        } catch (err) {
-          console.error(`❌ Error parsing data row for SKU [${row.SKU}]:`, err.message);
+  // 🧹 Read raw text & replace unquoted NaN with null so JSON.parse won't crash
+  const rawText = fs.readFileSync(jsonPath, 'utf8');
+  const sanitizedText = rawText.replace(/:\s*NaN\b/g, ': null');
+
+  const rawData = JSON.parse(sanitizedText);
+  const products = rawData.Products || [];
+
+  console.log(`📦 Found ${products.length} products to insert.`);
+
+  let successCount = 0;
+  let errorCount = 0;
+
+  for (const item of products) {
+    try {
+      const cleanSku = String(item.SKU).trim();
+      if (!cleanSku) continue;
+
+      const cleanPrice = parseFloat(String(item["Selling Price"] || "0").replace(/,/g, ''));
+
+      // Category setup
+      const catId = item.category_id && String(item.category_id) !== "null" 
+        ? String(item.category_id) 
+        : "cat_general";
+      const catName = item.Category && String(item.Category) !== "null" 
+        ? String(item.Category) 
+        : "General Spares";
+
+      await prisma.category.upsert({
+        where: { id: catId },
+        update: { name: catName },
+        create: { id: catId, name: catName }
+      });
+
+      // Vehicle setup
+      const vehId = item.vehicle_id && String(item.vehicle_id) !== "null" 
+        ? String(item.vehicle_id) 
+        : "veh_universal";
+      const vehMake = item.Make && String(item.Make) !== "null" 
+        ? String(item.Make) 
+        : "Universal";
+      const vehModel = item.Model && String(item.Model) !== "null" 
+        ? String(item.Model) 
+        : "Generic Fit";
+
+      await prisma.vehicle.upsert({
+        where: { id: vehId },
+        update: { make: vehMake, model: vehModel },
+        create: { id: vehId, make: vehMake, model: vehModel }
+      });
+
+      const cleanPosition = item.Position && String(item.Position) !== "null" 
+        ? String(item.Position) 
+        : null;
+
+      await prisma.product.upsert({
+        where: { sku: cleanSku },
+        update: {
+          productName: item["Product Name"] || "Spare Part",
+          sellingPrice: cleanPrice,
+          position: cleanPosition,
+          category_id: catId,
+          vehicle_id: vehId
+        },
+        create: {
+          sku: cleanSku,
+          productName: item["Product Name"] || "Spare Part",
+          sellingPrice: cleanPrice,
+          position: cleanPosition,
+          stock: 10,
+          heldStock: 0,
+          reorderPoint: 3,
+          condition: "OEM_GENUINE",
+          side: cleanPosition ? cleanPosition.toUpperCase() : "UNIVERSAL",
+          category_id: catId,
+          vehicle_id: vehId
         }
-      })();
-      processingRows.push(promise);
-    })
-    .on('end', async () => {
-      await Promise.all(processingRows);
-      console.log("✅ Seed run sync complete! Inventory rows securely migrated into PostgreSQL.");
-      await prisma.$disconnect();
-    });
+      });
+
+      successCount++;
+    } catch (err) {
+      console.error(`⚠️ Ingestion skipped for SKU [${item.SKU}]:`, err.message);
+      errorCount++;
+    }
+  }
+
+  console.log(`\n🎉 Ingestion Complete!`);
+  console.log(`✅ Successfully inserted/updated: ${successCount} products.`);
+  if (errorCount > 0) console.log(`⚠️ Skipped/Failed: ${errorCount} items.`);
 }
 
-main().catch(async (e) => {
-  console.error("Fatal exception trace running background data seeding operations:", e);
-  await prisma.$disconnect();
-  process.exit(1);
-});
+seedDatabase()
+  .catch(e => {
+    console.error("❌ Fatal Seeding Failure:", e);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

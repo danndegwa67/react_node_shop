@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
@@ -26,6 +26,10 @@ export default function AdminDashboard() {
   const [invSearchVehicle, setInvSearchVehicle] = useState('');
   const [invSearchCategory, setInvSearchCategory] = useState('');
   const [showLowStockOnly, setShowLowStockOnly] = useState(false);
+
+  // ⚡ High-Performance Inventory Pagination States
+  const [invPage, setInvPage] = useState(1);
+  const ITEMS_PER_PAGE = 50; // Controls lightweight DOM rendering
 
   // 🔍 Log Filtering States
   const [logSearchAction, setLogSearchAction] = useState('');
@@ -184,6 +188,7 @@ export default function AdminDashboard() {
       alert("Network error updating adjustment.");
     });
   };
+
   const handleIAMAction = (endpoint, body) => {
     fetch(`http://localhost:5000${endpoint}`, {
       method: 'PATCH',
@@ -205,6 +210,7 @@ export default function AdminDashboard() {
     })
     .catch(err => console.error("IAM Action Error:", err));
   };
+
   // 📷 CAMERA INTEGRATION ENGINE
   const startOrderScanLifecycle = (order) => {
     setActiveScanOrder(order);
@@ -302,6 +308,37 @@ export default function AdminDashboard() {
       fetchData('/api/admin/adjustments', setAdjustments);
     });
   };
+
+  // ⚡ MEMOIZED HIGH-PERFORMANCE INVENTORY FILTERING
+  const filteredInventory = useMemo(() => {
+    const cleanSku = invSearchSku.trim();
+    const cleanName = invSearchName.toLowerCase().trim();
+    const cleanVehicle = invSearchVehicle.toLowerCase().trim();
+    const cleanCat = invSearchCategory.toLowerCase().trim();
+
+    return inventory.filter(p => {
+      const matchesSku = cleanSku === '' || String(p.sku).includes(cleanSku);
+      const matchesName = cleanName === '' || p.productName?.toLowerCase().includes(cleanName);
+      const matchesVeh = cleanVehicle === '' || `${p.vehicle?.make} ${p.vehicle?.model}`.toLowerCase().includes(cleanVehicle);
+      const matchesCat = cleanCat === '' || p.category?.name?.toLowerCase().includes(cleanCat);
+      const isLow = (p.stock - p.heldStock) <= (p.reorderPoint || 3);
+
+      const matchesSearch = matchesSku && matchesName && matchesVeh && matchesCat;
+      return showLowStockOnly ? (matchesSearch && isLow) : matchesSearch;
+    });
+  }, [inventory, invSearchSku, invSearchName, invSearchVehicle, invSearchCategory, showLowStockOnly]);
+
+  // Reset pagination to page 1 whenever search filters change
+  useEffect(() => {
+    setInvPage(1);
+  }, [invSearchSku, invSearchName, invSearchVehicle, invSearchCategory, showLowStockOnly]);
+
+  // Slice paginated items for instant DOM rendering
+  const totalInvPages = Math.ceil(filteredInventory.length / ITEMS_PER_PAGE) || 1;
+  const paginatedInventory = useMemo(() => {
+    const start = (invPage - 1) * ITEMS_PER_PAGE;
+    return filteredInventory.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredInventory, invPage]);
 
   const filteredLogs = logs.filter(log => {
     const matchesAction = logSearchAction === '' || log.action.toLowerCase().includes(logSearchAction.toLowerCase());
@@ -452,8 +489,8 @@ export default function AdminDashboard() {
         <div className="card border-0 shadow-sm p-3 rounded-mhenik bg-white">
           <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
             <div>
-              <h3 className="h6 fw-bold text-dark mb-0">Live Inventory Matrix ({inventory.length} items)</h3>
-              <p className="text-muted small mb-0">Stock level index across branches.</p>
+              <h3 className="h6 fw-bold text-dark mb-0">Live Inventory Matrix ({filteredInventory.length} matching)</h3>
+              <p className="text-muted small mb-0">Showing page {invPage} of {totalInvPages}</p>
             </div>
             
             {/* 🚨 Module 2: Low-Stock Alert Toggle Button */}
@@ -486,56 +523,69 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {inventory
-                  .filter(p => {
-                    const matchesSearch = String(p.sku).includes(invSearchSku) && 
-                      p.productName.toLowerCase().includes(invSearchName.toLowerCase()) && 
-                      `${p.vehicle?.make} ${p.vehicle?.model}`.toLowerCase().includes(invSearchVehicle.toLowerCase()) && 
-                      p.category?.name.toLowerCase().includes(invSearchCategory.toLowerCase());
-                    
-                    const isLow = (p.stock - p.heldStock) <= (p.reorderPoint || 3);
-                    return showLowStockOnly ? (matchesSearch && isLow) : matchesSearch;
-                  })
-                  .map(prod => {
-                    // 🔐 Module 5: Concurrent Adjustment Lock check
-                    const isAdjustmentPending = adjustments.some(a => a.productSku === prod.sku && a.status === 'PENDING');
-                    const availableStock = Math.max(0, prod.stock - prod.heldStock);
+                {paginatedInventory.map(prod => {
+                  // 🔐 Module 5: Concurrent Adjustment Lock check
+                  const isAdjustmentPending = adjustments.some(a => a.productSku === prod.sku && a.status === 'PENDING');
+                  const availableStock = Math.max(0, prod.stock - prod.heldStock);
 
-                    return (
-                      <tr key={prod.sku}>
-                        <td className="fw-bold font-monospace">{prod.sku}</td>
-                        <td className="fw-semibold text-break">{prod.productName}</td>
-                        <td className="text-muted small">{prod.vehicle?.make} {prod.vehicle?.model}</td>
-                        {/* 🧩 Module 4: Condition & Side Badges */}
-                        <td>
-                          <span className="badge bg-light text-dark border rounded-mhenik me-1" style={{ fontSize: '10px' }}>{prod.condition || 'OEM'}</span>
-                          <span className="badge bg-secondary bg-opacity-10 text-secondary rounded-mhenik" style={{ fontSize: '10px' }}>{prod.side || 'UNI'}</span>
-                        </td>
-                        <td className="fw-bold text-success">KES {prod.sellingPrice?.toLocaleString()}</td>
-                        {/* 🔒 Module 1: Physical vs Held Stock Breakdown */}
-                        <td>
-                          <span className={`fw-bold d-block ${availableStock <= (prod.reorderPoint || 3) ? 'text-danger' : 'text-success'}`}>
-                            {availableStock} avail ({prod.stock} total)
+                  return (
+                    <tr key={prod.sku}>
+                      <td className="fw-bold font-monospace">{prod.sku}</td>
+                      <td className="fw-semibold text-break">{prod.productName}</td>
+                      <td className="text-muted small">{prod.vehicle?.make} {prod.vehicle?.model}</td>
+                      {/* 🧩 Module 4: Condition & Side Badges */}
+                      <td>
+                        <span className="badge bg-light text-dark border rounded-mhenik me-1" style={{ fontSize: '10px' }}>{prod.condition || 'OEM'}</span>
+                        <span className="badge bg-secondary bg-opacity-10 text-secondary rounded-mhenik" style={{ fontSize: '10px' }}>{prod.side || 'UNI'}</span>
+                      </td>
+                      <td className="fw-bold text-success">KES {prod.sellingPrice?.toLocaleString()}</td>
+                      {/* 🔒 Module 1: Physical vs Held Stock Breakdown */}
+                      <td>
+                        <span className={`fw-bold d-block ${availableStock <= (prod.reorderPoint || 3) ? 'text-danger' : 'text-success'}`}>
+                          {availableStock} avail ({prod.stock} total)
+                        </span>
+                        {prod.heldStock > 0 && (
+                          <span className="badge bg-warning text-dark rounded-mhenik mt-1" style={{ fontSize: '9px' }}>
+                            🔒 {prod.heldStock} held
                           </span>
-                          {prod.heldStock > 0 && (
-                            <span className="badge bg-warning text-dark rounded-mhenik mt-1" style={{ fontSize: '9px' }}>
-                              🔒 {prod.heldStock} held
-                            </span>
-                          )}
-                        </td>
-                        <td className="text-end">
-                          {isAdjustmentPending ? (
-                            <span className="badge bg-warning text-dark rounded-mhenik" style={{ fontSize: '10px' }}>⏳ Adjustment Locked</span>
-                          ) : (
-                            <button onClick={() => setEditingProduct(prod)} className="btn btn-sm btn-outline-dark rounded-mhenik">Edit</button>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
+                        )}
+                      </td>
+                      <td className="text-end">
+                        {isAdjustmentPending ? (
+                          <span className="badge bg-warning text-dark rounded-mhenik" style={{ fontSize: '10px' }}>⏳ Adjustment Locked</span>
+                        ) : (
+                          <button onClick={() => setEditingProduct(prod)} className="btn btn-sm btn-outline-dark rounded-mhenik">Edit</button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
+
+          {/* ⏩ Pagination Controls */}
+          {totalInvPages > 1 && (
+            <div className="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+              <button 
+                onClick={() => setInvPage(prev => Math.max(1, prev - 1))} 
+                disabled={invPage === 1}
+                className="btn btn-sm btn-outline-secondary rounded-mhenik fw-bold"
+              >
+                ← Previous
+              </button>
+              <span className="small fw-bold text-muted">
+                Page {invPage} of {totalInvPages}
+              </span>
+              <button 
+                onClick={() => setInvPage(prev => Math.min(totalInvPages, prev + 1))} 
+                disabled={invPage === totalInvPages}
+                className="btn btn-sm btn-outline-secondary rounded-mhenik fw-bold"
+              >
+                Next →
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -605,22 +655,22 @@ export default function AdminDashboard() {
               </div>
               
               <div className="mt-2 d-flex gap-2 flex-wrap">
-              {order.status === 'PENDING' && (
-  <div className="d-flex gap-2">
-    <button 
-      onClick={() => handleOrderApproval(order.id, 'APPROVED')} 
-      className="btn btn-sm btn-primary rounded-mhenik fw-bold"
-    >
-      Approve Allocation Hold
-    </button>
-    <button 
-      onClick={() => handleOrderApproval(order.id, 'REJECTED')} 
-      className="btn btn-sm btn-outline-danger rounded-mhenik fw-bold"
-    >
-      Deny Order
-    </button>
-  </div>
-)}
+                {order.status === 'PENDING' && (
+                  <div className="d-flex gap-2">
+                    <button 
+                      onClick={() => handleOrderApproval(order.id, 'APPROVED')} 
+                      className="btn btn-sm btn-primary rounded-mhenik fw-bold"
+                    >
+                      Approve Allocation Hold
+                    </button>
+                    <button 
+                      onClick={() => handleOrderApproval(order.id, 'REJECTED')} 
+                      className="btn btn-sm btn-outline-danger rounded-mhenik fw-bold"
+                    >
+                      Deny Order
+                    </button>
+                  </div>
+                )}
                 {order.status === 'APPROVED' && (
                   <button onClick={() => startOrderScanLifecycle(order)} className="btn btn-sm btn-success rounded-mhenik fw-bold">
                     📷 Verify Barcode to Dispatch
@@ -673,85 +723,85 @@ export default function AdminDashboard() {
       )}
 
       {/* TAB 5: IAM STAFF ROLES */}
-{activeTab === 'staff' && staff.role === 'admin' && (
-  <div className="card border-0 shadow-sm p-3 rounded-mhenik bg-white">
-    <h3 className="h6 fw-bold text-dark mb-1">IAM Employee Verification Controls</h3>
-    <p className="text-muted small mb-3">Activate newly registered staff accounts or manage organizational clearances.</p>
-    
-    <div className="table-responsive">
-      <table className="table table-hover align-middle mb-0" style={{ minWidth: '550px' }}>
-        <thead className="table-light">
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th className="text-end">Account Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map(u => (
-            <tr key={u.id}>
-              <td className="fw-bold">{u.name}</td>
-              <td className="small text-muted">{u.email}</td>
-              <td>
-                <span className={`badge rounded-mhenik ${u.role === 'admin' ? 'bg-danger bg-opacity-10 text-danger' : 'bg-secondary bg-opacity-10 text-secondary'}`}>
-                  {u.role.toUpperCase()}
-                </span>
-              </td>
-              <td>
-                <span className={`fw-bold small ${u.status === 'APPROVED' ? 'text-success' : u.status === 'SUSPENDED' ? 'text-danger' : 'text-warning'}`}>
-                  {u.status}
-                </span>
-              </td>
-              <td className="text-end">
-                {u.email === "joshuaochieng21@gmail.com" ? (
-                  <span className="badge bg-light text-muted border rounded-mhenik font-monospace">🔒 Immutable Admin</span>
-                ) : (
-                  <div className="d-flex gap-1 justify-content-end flex-wrap">
-                    {/* Status Toggle Buttons */}
-                    {u.status === 'PENDING' && (
-                      <button 
-                        onClick={() => handleIAMAction(`/api/admin/users/${u.id}/status`, { status: 'APPROVED' })} 
-                        className="btn btn-xs btn-success rounded-mhenik fw-bold px-2 py-1" style={{ fontSize: '11px' }}
-                      >
-                        Activate
-                      </button>
-                    )}
-                    {u.status === 'APPROVED' && (
-                      <button 
-                        onClick={() => handleIAMAction(`/api/admin/users/${u.id}/status`, { status: 'SUSPENDED' })} 
-                        className="btn btn-xs btn-outline-danger rounded-mhenik fw-bold px-2 py-1" style={{ fontSize: '11px' }}
-                      >
-                        Suspend
-                      </button>
-                    )}
-                    {u.status === 'SUSPENDED' && (
-                      <button 
-                        onClick={() => handleIAMAction(`/api/admin/users/${u.id}/status`, { status: 'APPROVED' })} 
-                        className="btn btn-xs btn-outline-success rounded-mhenik fw-bold px-2 py-1" style={{ fontSize: '11px' }}
-                      >
-                        Reactivate
-                      </button>
-                    )}
+      {activeTab === 'staff' && staff.role === 'admin' && (
+        <div className="card border-0 shadow-sm p-3 rounded-mhenik bg-white">
+          <h3 className="h6 fw-bold text-dark mb-1">IAM Employee Verification Controls</h3>
+          <p className="text-muted small mb-3">Activate newly registered staff accounts or manage organizational clearances.</p>
+          
+          <div className="table-responsive">
+            <table className="table table-hover align-middle mb-0" style={{ minWidth: '550px' }}>
+              <thead className="table-light">
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th className="text-end">Account Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map(u => (
+                  <tr key={u.id}>
+                    <td className="fw-bold">{u.name}</td>
+                    <td className="small text-muted">{u.email}</td>
+                    <td>
+                      <span className={`badge rounded-mhenik ${u.role === 'admin' ? 'bg-danger bg-opacity-10 text-danger' : 'bg-secondary bg-opacity-10 text-secondary'}`}>
+                        {u.role.toUpperCase()}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`fw-bold small ${u.status === 'APPROVED' ? 'text-success' : u.status === 'SUSPENDED' ? 'text-danger' : 'text-warning'}`}>
+                        {u.status}
+                      </span>
+                    </td>
+                    <td className="text-end">
+                      {u.email === "joshuaochieng21@gmail.com" ? (
+                        <span className="badge bg-light text-muted border rounded-mhenik font-monospace">🔒 Immutable Admin</span>
+                      ) : (
+                        <div className="d-flex gap-1 justify-content-end flex-wrap">
+                          {/* Status Toggle Buttons */}
+                          {u.status === 'PENDING' && (
+                            <button 
+                              onClick={() => handleIAMAction(`/api/admin/users/${u.id}/status`, { status: 'APPROVED' })} 
+                              className="btn btn-xs btn-success rounded-mhenik fw-bold px-2 py-1" style={{ fontSize: '11px' }}
+                            >
+                              Activate
+                            </button>
+                          )}
+                          {u.status === 'APPROVED' && (
+                            <button 
+                              onClick={() => handleIAMAction(`/api/admin/users/${u.id}/status`, { status: 'SUSPENDED' })} 
+                              className="btn btn-xs btn-outline-danger rounded-mhenik fw-bold px-2 py-1" style={{ fontSize: '11px' }}
+                            >
+                              Suspend
+                            </button>
+                          )}
+                          {u.status === 'SUSPENDED' && (
+                            <button 
+                              onClick={() => handleIAMAction(`/api/admin/users/${u.id}/status`, { status: 'APPROVED' })} 
+                              className="btn btn-xs btn-outline-success rounded-mhenik fw-bold px-2 py-1" style={{ fontSize: '11px' }}
+                            >
+                              Reactivate
+                            </button>
+                          )}
 
-                    {/* Role Toggle Button */}
-                    <button 
-                      onClick={() => handleIAMAction(`/api/admin/users/${u.id}/role`, { role: u.role === 'admin' ? 'employee' : 'admin' })} 
-                      className="btn btn-xs btn-light text-dark border rounded-mhenik fw-bold px-2 py-1" style={{ fontSize: '11px' }}
-                    >
-                      Set as {u.role === 'admin' ? 'Staff' : 'Admin'}
-                    </button>
-                  </div>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </div>
-)}
+                          {/* Role Toggle Button */}
+                          <button 
+                            onClick={() => handleIAMAction(`/api/admin/users/${u.id}/role`, { role: u.role === 'admin' ? 'employee' : 'admin' })} 
+                            className="btn btn-xs btn-light text-dark border rounded-mhenik fw-bold px-2 py-1" style={{ fontSize: '11px' }}
+                          >
+                            Set as {u.role === 'admin' ? 'Staff' : 'Admin'}
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* 📜 Module 3 TAB 6: INVENTORY TRANSACTION LEDGER */}
       {activeTab === 'ledger' && staff.role === 'admin' && (
