@@ -27,6 +27,8 @@ export default function AdminDashboard() {
   const [invSearchCategory, setInvSearchCategory] = useState('');
   const [showLowStockOnly, setShowLowStockOnly] = useState(false);
 
+  const [isSubmittingIncoming, setIsSubmittingIncoming] = useState(false);
+
   // ⚡ High-Performance Inventory Pagination States
   const [invPage, setInvPage] = useState(1);
   const ITEMS_PER_PAGE = 50; 
@@ -43,6 +45,9 @@ export default function AdminDashboard() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [correctionTargetQty, setCorrectionTargetQty] = useState('');
   const [correctionReason, setCorrectionReason] = useState('');
+
+  // 🏷️ QR CODE LABEL GENERATOR STATE
+  const [qrProduct, setQrProduct] = useState(null);
 
   // 📷 ADVANCED MULTI-ITEM SCANNER AGGREGATION STATES
   const [activeScanOrder, setActiveScanOrder] = useState(null);
@@ -114,18 +119,55 @@ export default function AdminDashboard() {
 
   const handleIncomingStock = (e) => {
     e.preventDefault();
+    if (isSubmittingIncoming) return;
+
+    setIsSubmittingIncoming(true);
+
     fetch('http://localhost:5000/api/admin/incoming-stock', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('mhenik_staff_token')}` },
+      headers: { 
+        'Content-Type': 'application/json', 
+        'Authorization': `Bearer ${localStorage.getItem('mhenik_staff_token')}` 
+      },
       body: JSON.stringify(form)
     })
-    .then(() => { 
+    .then(async res => {
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.message || 'Failed logging incoming cargo.');
+        setIsSubmittingIncoming(false);
+        return;
+      }
+
       fetchData('/api/admin/inventory', setInventory); 
       if (staff.role === 'admin') {
         fetchPaginatedLogs(logCurrentPage);
         fetchData('/api/admin/transactions', setTransactions);
       }
-      alert('Allocation logged successfully!'); 
+      
+      alert('Allocation logged successfully!');
+      
+      // 🏷️ Launch QR label preview for the ingested item
+      setQrProduct({
+        sku: form.sku,
+        productName: form.productName,
+        sellingPrice: parseFloat(form.sellingPrice) || 0
+      });
+
+      // 🧹 1. Reset all form fields back to blank defaults
+      setForm({ 
+        sku: '', productName: '', position: '', sellingPrice: '', stockAmount: '', 
+        categoryId: '', categoryName: '', vehicleId: '', make: '', model: '',
+        condition: 'OEM_GENUINE', side: 'UNIVERSAL', reorderPoint: 3
+      });
+    })
+    .catch(err => {
+      console.error("Incoming stock error:", err);
+      alert("Network error logging incoming stock.");
+    })
+    .finally(() => {
+      // 🔒 2. Unlock submission guard
+      setIsSubmittingIncoming(false);
     });
   };
 
@@ -309,7 +351,7 @@ export default function AdminDashboard() {
     });
   };
 
-  // 🖨️ PRINT OFFICIAL ORDER RECEIPT / MANIFEST (STRICTLY APPROVED OR DISPATCHED)
+  // 🖨️ PRINT OFFICIAL ORDER RECEIPT / MANIFEST
   const printOrderInvoice = (order) => {
     if (order.status !== 'APPROVED' && order.status !== 'DISPATCHED') {
       alert("Operational Lock: Manifests can only be printed AFTER allocation approval.");
@@ -317,16 +359,17 @@ export default function AdminDashboard() {
     }
 
     const printWindow = window.open('', '_blank', 'width=800,height=600');
-    const itemsHtml = order.items.map(item => `
+    const itemsHtml = order.items?.map(item => `
       <tr>
         <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.productSku}</td>
         <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.product?.productName || 'Genuine Part'}</td>
         <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${item.quantity}</td>
         <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">KES ${item.product?.sellingPrice?.toLocaleString() || '0'}</td>
       </tr>
-    `).join('');
+    `).join('') || '';
 
     printWindow.document.write(`
+      <!DOCTYPE html>
       <html>
         <head>
           <title>Invoice - Manifest #${order.id.slice(0, 8).toUpperCase()}</title>
@@ -360,11 +403,55 @@ export default function AdminDashboard() {
           <div style="margin-top: 30px; text-align: right;">
             <p><strong>Verified By:</strong> ${staff.name} (${staff.role?.toUpperCase()})</p>
           </div>
+          <script>
+            window.onload = function() {
+              window.focus();
+              window.print();
+            };
+          </script>
         </body>
       </html>
     `);
     printWindow.document.close();
-    printWindow.print();
+  };
+
+  // 🖨️ PRINT THERMAL SHELF QR CODE LABEL
+  const printQrLabelModal = () => {
+    const printContent = document.getElementById('printable-qr-label');
+    if (!printContent) return;
+    
+    const printWindow = window.open('', '_blank', 'width=400,height=450');
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Shelf Label - SKU ${qrProduct?.sku}</title>
+          <style>
+            body { font-family: monospace; text-align: center; padding: 15px; margin: 0; }
+            .label-box { border: 2px solid #000; padding: 15px; border-radius: 8px; display: inline-block; width: 90%; }
+            h2 { margin: 5px 0; font-size: 18px; }
+            p { margin: 3px 0; font-size: 13px; }
+            .price { font-size: 16px; font-weight: bold; margin-top: 8px; }
+            svg { max-width: 100%; height: auto; }
+          </style>
+        </head>
+        <body>
+          <div class="label-box">
+            ${printContent.innerHTML}
+          </div>
+          <script>
+            window.onload = function() {
+              window.focus();
+              window.print();
+              window.onafterprint = function() {
+                window.close();
+              };
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   // ⚡ MEMOIZED HIGH-PERFORMANCE INVENTORY FILTERING
@@ -578,6 +665,31 @@ export default function AdminDashboard() {
         </div>
       )}
 
+      {/* 🏷️ PRINTABLE QR CODE SHELF LABEL MODAL */}
+      {qrProduct && (
+        <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center p-3" style={{ zIndex: 1060 }}>
+          <div className="card border-0 shadow-lg p-4 rounded-mhenik bg-white text-center" style={{ maxWidth: '360px' }}>
+            <h5 className="fw-bold text-dark mb-1">Product Shelf Label</h5>
+            <p className="small text-muted mb-3">Scan code at dispatch verification counter.</p>
+
+            <div id="printable-qr-label" className="p-3 border rounded-mhenik bg-light mb-3">
+              <h2 className="fw-bold font-monospace text-dark mb-1">SKU: {qrProduct.sku}</h2>
+              <p className="fw-bold small text-dark text-truncate mb-2">{qrProduct.productName}</p>
+              <div className="my-2 d-flex justify-content-center">
+                <QRCodeSVG value={String(qrProduct.sku)} size={140} level="H" includeMargin={true} />
+              </div>
+              <p className="price fw-bold text-success mb-0">KES {qrProduct.sellingPrice?.toLocaleString()}</p>
+              <span className="small text-muted font-monospace d-block mt-1">MHENIK TRADERS</span>
+            </div>
+
+            <div className="d-flex gap-2 justify-content-center">
+              <button onClick={() => setQrProduct(null)} className="btn btn-light rounded-mhenik fw-bold">Close</button>
+              <button onClick={printQrLabelModal} className="btn btn-primary rounded-mhenik fw-bold">🖨️ Print Label</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* TAB 1: LIVE INVENTORY */}
       {activeTab === 'records' && (
         <div className="card border-0 shadow-sm p-3 rounded-mhenik bg-white">
@@ -612,7 +724,7 @@ export default function AdminDashboard() {
                   <th>Attributes</th>
                   <th>Price</th>
                   <th>Stock Levels</th>
-                  <th className="text-end">Action</th>
+                  <th className="text-end">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -641,11 +753,16 @@ export default function AdminDashboard() {
                         )}
                       </td>
                       <td className="text-end">
-                        {isAdjustmentPending ? (
-                          <span className="badge bg-warning text-dark rounded-mhenik" style={{ fontSize: '10px' }}>⏳ Adjustment Locked</span>
-                        ) : (
-                          <button onClick={() => setEditingProduct(prod)} className="btn btn-sm btn-outline-dark rounded-mhenik">Edit</button>
-                        )}
+                        <div className="d-flex gap-1 justify-content-end">
+                          <button onClick={() => setQrProduct(prod)} className="btn btn-sm btn-outline-secondary rounded-mhenik" title="Generate Thermal QR Label">
+                            🏷️ Label
+                          </button>
+                          {isAdjustmentPending ? (
+                            <span className="badge bg-warning text-dark rounded-mhenik" style={{ fontSize: '10px' }}>⏳ Adjustment Locked</span>
+                          ) : (
+                            <button onClick={() => setEditingProduct(prod)} className="btn btn-sm btn-outline-dark rounded-mhenik">Edit</button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -713,8 +830,14 @@ export default function AdminDashboard() {
               </div>
             ))}
             <div className="col-12">
-              <button type="submit" className="btn btn-primary rounded-mhenik w-100 py-2 fw-bold">Inbound Ingestion</button>
-            </div>
+  <button 
+    type="submit" 
+    disabled={isSubmittingIncoming} 
+    className="btn btn-primary rounded-mhenik w-100 py-2 fw-bold"
+  >
+    {isSubmittingIncoming ? '⌛ Logging Allocation...' : 'Inbound Ingestion'}
+  </button>
+</div>
           </form>
         </div>
       )}
@@ -767,7 +890,6 @@ export default function AdminDashboard() {
                   </button>
                 )}
 
-                {/* 🖨️ MANIFEST PRINTING STRICTLY GATED TO APPROVED / DISPATCHED */}
                 {(order.status === 'APPROVED' || order.status === 'DISPATCHED') && (
                   <button onClick={() => printOrderInvoice(order)} className="btn btn-sm btn-outline-secondary rounded-mhenik fw-bold">
                     🖨️ Print Manifest

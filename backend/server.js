@@ -207,6 +207,14 @@ app.post('/api/admin/incoming-stock', authenticateStaff, async (req, res) => {
       });
     }
 
+    // 🛑 STRICT SKU DUPLICATE GUARD
+    const existingProduct = await prisma.product.findUnique({ where: { sku: cleanSku } });
+    if (existingProduct) {
+      return res.status(400).json({ 
+        message: `SKU Conflict: SKU [${cleanSku}] already exists in inventory (${existingProduct.productName}). If you wish to adjust stock levels, use the Edit/Correction flow.` 
+      });
+    }
+
     const cleanCatId = String(categoryId || categoryName).toLowerCase().replace(/\s+/g, '-').trim();
     const cleanVehId = String(vehicleId || `${make}-${model}`).toLowerCase().replace(/\s+/g, '-').trim();
 
@@ -222,20 +230,9 @@ app.post('/api/admin/incoming-stock', authenticateStaff, async (req, res) => {
       create: { id: cleanVehId, make: make || "Generic", model: model || "Universal" }
     });
 
-    const existingProduct = await prisma.product.findUnique({ where: { sku: cleanSku } });
-    const prevStock = existingProduct ? existingProduct.stock : 0;
-    const newStock = prevStock + cleanStock;
-
-    const product = await prisma.product.upsert({
-      where: { sku: cleanSku },
-      update: {
-        stock: { increment: cleanStock },
-        sellingPrice: cleanPrice,
-        reorderPoint: cleanReorder,
-        condition: condition || existingProduct?.condition || "OEM_GENUINE",
-        side: side || existingProduct?.side || "UNIVERSAL"
-      },
-      create: {
+    // Strictly create brand new product record
+    const product = await prisma.product.create({
+      data: {
         sku: cleanSku,
         productName,
         sellingPrice: cleanPrice,
@@ -252,8 +249,8 @@ app.post('/api/admin/incoming-stock', authenticateStaff, async (req, res) => {
       sku: cleanSku,
       type: "INBOUND_CARGO",
       change: cleanStock,
-      prevStock: prevStock,
-      newStock: newStock,
+      prevStock: 0,
+      newStock: cleanStock,
       refId: "CARGO_INGEST",
       actor: req.user.name
     });
@@ -262,10 +259,10 @@ app.post('/api/admin/incoming-stock', authenticateStaff, async (req, res) => {
       req.user.id, 
       req.user.name, 
       "STOCK_INGEST", 
-      `Added +${cleanStock} units to SKU: ${cleanSku} (${productName}).`
+      `Created new SKU entry: ${cleanSku} (${productName}) with ${cleanStock} units.`
     );
 
-    return res.status(200).json({ message: "Stock adjustments committed.", product });
+    return res.status(200).json({ message: "New stock allocation committed successfully.", product });
   } catch (error) {
     console.error("[CRASH] Cargo ingestion pipeline crash:", error);
     return res.status(500).json({ message: "Internal application error processing ingestion cargo loop." });
@@ -425,19 +422,95 @@ app.post('/api/client/adjustments/request', async (req, res) => {
   }
 });
 
+// =========================================================================
+// 🛒 PUBLIC CLIENT REQUESTS & LIVE STATUS TRACKER API
+// =========================================================================
+
+// =========================================================================
+// 🛒 PUBLIC CLIENT REQUESTS & LIVE STATUS TRACKER API
+// =========================================================================
+
+// 🛠️ 1. CLIENT ORDER CREATION - PRESERVE DEVICE FINGERPRINT TOKEN
+app.post('/api/client/adjustments/request', async (req, res) => {
+  const { productSku, productName, oldStock, newStock, reason, requestedBy } = req.body;
+
+  if (!productSku) {
+    return res.status(400).json({ message: "Missing required product SKU field." });
+  }
+
+  try {
+    // Store full requestedBy string (which contains DEV-XXXXX fingerprint token)
+    const fullClientIdentity = requestedBy || 'Anonymous Customer';
+
+    const order = await prisma.order.create({
+      data: {
+        customerName: `${fullClientIdentity} [Metadata: ${reason || 'Inquiry'}]`,
+        status: "PENDING",
+        items: {
+          create: [{
+            productSku: productSku,
+            quantity: parseInt(newStock || 1, 10)
+          }]
+        }
+      }
+    });
+
+    await createAuditLog(
+      "client-user", 
+      fullClientIdentity, 
+      "CLIENT_ORDER_SUBMIT", 
+      `Order placed on SKU ${productSku} for quantity ${newStock}.`
+    );
+
+    return res.status(201).json(order);
+  } catch (error) {
+    console.error("Cart submission ingestion failure:", error);
+    return res.status(500).json({ message: "Failed to log client transaction." });
+  }
+});
+
+// 🛠️ 2. GET CLIENT ADJUSTMENTS / ORDERS - MAP EXPECTED FRONTEND FIELDS
+// 🛒 PUBLIC CLIENT REQUESTS & LIVE STATUS TRACKER API
 app.get('/api/client/adjustments', async (req, res) => {
   try {
-    const data = await prisma.stockAdjustment.findMany({
-      where: {
-        NOT: [
-          { reason: { contains: 'Checkout inquiries', mode: 'insensitive' } },
-          { reason: { contains: 'Client checkout', mode: 'insensitive' } }
-        ]
-      },
-      orderBy: { createdAt: 'desc' }
+    const [orders, adjustments] = await Promise.all([
+      prisma.order.findMany({
+        include: { items: { include: { product: true } } },
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.stockAdjustment.findMany({
+        orderBy: { createdAt: 'desc' }
+      })
+    ]);
+
+    const formattedOrders = orders.map(order => {
+      const firstItem = order.items && order.items[0];
+
+      return {
+        id: order.id,
+        productSku: firstItem ? firstItem.productSku : 'N/A',
+        productName: firstItem?.product?.productName || (order.items?.length > 1 ? `${order.items.length} Spare Parts Order` : 'Auto Spare Part'),
+        oldStock: firstItem?.product?.stock || 0,
+        newStock: firstItem ? firstItem.quantity : 1,
+        reason: order.customerName,
+        // 🔑 Return full customerName string containing (DEV-XXXXX) token
+        requestedBy: order.customerName,
+        customerName: order.customerName,
+        status: order.status,
+        createdAt: order.createdAt,
+        items: order.items
+      };
     });
-    return res.status(200).json(data);
+
+    const formattedAdjustments = adjustments.map(adj => ({
+      ...adj,
+      customerName: adj.requestedBy,
+      items: [{ productSku: adj.productSku, quantity: adj.newStock }]
+    }));
+
+    return res.status(200).json([...formattedOrders, ...formattedAdjustments]);
   } catch (error) {
+    console.error("Failed to fetch client requests:", error);
     return res.status(500).json({ message: "Failed to read data logs." });
   }
 });
