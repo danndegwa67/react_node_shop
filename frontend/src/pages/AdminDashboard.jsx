@@ -20,7 +20,7 @@ export default function AdminDashboard() {
     condition: 'OEM_GENUINE', side: 'UNIVERSAL', reorderPoint: 3
   });
 
-  // 🚨 Module 2 Filter & Search States
+  // 🚨 Filter & Search States
   const [invSearchSku, setInvSearchSku] = useState('');
   const [invSearchName, setInvSearchName] = useState('');
   const [invSearchVehicle, setInvSearchVehicle] = useState('');
@@ -29,7 +29,7 @@ export default function AdminDashboard() {
 
   // ⚡ High-Performance Inventory Pagination States
   const [invPage, setInvPage] = useState(1);
-  const ITEMS_PER_PAGE = 50; // Controls lightweight DOM rendering
+  const ITEMS_PER_PAGE = 50; 
 
   // 🔍 Log Filtering States
   const [logSearchAction, setLogSearchAction] = useState('');
@@ -309,6 +309,64 @@ export default function AdminDashboard() {
     });
   };
 
+  // 🖨️ PRINT OFFICIAL ORDER RECEIPT / MANIFEST (STRICTLY APPROVED OR DISPATCHED)
+  const printOrderInvoice = (order) => {
+    if (order.status !== 'APPROVED' && order.status !== 'DISPATCHED') {
+      alert("Operational Lock: Manifests can only be printed AFTER allocation approval.");
+      return;
+    }
+
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    const itemsHtml = order.items.map(item => `
+      <tr>
+        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.productSku}</td>
+        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.product?.productName || 'Genuine Part'}</td>
+        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${item.quantity}</td>
+        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">KES ${item.product?.sellingPrice?.toLocaleString() || '0'}</td>
+      </tr>
+    `).join('');
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Invoice - Manifest #${order.id.slice(0, 8).toUpperCase()}</title>
+          <style>
+            body { font-family: sans-serif; padding: 20px; color: #333; }
+            .header { display: flex; justify-content: space-between; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th { background: #f4f4f4; text-align: left; padding: 8px; border-bottom: 2px solid #ddd; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div>
+              <h2>MHENIK TRADERS</h2>
+              <p>Auto Spares & Hardware Operations</p>
+            </div>
+            <div style="text-align: right;">
+              <h3>ORDER MANIFEST</h3>
+              <p>ID: #${order.id.slice(0, 12).toUpperCase()}</p>
+              <p>Status: <strong>${order.status}</strong></p>
+            </div>
+          </div>
+          <p><strong>Customer Details:</strong> ${order.customerName}</p>
+          <p><strong>Date:</strong> ${new Date(order.createdAt).toLocaleString()}</p>
+          <table>
+            <thead>
+              <tr><th>SKU</th><th>Item Designation</th><th style="text-align: center;">Qty</th><th style="text-align: right;">Price</th></tr>
+            </thead>
+            <tbody>${itemsHtml}</tbody>
+          </table>
+          <div style="margin-top: 30px; text-align: right;">
+            <p><strong>Verified By:</strong> ${staff.name} (${staff.role?.toUpperCase()})</p>
+          </div>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+  };
+
   // ⚡ MEMOIZED HIGH-PERFORMANCE INVENTORY FILTERING
   const filteredInventory = useMemo(() => {
     const cleanSku = invSearchSku.trim();
@@ -328,12 +386,20 @@ export default function AdminDashboard() {
     });
   }, [inventory, invSearchSku, invSearchName, invSearchVehicle, invSearchCategory, showLowStockOnly]);
 
-  // Reset pagination to page 1 whenever search filters change
+  // 📊 LIVE KPI METRICS CALCULATIONS
+  const metrics = useMemo(() => {
+    const totalSkus = inventory.length;
+    const totalUnits = inventory.reduce((acc, item) => acc + (item.stock || 0), 0);
+    const totalValuation = inventory.reduce((acc, item) => acc + ((item.stock || 0) * (item.sellingPrice || 0)), 0);
+    const lowStock = inventory.filter(p => (p.stock - p.heldStock) <= (p.reorderPoint || 3)).length;
+
+    return { totalSkus, totalUnits, totalValuation, lowStock };
+  }, [inventory]);
+
   useEffect(() => {
     setInvPage(1);
   }, [invSearchSku, invSearchName, invSearchVehicle, invSearchCategory, showLowStockOnly]);
 
-  // Slice paginated items for instant DOM rendering
   const totalInvPages = Math.ceil(filteredInventory.length / ITEMS_PER_PAGE) || 1;
   const paginatedInventory = useMemo(() => {
     const start = (invPage - 1) * ITEMS_PER_PAGE;
@@ -382,9 +448,38 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      {/* 📊 LIVE KPI STATS BANNER */}
+      <div className="row g-2 mb-3">
+        <div className="col-6 col-md-3">
+          <div className="card border-0 shadow-sm p-3 rounded-mhenik bg-white h-100">
+            <span className="text-muted small fw-bold text-uppercase d-block mb-1">Total Catalog SKUs</span>
+            <h3 className="h5 fw-bold text-dark mb-0">{metrics.totalSkus.toLocaleString()}</h3>
+          </div>
+        </div>
+        <div className="col-6 col-md-3">
+          <div className="card border-0 shadow-sm p-3 rounded-mhenik bg-white h-100">
+            <span className="text-muted small fw-bold text-uppercase d-block mb-1">Physical Stock Count</span>
+            <h3 className="h5 fw-bold text-primary mb-0">{metrics.totalUnits.toLocaleString()} units</h3>
+          </div>
+        </div>
+        <div className="col-6 col-md-3">
+          <div className="card border-0 shadow-sm p-3 rounded-mhenik bg-white h-100">
+            <span className="text-muted small fw-bold text-uppercase d-block mb-1">Warehouse Stock Value</span>
+            <h3 className="h5 fw-bold text-success mb-0">KES {metrics.totalValuation.toLocaleString()}</h3>
+          </div>
+        </div>
+        <div className="col-6 col-md-3">
+          <div className="card border-0 shadow-sm p-3 rounded-mhenik bg-white h-100">
+            <span className="text-muted small fw-bold text-uppercase d-block mb-1">Stock Alerts</span>
+            <h3 className={`h5 fw-bold mb-0 ${metrics.lowStock > 0 ? 'text-danger' : 'text-muted'}`}>
+              {metrics.lowStock} items low
+            </h3>
+          </div>
+        </div>
+      </div>
+
       {/* 📱 COMPACT STYLED MOBILE DROPDOWN / DESKTOP BUTTON STRIP */}
       <div className="card border-0 shadow-sm p-2 rounded-mhenik mb-3 bg-white">
-        {/* Mobile Dropdown View */}
         <div className="d-block d-md-none">
           <div className="d-flex align-items-center gap-2">
             <label className="form-label small fw-bold text-muted mb-0 text-nowrap" style={{ fontSize: '12px' }}>Module:</label>
@@ -403,7 +498,6 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Desktop Button Strip */}
         <div className="d-none d-md-flex gap-2 flex-wrap">
           {tabList.map(tab => (
             <button 
@@ -493,7 +587,6 @@ export default function AdminDashboard() {
               <p className="text-muted small mb-0">Showing page {invPage} of {totalInvPages}</p>
             </div>
             
-            {/* 🚨 Module 2: Low-Stock Alert Toggle Button */}
             <button 
               onClick={() => setShowLowStockOnly(!showLowStockOnly)} 
               className={`btn btn-sm rounded-mhenik fw-bold ${showLowStockOnly ? 'btn-danger' : 'btn-outline-danger'}`}
@@ -524,7 +617,6 @@ export default function AdminDashboard() {
               </thead>
               <tbody>
                 {paginatedInventory.map(prod => {
-                  // 🔐 Module 5: Concurrent Adjustment Lock check
                   const isAdjustmentPending = adjustments.some(a => a.productSku === prod.sku && a.status === 'PENDING');
                   const availableStock = Math.max(0, prod.stock - prod.heldStock);
 
@@ -533,13 +625,11 @@ export default function AdminDashboard() {
                       <td className="fw-bold font-monospace">{prod.sku}</td>
                       <td className="fw-semibold text-break">{prod.productName}</td>
                       <td className="text-muted small">{prod.vehicle?.make} {prod.vehicle?.model}</td>
-                      {/* 🧩 Module 4: Condition & Side Badges */}
                       <td>
                         <span className="badge bg-light text-dark border rounded-mhenik me-1" style={{ fontSize: '10px' }}>{prod.condition || 'OEM'}</span>
                         <span className="badge bg-secondary bg-opacity-10 text-secondary rounded-mhenik" style={{ fontSize: '10px' }}>{prod.side || 'UNI'}</span>
                       </td>
                       <td className="fw-bold text-success">KES {prod.sellingPrice?.toLocaleString()}</td>
-                      {/* 🔒 Module 1: Physical vs Held Stock Breakdown */}
                       <td>
                         <span className={`fw-bold d-block ${availableStock <= (prod.reorderPoint || 3) ? 'text-danger' : 'text-success'}`}>
                           {availableStock} avail ({prod.stock} total)
@@ -564,7 +654,6 @@ export default function AdminDashboard() {
             </table>
           </div>
 
-          {/* ⏩ Pagination Controls */}
           {totalInvPages > 1 && (
             <div className="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
               <button 
@@ -649,7 +738,7 @@ export default function AdminDashboard() {
                     ))}
                   </div>
                 </div>
-                <span className={`badge rounded-mhenik ${order.status === 'PENDING' ? 'bg-warning text-dark' : 'bg-success text-white'}`}>
+                <span className={`badge rounded-mhenik ${order.status === 'PENDING' ? 'bg-warning text-dark' : order.status === 'APPROVED' ? 'bg-primary text-white' : order.status === 'DISPATCHED' ? 'bg-success text-white' : 'bg-danger text-white'}`}>
                   {order.status?.toUpperCase()}
                 </span>
               </div>
@@ -671,9 +760,17 @@ export default function AdminDashboard() {
                     </button>
                   </div>
                 )}
+
                 {order.status === 'APPROVED' && (
                   <button onClick={() => startOrderScanLifecycle(order)} className="btn btn-sm btn-success rounded-mhenik fw-bold">
                     📷 Verify Barcode to Dispatch
+                  </button>
+                )}
+
+                {/* 🖨️ MANIFEST PRINTING STRICTLY GATED TO APPROVED / DISPATCHED */}
+                {(order.status === 'APPROVED' || order.status === 'DISPATCHED') && (
+                  <button onClick={() => printOrderInvoice(order)} className="btn btn-sm btn-outline-secondary rounded-mhenik fw-bold">
+                    🖨️ Print Manifest
                   </button>
                 )}
               </div>
@@ -759,7 +856,6 @@ export default function AdminDashboard() {
                         <span className="badge bg-light text-muted border rounded-mhenik font-monospace">🔒 Immutable Admin</span>
                       ) : (
                         <div className="d-flex gap-1 justify-content-end flex-wrap">
-                          {/* Status Toggle Buttons */}
                           {u.status === 'PENDING' && (
                             <button 
                               onClick={() => handleIAMAction(`/api/admin/users/${u.id}/status`, { status: 'APPROVED' })} 
@@ -785,7 +881,6 @@ export default function AdminDashboard() {
                             </button>
                           )}
 
-                          {/* Role Toggle Button */}
                           <button 
                             onClick={() => handleIAMAction(`/api/admin/users/${u.id}/role`, { role: u.role === 'admin' ? 'employee' : 'admin' })} 
                             className="btn btn-xs btn-light text-dark border rounded-mhenik fw-bold px-2 py-1" style={{ fontSize: '11px' }}
