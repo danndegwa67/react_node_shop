@@ -898,6 +898,33 @@ app.get('/api/admin/adjustments', authenticateStaff, async (req, res) => {
   }
 });
 
+// =========================================================================
+// 🏷️ JIJI LISTING STATUS TOGGLE ENDPOINT
+// =========================================================================
+app.patch('/api/admin/inventory/:sku/jiji-status', authenticateStaff, async (req, res) => {
+  const { sku } = req.params;
+  const { isJijiListed } = req.body;
+
+  try {
+    const updatedProduct = await prisma.product.update({
+      where: { sku: String(sku).trim() },
+      data: { isJijiListed: Boolean(isJijiListed) }
+    });
+
+    await createAuditLog(
+      req.user.id,
+      req.user.name,
+      "JIJI_STATUS_TOGGLE",
+      `Marked SKU ${sku} as ${isJijiListed ? 'PUBLISHED ON JIJI' : 'REMOVED FROM JIJI'}.`
+    );
+
+    return res.status(200).json(updatedProduct);
+  } catch (error) {
+    console.error("Failed toggling Jiji status:", error);
+    return res.status(500).json({ message: "Failed updating Jiji listing flag." });
+  }
+});
+
 module.exports = { prisma };
 
 app.listen(PORT, () => {

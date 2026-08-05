@@ -49,6 +49,9 @@ export default function AdminDashboard() {
   // 🏷️ QR CODE LABEL GENERATOR STATE
   const [qrProduct, setQrProduct] = useState(null);
 
+  // 🚀 JIJI PREP MODAL STATE
+  const [jijiModalProduct, setJijiModalProduct] = useState(null);
+
   // 📷 ADVANCED MULTI-ITEM SCANNER AGGREGATION STATES
   const [activeScanOrder, setActiveScanOrder] = useState(null);
   const [scanProgressMap, setScanProgressMap] = useState({});
@@ -154,7 +157,7 @@ export default function AdminDashboard() {
         sellingPrice: parseFloat(form.sellingPrice) || 0
       });
 
-      // 🧹 1. Reset all form fields back to blank defaults
+      // 🧹 Reset all form fields back to blank defaults
       setForm({ 
         sku: '', productName: '', position: '', sellingPrice: '', stockAmount: '', 
         categoryId: '', categoryName: '', vehicleId: '', make: '', model: '',
@@ -166,7 +169,7 @@ export default function AdminDashboard() {
       alert("Network error logging incoming stock.");
     })
     .finally(() => {
-      // 🔒 2. Unlock submission guard
+      // 🔒 Unlock submission guard
       setIsSubmittingIncoming(false);
     });
   };
@@ -518,6 +521,35 @@ export default function AdminDashboard() {
     staff.role === 'admin' ? { id: 'logs', label: 'LOGS' } : null
   ].filter(Boolean);
 
+  // 🚀 JIJI AUTO-FILL PREP BRIDGE
+  const launchJijiUploader = (product) => {
+    setJijiModalProduct(product);
+  };
+
+  const copyToClipboard = (text, label) => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      alert(`✅ Copied ${label} to clipboard! Ready to paste (Ctrl+V) on Jiji.`);
+    }
+  };
+
+  const toggleJijiStatus = (sku, currentStatus) => {
+    const newStatus = !currentStatus;
+    fetch(`http://localhost:5000/api/admin/inventory/${sku}/jiji-status`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('mhenik_staff_token')}`
+      },
+      body: JSON.stringify({ isJijiListed: newStatus })
+    })
+    .then(res => res.json())
+    .then(() => {
+      setInventory(prev => prev.map(p => p.sku === sku ? { ...p, isJijiListed: newStatus } : p));
+    })
+    .catch(err => console.error("Jiji toggle error:", err));
+  };
+
   return (
     <div className="container-fluid p-2 p-md-4 min-vh-100" style={{ background: '#f8fafc', maxWidth: '100vw', overflowX: 'hidden' }}>
       
@@ -703,7 +735,7 @@ export default function AdminDashboard() {
               onClick={() => setShowLowStockOnly(!showLowStockOnly)} 
               className={`btn btn-sm rounded-mhenik fw-bold ${showLowStockOnly ? 'btn-danger' : 'btn-outline-danger'}`}
             >
-              ⚠️ Low Stock Filter {lowStockCount > 0 && <span className="badge bg-white text-danger ms-1">{lowStockCount}</span>}
+              Low Stock Filter {lowStockCount > 0 && <span className="badge bg-white text-danger ms-1">{lowStockCount}</span>}
             </button>
           </div>
           
@@ -721,7 +753,7 @@ export default function AdminDashboard() {
                   <th>SKU</th>
                   <th>Designation</th>
                   <th>Vehicle / Fits</th>
-                  <th>Attributes</th>
+                  <th>Attributes & Platforms</th>
                   <th>Price</th>
                   <th>Stock Levels</th>
                   <th className="text-end">Actions</th>
@@ -739,7 +771,28 @@ export default function AdminDashboard() {
                       <td className="text-muted small">{prod.vehicle?.make} {prod.vehicle?.model}</td>
                       <td>
                         <span className="badge bg-light text-dark border rounded-mhenik me-1" style={{ fontSize: '10px' }}>{prod.condition || 'OEM'}</span>
-                        <span className="badge bg-secondary bg-opacity-10 text-secondary rounded-mhenik" style={{ fontSize: '10px' }}>{prod.side || 'UNI'}</span>
+                        <span className="badge bg-secondary bg-opacity-10 text-secondary rounded-mhenik me-1" style={{ fontSize: '10px' }}>{prod.side || 'UNI'}</span>
+
+                        {/* 🏷️ JIJI STATUS TICK BADGE */}
+                        {prod.isJijiListed ? (
+                          <span 
+                            onClick={() => toggleJijiStatus(prod.sku, true)} 
+                            className="badge bg-success text-white rounded-mhenik" 
+                            style={{ fontSize: '10px', cursor: 'pointer' }}
+                            title="Click to toggle Jiji status"
+                          >
+                            ✓ Jiji Listed
+                          </span>
+                        ) : (
+                          <span 
+                            onClick={() => toggleJijiStatus(prod.sku, false)} 
+                            className="badge bg-light text-muted border rounded-mhenik" 
+                            style={{ fontSize: '10px', cursor: 'pointer' }}
+                            title="Click to mark as listed on Jiji"
+                          >
+                            + Mark Jiji
+                          </span>
+                        )}
                       </td>
                       <td className="fw-bold text-success">KES {prod.sellingPrice?.toLocaleString()}</td>
                       <td>
@@ -754,11 +807,21 @@ export default function AdminDashboard() {
                       </td>
                       <td className="text-end">
                         <div className="d-flex gap-1 justify-content-end">
-                          <button onClick={() => setQrProduct(prod)} className="btn btn-sm btn-outline-secondary rounded-mhenik" title="Generate Thermal QR Label">
-                            🏷️ Label
+                          <button 
+                            onClick={() => launchJijiUploader(prod)} 
+                            className="btn btn-sm btn-outline-success rounded-mhenik fw-bold" 
+                            style={{ fontSize: '11px' }}
+                            title="Copy details and open Jiji listing window"
+                          >
+                            Post Jiji
                           </button>
+
+                          <button onClick={() => setQrProduct(prod)} className="btn btn-sm btn-outline-secondary rounded-mhenik" title="Generate Thermal QR Label">
+                            Label
+                          </button>
+
                           {isAdjustmentPending ? (
-                            <span className="badge bg-warning text-dark rounded-mhenik" style={{ fontSize: '10px' }}>⏳ Adjustment Locked</span>
+                            <span className="badge bg-warning text-dark rounded-mhenik" style={{ fontSize: '10px' }}> Adjustment Locked</span>
                           ) : (
                             <button onClick={() => setEditingProduct(prod)} className="btn btn-sm btn-outline-dark rounded-mhenik">Edit</button>
                           )}
@@ -830,14 +893,14 @@ export default function AdminDashboard() {
               </div>
             ))}
             <div className="col-12">
-  <button 
-    type="submit" 
-    disabled={isSubmittingIncoming} 
-    className="btn btn-primary rounded-mhenik w-100 py-2 fw-bold"
-  >
-    {isSubmittingIncoming ? '⌛ Logging Allocation...' : 'Inbound Ingestion'}
-  </button>
-</div>
+              <button 
+                type="submit" 
+                disabled={isSubmittingIncoming} 
+                className="btn btn-primary rounded-mhenik w-100 py-2 fw-bold"
+              >
+                {isSubmittingIncoming ? 'Logging Allocation...' : 'Inbound Ingestion'}
+              </button>
+            </div>
           </form>
         </div>
       )}
@@ -1117,6 +1180,189 @@ export default function AdminDashboard() {
               <button type="submit" className="btn btn-primary rounded-mhenik fw-bold">Submit</button>
             </div>
           </form>
+        </div>
+      )}
+
+      {/* 🚀 TWO-STEP JIJI LISTING PREPARATION MODAL */}
+      {jijiModalProduct && (
+        <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-75 d-flex align-items-center justify-content-center p-3" style={{ zIndex: 1070 }}>
+          <div className="card border-0 shadow-lg p-4 rounded-mhenik bg-white w-100" style={{ maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div className="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+              <h5 className="fw-bold text-dark mb-0">Jiji Ad Preparation Guide</h5>
+              <button onClick={() => setJijiModalProduct(null)} className="btn-close"></button>
+            </div>
+
+            <p className="small text-muted mb-3">
+              Target Item: <strong className="text-dark">{jijiModalProduct.productName}</strong> (SKU: {jijiModalProduct.sku})
+            </p>
+
+            <div className="d-flex flex-column gap-3 mb-4">
+              
+              {/* STEP 1: INITIAL PAGE FIELDS */}
+              <div className="p-3 border rounded-mhenik bg-white shadow-xs">
+                <span className="badge bg-primary mb-2">PAGE 1: General Info & Photos</span>
+                
+                {/* 1. TITLE FIELD */}
+                <div className="mb-3">
+                  <div className="d-flex justify-content-between align-items-center mb-1">
+                    <span className="fw-bold small text-muted">Title</span>
+                    <button 
+                      onClick={() => copyToClipboard(`${jijiModalProduct.productName} (${jijiModalProduct.vehicle?.make || 'Universal'} ${jijiModalProduct.vehicle?.model || ''})`.slice(0, 70), 'Title')} 
+                      className="btn btn-xs btn-outline-primary rounded-mhenik fw-bold px-2 py-1" style={{ fontSize: '11px' }}
+                    >
+                       Copy Title
+                    </button>
+                  </div>
+                  <input 
+                    readOnly 
+                    className="form-control form-control-sm bg-light font-monospace" 
+                    value={`${jijiModalProduct.productName} (${jijiModalProduct.vehicle?.make || 'Universal'} ${jijiModalProduct.vehicle?.model || ''})`.slice(0, 70)} 
+                  />
+                </div>
+
+                {/* 2. CATEGORY & LOCATION DROPDOWNS */}
+                <div className="mb-3">
+                  <span className="fw-bold small text-muted d-block mb-1">Category & Location Dropdowns</span>
+                  <div className="d-flex flex-column gap-1 small p-2 bg-light rounded">
+                    <div><strong>Category:</strong> Vehicle Parts & Accessories ➔ Car Parts & Accessories</div>
+                    <div><strong>Location:</strong> Nairobi ➔ Nairobi Central</div>
+                  </div>
+                </div>
+
+                {/* 3. GALLERY PHOTOS */}
+                <div>
+                  <span className="fw-bold small text-muted d-block mb-2">Product Photos</span>
+                  <div className="row g-2">
+                    {[
+                      `https://picsum.photos/seed/${jijiModalProduct.sku}-1/300/200`,
+                      `https://picsum.photos/seed/${jijiModalProduct.sku}-2/300/200`
+                    ].map((imgUrl, idx) => (
+                      <div className="col-6 text-center" key={idx}>
+                        <img 
+                          src={imgUrl} 
+                          alt={`Demo Spare ${idx + 1}`} 
+                          className="img-fluid rounded border mb-1" 
+                          style={{ height: '80px', objectFit: 'cover', width: '100%' }} 
+                        />
+                        <a 
+                          href={imgUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          download={`SKU-${jijiModalProduct.sku}-Photo${idx + 1}.jpg`}
+                          className="btn btn-xs btn-outline-secondary w-100 rounded-mhenik" 
+                          style={{ fontSize: '10px' }}
+                        >
+                          Download Photo #{idx + 1}
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* STEP 2: SECOND PAGE ATTRIBUTES & PRICE */}
+              <div className="p-3 border rounded-mhenik bg-white shadow-xs">
+                <span className="badge bg-success mb-2">PAGE 2: Attributes, Description & Pricing</span>
+
+                {/* 1. MAKE & CONDITION QUICK REFS */}
+                <div className="row g-2 mb-3">
+                  <div className="col-6">
+                    <div className="d-flex justify-content-between align-items-center mb-1">
+                      <span className="fw-bold small text-muted">Make</span>
+                      <button 
+                        onClick={() => copyToClipboard(jijiModalProduct.vehicle?.make || 'Generic', 'Make')} 
+                        className="btn btn-xs btn-outline-secondary rounded-mhenik px-1 py-0" style={{ fontSize: '10px' }}
+                      >
+                      Copy
+                      </button>
+                    </div>
+                    <input readOnly className="form-control form-control-sm bg-light" value={jijiModalProduct.vehicle?.make || 'Generic'} />
+                  </div>
+
+                  <div className="col-6">
+                    <div className="d-flex justify-content-between align-items-center mb-1">
+                      <span className="fw-bold small text-muted">Condition</span>
+                      <button 
+                        onClick={() => copyToClipboard(jijiModalProduct.condition || 'OEM Genuine', 'Condition')} 
+                        className="btn btn-xs btn-outline-secondary rounded-mhenik px-1 py-0" style={{ fontSize: '10px' }}
+                      >
+                        Copy
+                      </button>
+                    </div>
+                    <input readOnly className="form-control form-control-sm bg-light" value={jijiModalProduct.condition || 'OEM Genuine'} />
+                  </div>
+                </div>
+
+                {/* 2. DESCRIPTION TEXT */}
+                <div className="mb-3">
+                  <div className="d-flex justify-content-between align-items-center mb-1">
+                    <span className="fw-bold small text-muted">Description</span>
+                    <button 
+                      onClick={() => copyToClipboard(
+                        `MHENIK TRADERS - Genuine Auto Spare Part\n\n` +
+                        `Product: ${jijiModalProduct.productName}\n` +
+                        `SKU Ref: ${jijiModalProduct.sku}\n` +
+                        `Vehicle Fit: ${jijiModalProduct.vehicle?.make || 'Universal'} ${jijiModalProduct.vehicle?.model || ''}\n` +
+                        `Condition: ${jijiModalProduct.condition || 'OEM Genuine'}\n` +
+                        `Price: KES ${jijiModalProduct.sellingPrice?.toLocaleString()}\n\n` +
+                        `Quality guaranteed auto spares. Contact Mhenik Traders for pickup or fast dispatch!`,
+                        'Description'
+                      )} 
+                      className="btn btn-xs btn-outline-primary rounded-mhenik fw-bold px-2 py-1" style={{ fontSize: '11px' }}
+                    >
+                      Copy Description
+                    </button>
+                  </div>
+                  <textarea 
+                    readOnly 
+                    rows="3" 
+                    className="form-control form-control-sm bg-light small" 
+                    value={
+                      `MHENIK TRADERS - Genuine Auto Spare Part\n\n` +
+                      `Product: ${jijiModalProduct.productName}\n` +
+                      `SKU Ref: ${jijiModalProduct.sku}\n` +
+                      `Vehicle Fit: ${jijiModalProduct.vehicle?.make || 'Universal'} ${jijiModalProduct.vehicle?.model || ''}\n` +
+                      `Condition: ${jijiModalProduct.condition || 'OEM Genuine'}\n` +
+                      `Price: KES ${jijiModalProduct.sellingPrice?.toLocaleString()}\n\n` +
+                      `Quality guaranteed auto spares. Contact Mhenik Traders for pickup or fast dispatch!`
+                    } 
+                  />
+                </div>
+
+                {/* 3. PRICE FIELD */}
+                <div className="mb-3">
+                  <div className="d-flex justify-content-between align-items-center mb-1">
+                    <span className="fw-bold small text-muted">Price (KSh)</span>
+                    <button 
+                      onClick={() => copyToClipboard(String(jijiModalProduct.sellingPrice || 0), 'Price')} 
+                      className="btn btn-xs btn-outline-success rounded-mhenik fw-bold px-2 py-1" style={{ fontSize: '11px' }}
+                    >
+                      Copy Price
+                    </button>
+                  </div>
+                  <input readOnly className="form-control form-control-sm bg-light fw-bold text-success" value={jijiModalProduct.sellingPrice || 0} />
+                </div>
+
+                {/* 4. PROMO PLAN INSTRUCTION */}
+                <div className="p-2 bg-light border rounded small">
+                  <strong>💡 Final Step:</strong> Under <em>Promote your ad</em>, select <span className="text-success fw-bold">"No promo (free)"</span> and submit!
+                </div>
+              </div>
+
+            </div>
+
+            <div className="d-flex justify-content-between gap-2 pt-2 border-top">
+              <button onClick={() => setJijiModalProduct(null)} className="btn btn-light rounded-mhenik fw-bold">Close</button>
+              <a 
+                href="https://jiji.co.ke/add-free-ad.html" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="btn btn-success rounded-mhenik fw-bold"
+              >
+                Open Jiji Form ↗
+              </a>
+            </div>
+          </div>
         </div>
       )}
 
