@@ -6,4 +6,7 @@ module.exports = defineConfig({
   datasource: {
     url: env("DATABASE_URL") || "postgresql://postgres:mhenik123@localhost:5432/mhenik_inventory?schema=public",
   },
+  migrations: {
+    seed: "node prisma/seed.js",
+  },
 });
