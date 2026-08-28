@@ -4,7 +4,6 @@ datasource db {
 
 generator client {
   provider = "prisma-client-js"
-  output   = "./generated-client"
 }
 
 model Category {
@@ -36,6 +35,7 @@ model Product {
   vehicle      Vehicle                @relation(fields: [vehicle_id], references: [id], onDelete: Restrict)
   orderItems   OrderItem[]            // Relates to order processing
   transactions InventoryTransaction[] // 📜 Module 3: Stock Movement Ledger History
+  imageUrl     String?                //
   createdAt    DateTime               @default(now())
 }
 

@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react';
 import { fetchProducts } from '../services/api';
 
+const BACKEND_URL = import.meta.env?.VITE_API_URL || "http://localhost:5000";
+
+const resolveImageUrl = (url) => {
+  const fallback = "https://cdn-icons-png.flaticon.com/512/744/744465.png";
+  if (!url) return fallback;
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return `${BACKEND_URL}${url.startsWith("/") ? "" : "/"}${url}`;
+};
+
 export default function ProductCatalog() {
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState('');
@@ -122,22 +131,21 @@ export default function ProductCatalog() {
                   <div className="col-sm-6 col-md-4 col-lg-3" key={p.sku}>
                     <div className="card h-100 border-0 shadow-sm bg-white rounded-mhenik overflow-hidden d-flex flex-column justify-content-between">
                       
-                      {/* 1. TOP LIGHT GREY IMAGE FRAME WITH PHOTO BADGE */}
+                      {/* 1. TOP LIGHT GREY IMAGE FRAME WITH RESOLVED IMAGE */}
                       <div 
-                        className="position-relative p-4 d-flex align-items-center justify-content-center"
-                        style={{ background: '#f4f5f7', minHeight: '170px' }}
+                        className="position-relative p-3 d-flex align-items-center justify-content-center"
+                        style={{ background: '#f4f5f7', height: '170px' }}
                       >
-                        {/* Photo Count / Spec Badge */}
-                        {/* <div className="position-absolute top-0 start-0 m-3 px-2 py-1 bg-dark bg-opacity-75 text-white rounded-mhenik fw-semibold d-flex align-items-center gap-1" style={{ fontSize: '11px', backdropFilter: 'blur(4px)' }}>
-                          📷 1
-                        </div> */}
-
-                        {/* Product Image or Fallback Engine Asset */}
                         <img 
-                          src={p.imageUrl || "https://cdn-icons-png.flaticon.com/512/744/744465.png"} 
+                          src={resolveImageUrl(p.imageUrl)} 
                           alt={name}
-                          className="img-fluid object-fit-contain opacity-75"
-                          style={{ maxHeight: '120px' }}
+                          loading="lazy"
+                          decoding="async"
+                          className="img-fluid object-fit-contain w-100 h-100"
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = "https://cdn-icons-png.flaticon.com/512/744/744465.png";
+                          }}
                         />
                       </div>
 
@@ -190,7 +198,7 @@ export default function ProductCatalog() {
                           disabled={currentStock <= 0}
                           onClick={() => addToCart(p)}
                         >
-                          {currentStock > 0 ? 'Add to Cart' : ' Out of Stock'}
+                          {currentStock > 0 ? 'Add to Cart' : 'Out of Stock'}
                         </button>
                       </div>
 

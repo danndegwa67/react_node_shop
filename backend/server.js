@@ -16,13 +16,14 @@ app.use(cors({
 app.use(express.json());
 
 // 🗄️ Initialize Prisma 7 Database Driver Engine
-const { PrismaClient } = require('./prisma/generated-client'); 
+const { PrismaClient } = require('@prisma/client'); 
 const { PrismaPg } = require('@prisma/adapter-pg');
+const { Pool } = require('pg');
 
 const connectionString = process.env.DATABASE_URL || "postgresql://postgres:mhenik123@localhost:5432/mhenik_inventory?schema=public";
-const adapter = new PrismaPg({ connectionString });
+const pool = new Pool({ connectionString });
+const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
-
 // 🕵️‍♂️ System Audit Logging Utility
 async function createAuditLog(userId, userName, action, details) {
   try {
@@ -924,6 +925,14 @@ app.patch('/api/admin/inventory/:sku/jiji-status', authenticateStaff, async (req
     return res.status(500).json({ message: "Failed updating Jiji listing flag." });
   }
 });
+
+const path = require('path');
+
+// 🖼️ Serve uploaded product images
+app.use('/uploads', express.static(path.join(__dirname, 'data/public/uploads'), {
+  maxAge: '7d',
+  immutable: true
+}));
 
 module.exports = { prisma };
 
