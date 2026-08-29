@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Directly fallback to your live Railway backend URL if the env var isn't picked up
-const API_BASE = import.meta.env.VITE_API_URL || 'https://reactnodeshop-production-xxxx.up.railway.app';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://reactnodeshop-production.up.railway.app';
 
 const API = axios.create({
   baseURL: `${API_BASE}/api`
