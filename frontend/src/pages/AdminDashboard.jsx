@@ -13,6 +13,7 @@ export default function AdminDashboard() {
   const [adjustments, setAdjustments] = useState([]);
   const [staff, setStaff] = useState({ name: '', role: '' });
   const navigate = useNavigate();
+  const API_BASE = import.meta.env.VITE_API_URL || 'https://reactnodeshop-production.up.railway.app';
 
   const [form, setForm] = useState({ 
     sku: '', productName: '', position: '', sellingPrice: '', stockAmount: '', 
@@ -87,7 +88,7 @@ export default function AdminDashboard() {
   }, [logCurrentPage, staff.role]);
 
   const fetchData = (endpoint, setter) => {
-    fetch(`http://localhost:5000${endpoint}`, {
+    fetch(`${API_BASE}${endpoint}`, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('mhenik_staff_token')}` }
     })
     .then(res => { 
@@ -100,7 +101,7 @@ export default function AdminDashboard() {
 
   const fetchPaginatedLogs = (pageNumber) => {
     const cacheBuster = Date.now();
-    fetch(`http://localhost:5000/api/admin/logs?page=${pageNumber}&_cb=${cacheBuster}`, {
+    fetch(`${API_BASE}/api/admin/logs?page=${pageNumber}&_cb=${cacheBuster}`, {
       method: 'GET',
       headers: { 
         'Authorization': `Bearer ${localStorage.getItem('mhenik_staff_token')}`,
@@ -126,7 +127,7 @@ export default function AdminDashboard() {
 
     setIsSubmittingIncoming(true);
 
-    fetch('http://localhost:5000/api/admin/incoming-stock', {
+    fetch(`${API_BASE}/api/admin/incoming-stock`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json', 
@@ -182,7 +183,7 @@ export default function AdminDashboard() {
       return;
     }
 
-    fetch('http://localhost:5000/api/admin/adjustments/request', {
+    fetch(`${API_BASE}/api/admin/adjustments/request`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('mhenik_staff_token')}` },
       body: JSON.stringify({
@@ -209,7 +210,7 @@ export default function AdminDashboard() {
   };
 
   const resolveAdjustment = (id, decision) => {
-    fetch(`http://localhost:5000/api/admin/adjustments/${id}/status`, {
+    fetch(`${API_BASE}/api/admin/adjustments/${id}/status`, {
       method: 'PATCH',
       headers: { 
         'Content-Type': 'application/json', 
@@ -235,7 +236,7 @@ export default function AdminDashboard() {
   };
 
   const handleIAMAction = (endpoint, body) => {
-    fetch(`http://localhost:5000${endpoint}`, {
+    fetch(`${API_BASE}${endpoint}`, {
       method: 'PATCH',
       headers: { 
         'Content-Type': 'application/json', 
@@ -315,7 +316,7 @@ export default function AdminDashboard() {
     }
 
     const dispatchPromises = activeScanOrder.items.map(item => {
-      return fetch(`http://localhost:5000/api/admin/orders/${activeScanOrder.id}/status`, {
+      return fetch(`${API_BASE}/api/admin/orders/${activeScanOrder.id}/status`, {
         method: 'PATCH',
         headers: { 
           'Content-Type': 'application/json',
@@ -337,7 +338,7 @@ export default function AdminDashboard() {
   };
 
   const handleOrderApproval = (orderId, decision = 'APPROVED') => {
-    fetch(`http://localhost:5000/api/admin/orders/${orderId}/status`, {
+    fetch(`${API_BASE}/api/admin/orders/${orderId}/status`, {
       method: 'PATCH',
       headers: { 
         'Content-Type': 'application/json', 
@@ -535,7 +536,7 @@ export default function AdminDashboard() {
 
   const toggleJijiStatus = (sku, currentStatus) => {
     const newStatus = !currentStatus;
-    fetch(`http://localhost:5000/api/admin/inventory/${sku}/jiji-status`, {
+    fetch(`${API_BASE}/api/admin/inventory/${sku}/jiji-status`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
