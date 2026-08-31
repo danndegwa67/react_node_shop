@@ -6,6 +6,7 @@ export default function AdminAuth() {
   const [form, setForm] = useState({ email: '', password: '', name: '' });
   const [msg, setMsg] = useState({ text: '', isError: false });
   const navigate = useNavigate();
+  const API_BASE = import.meta.env.VITE_API_URL || 'https://reactnodeshop-production.up.railway.app';
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -13,7 +14,7 @@ export default function AdminAuth() {
 
     const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
     
-    fetch(`http://localhost:5000${endpoint}`, {
+    fetch(`${API_BASE}${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form)
