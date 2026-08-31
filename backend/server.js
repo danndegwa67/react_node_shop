@@ -13,7 +13,7 @@ app.use(cors({
   origin: ['https://mheniktraders.shop', 'https://www.mheniktraders.shop', 'http://localhost:5173'],
   credentials: true
 }));
-app.options('*', cors()); // Enable pre-flight across-the-board for all routes
+app.options(/(.*)/, cors());// Enable pre-flight across-the-board for all routes
 app.use(express.json());
 
 // 🗄️ Initialize Prisma 7 Database Driver Engine
