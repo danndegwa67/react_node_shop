@@ -9,8 +9,9 @@ const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || "mhenik_super_secret_key_2026";
 
 // ⚙️ Core Global Middleware Setup
+const cors = require('cors');
 app.use(cors({
-  origin: 'http://localhost:5173', 
+  origin: ['https://mheniktraders.shop', 'https://www.mheniktraders.shop', 'http://localhost:5173'],
   credentials: true
 }));
 app.use(express.json());
