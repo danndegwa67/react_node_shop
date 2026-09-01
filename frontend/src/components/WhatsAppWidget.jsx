@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function WhatsAppWidget({ selectedProduct = null }) {
   // Replace with Mhenik Traders' business phone number (format without + or spaces)
-  const PHONE_NUMBER = "254768876888"; 
+  const PHONE_NUMBER = "254716687687"; 
 
   const getWhatsAppLink = () => {
     let message = "";

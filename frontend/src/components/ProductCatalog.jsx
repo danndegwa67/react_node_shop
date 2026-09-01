@@ -126,9 +126,35 @@ export default function ProductCatalog() {
                 const currentStock = typeof p.stock === 'number' ? p.stock : 0;
                 const categoryName = p.category?.name || "General Spare";
                 const vehicleFit = p.vehicle ? `${p.vehicle.make} ${p.vehicle.model}` : "Universal Fit";
+                const imageUrl = resolveImageUrl(p.imageUrl);
+
+                // Structured JSON-LD object for each product card
+                const productSchema = {
+                  "@context": "https://schema.org/",
+                  "@type": "Product",
+                  "name": name,
+                  "image": [imageUrl],
+                  "description": `Genuine ${categoryName} spare part fit for ${vehicleFit}. Available at Mhenik Traders Nairobi.`,
+                  "sku": p.sku,
+                  "offers": {
+                    "@type": "Offer",
+                    "priceCurrency": "KES",
+                    "price": cost.toString(),
+                    "availability": currentStock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+                    "seller": {
+                      "@type": "Organization",
+                      "name": "Mhenik Traders"
+                    }
+                  }
+                };
 
                 return (
                   <div className="col-sm-6 col-md-4 col-lg-3" key={p.sku}>
+                    {/* Inject Product Schema Markup directly into the DOM for SEO indexing */}
+                    <script type="application/ld+json">
+                      {JSON.stringify(productSchema)}
+                    </script>
+
                     <div className="card h-100 border-0 shadow-sm bg-white rounded-mhenik overflow-hidden d-flex flex-column justify-content-between">
                       
                       {/* 1. TOP LIGHT GREY IMAGE FRAME WITH RESOLVED IMAGE */}
@@ -137,11 +163,11 @@ export default function ProductCatalog() {
                         style={{ background: '#f4f5f7', height: '170px' }}
                       >
                         <img 
-                          src={resolveImageUrl(p.imageUrl)} 
+                          src={imageUrl} 
                           alt={name}
                           loading="lazy"
                           decoding="async"
-                          className="img-fluid object-fit-contain w-100 h-100"
+                          className="img-fluid object-fit-cover w-100 h-100"
                           onError={(e) => {
                             e.currentTarget.onerror = null;
                             e.currentTarget.src = "https://cdn-icons-png.flaticon.com/512/744/744465.png";
@@ -181,12 +207,26 @@ export default function ProductCatalog() {
 
                         {/* 3. BOTTOM TITLE & VEHICLE FITMENT */}
                         <div className="border-top pt-2 mt-2">
-                          <h6 className="fw-bold text-dark mb-1 text-truncate" title={name} style={{ fontSize: '14px' }}>
+                          <h6 
+                            className="fw-bold text-dark mb-1" 
+                            title={name} 
+                            style={{ 
+                              fontSize: '13px', 
+                              lineHeight: '1.3', 
+                              display: '-webkit-box', 
+                              WebkitLineClamp: '2', 
+                              WebkitBoxOrient: 'vertical', 
+                              overflow: 'hidden', 
+                              height: '34px' 
+                            }}
+                          >
                             {name}
                           </h6>
-                          <p className="text-muted mb-0 text-truncate" style={{ fontSize: '12px' }}>
-                            Fit: {vehicleFit}
-                          </p>
+                          <div className="d-flex align-items-center gap-1 mt-1">
+                            <span className="badge bg-secondary bg-opacity-10 text-secondary fw-medium px-1.5 py-0.5" style={{ fontSize: '10px' }}>
+                              Fit: {vehicleFit}
+                            </span>
+                          </div>
                         </div>
                       </div>
 

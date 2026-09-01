@@ -97,10 +97,10 @@ function Home() {
           <div className="row g-3">
             <div className="col-md-6">
               <p className="mb-2 fs-6">📍 <strong>Physical Location:</strong> Nairobi, Kenya</p>
-              <p className="mb-0 fs-6">📞 <strong>Primary Phone Enquiries:</strong> +254 XXX XXX XXX</p>
+              <p className="mb-0 fs-6">📞 <strong>Primary Phone Enquiries:</strong> +254 716 687687</p>
             </div>
             <div className="col-md-6">
-              <p className="mb-2 fs-6">✉️ <strong>Corporate Email Address:</strong> info@mheniktraders.com</p>
+              <p className="mb-2 fs-6">✉️ <strong>Corporate Email Address:</strong> mhenikt@gmail.com</p>
               <p className="mb-0 fs-6">⏱️ <strong>Operating Hours:</strong> Mon – Sat | 8:00 AM – 5:00 PM</p>
             </div>
           </div>
@@ -132,15 +132,15 @@ function Home() {
       }}
     >
       <iframe
-        title="Mhenik Traders Location Map"
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15955.277443585257!2d36.81471135!3d-1.286389!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f1172d84d49a7%3A0xf7eb0254b4d9e1e!2sNairobi%2C%20Kenya!5e0!3m2!1sen!2ske!4v1710000000000!5m2!1sen!2ske"
-        width="100%"
-        height="100%"
-        style={{ border: 0, display: 'block' }}
-        allowFullScreen=""
-        loading="lazy"
-        referrerPolicy="no-referrer-when-downgrade"
-      ></iframe>
+  title="Mhenik Traders Location"
+  src="https://maps.google.com/maps?q=MHENIK+TRADERS+49+Kirinyaga+Rd+Nairobi&t=&z=16&ie=UTF8&iwloc=&output=embed"
+  width="100%"
+  height="380"
+  style={{ border: 0, borderRadius: '8px' }}
+  allowFullScreen=""
+  loading="lazy"
+  referrerPolicy="no-referrer-when-downgrade"
+></iframe>
     </div>
 
   </div>
