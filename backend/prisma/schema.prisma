@@ -103,3 +103,25 @@ model StockAdjustment {
   status       String   @default("PENDING") // PENDING, APPROVED, REJECTED
   createdAt    DateTime @default(now())
 }
+
+model Post {
+  id              String    @id @default(uuid())
+  title           String
+  slug            String    @unique
+  excerpt         String?   @db.Text
+  content         String    @db.Text
+  coverImage      String?
+  category        String    @default("General")
+  status          String    @default("DRAFT") // "DRAFT" or "PUBLISHED"
+  views           Int       @default(0)
+  author          String    @default("Mhenik Admin")
+  
+  // Link auto parts to an article so readers can buy directly from guides
+  featuredSkus    String[]  @default([])
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([slug])
+  @@index([status])
+}

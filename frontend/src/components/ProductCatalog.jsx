@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { fetchProducts } from '../services/api';
+import { ShoppingBag } from 'lucide-react';
 
 const BACKEND_URL = import.meta.env?.VITE_API_URL || "http://localhost:5000";
+const MHENIK_WHATSAPP_NUMBER = "254716687687"; // Official Mhenik contact[cite: 23]
 
 const resolveImageUrl = (url) => {
   const fallback = "https://cdn-icons-png.flaticon.com/512/744/744465.png";
@@ -71,6 +73,16 @@ export default function ProductCatalog() {
     window.dispatchEvent(new Event('storage'));
   };
 
+  const openWhatsAppInquiry = (product, name, cost) => {
+    const vehicleFit = product.vehicle ? `${product.vehicle.make} ${product.vehicle.model}` : "Universal Fit";
+    const message = `Hello Mhenik Traders! 👋 I would like to inquire about the following spare part:\n\n` +
+                    `*Item:* ${name}\n` +
+                    `*Price:* KES ${Number(cost).toLocaleString()}\n` +
+                    `*Vehicle Fit:* ${vehicleFit}\n\n` +
+                    `Is this currently available at your shop?`;
+    window.open(`https://wa.me/${MHENIK_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <div className="w-100">
       {alertMsg && (
@@ -115,7 +127,7 @@ export default function ProductCatalog() {
         <div className="text-center py-5"><div className="spinner-border text-danger"></div></div>
       ) : (
         <>
-          <div className="row g-4">
+          <div className="row g-3 g-md-4">
             {products.length === 0 ? (
               <div className="col-12 text-center py-5 bg-white rounded-mhenik shadow-sm border">
                 <p className="text-muted fw-bold mb-0">No genuine parts match the active filter configurations.</p>
@@ -124,12 +136,11 @@ export default function ProductCatalog() {
               products.map((p) => {
                 const name = p.productName || p.product_name || "Unknown Component";
                 const cost = p.sellingPrice || p.price || 4500;
-                const currentStock = typeof p.stock === 'number' ? p.stock : 0;
                 const categoryName = p.category?.name || "General Spare";
                 const vehicleFit = p.vehicle ? `${p.vehicle.make} ${p.vehicle.model}` : "Universal Fit";
                 const imageUrl = resolveImageUrl(p.imageUrl);
 
-                // Structured JSON-LD object for each product card
+                // Structured JSON-LD object for SEO indexing
                 const productSchema = {
                   "@context": "https://schema.org/",
                   "@type": "Product",
@@ -141,7 +152,7 @@ export default function ProductCatalog() {
                     "@type": "Offer",
                     "priceCurrency": "KES",
                     "price": cost.toString(),
-                    "availability": currentStock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+                    "availability": "https://schema.org/InStock",
                     "seller": {
                       "@type": "Organization",
                       "name": "Mhenik Traders"
@@ -150,22 +161,20 @@ export default function ProductCatalog() {
                 };
 
                 return (
-                  <div className="col-sm-6 col-md-4 col-lg-3" key={p.sku}>
-                    {/* Inject Product Schema Markup directly into the DOM for SEO indexing */}
+                  <div className="col-6 col-md-4 col-lg-3" key={p.sku}>
                     <script type="application/ld+json">
                       {JSON.stringify(productSchema)}
                     </script>
 
                     <div className="card h-100 border-0 shadow-sm bg-white rounded-mhenik overflow-hidden d-flex flex-column justify-content-between">
                       
-                      {/* 1. TOP IMAGE FRAME WITH AMBIENT BLURRED BACKDROP */}
+                      {/* 1. IMAGE FRAME */}
                       <div 
                         className="position-relative overflow-hidden p-2 d-flex align-items-center justify-content-center"
-                        style={{ background: '#f4f5f7', height: '175px', cursor: 'zoom-in' }}
+                        style={{ background: '#f4f5f7', height: '155px', cursor: 'zoom-in' }}
                         onClick={() => setPreviewImage({ url: imageUrl, name, sku: p.sku })}
                         title="Click to view full image"
                       >
-                        {/* Ambient Background Layer */}
                         <img 
                           src={imageUrl} 
                           alt=""
@@ -184,16 +193,13 @@ export default function ProductCatalog() {
                           }}
                         />
 
-                        {/* Foreground Part Layer */}
                         <img 
                           src={imageUrl} 
                           alt={name}
                           loading="lazy"
                           decoding="async"
                           className="position-relative img-fluid object-fit-contain w-100 h-100"
-                          style={{
-                            filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.12))'
-                          }}
+                          style={{ filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.12))' }}
                           onError={(e) => {
                             e.currentTarget.onerror = null;
                             e.currentTarget.src = "https://cdn-icons-png.flaticon.com/512/744/744465.png";
@@ -201,71 +207,72 @@ export default function ProductCatalog() {
                         />
                       </div>
 
-                      {/* 2. CARD BODY: PRICING, STOCK DETAILS & BADGES */}
-                      <div className="card-body p-3 d-flex flex-column justify-content-between">
+                      {/* 2. COMPACT CARD BODY */}
+                      <div className="card-body p-3 d-flex flex-column justify-content-between flex-grow-1">
                         <div>
-                          {/* Price Tag & SKU Details Row */}
-                          <div className="d-flex justify-content-between align-items-start mb-2">
-                            <div>
-                              <span className="text-muted d-block" style={{ fontSize: '11px', fontWeight: '500' }}>Price</span>
-                              <span className="fw-bold text-dark fs-5 lh-1">
-                                KES {Number(cost).toLocaleString()}
-                              </span>
-                              <span className="text-muted d-block mt-1" style={{ fontSize: '10px' }}>(Inc. VAT)</span>
-                            </div>
-
-                            <div className="text-end text-muted font-monospace" style={{ fontSize: '11px', lineHeight: '1.4' }}>
-                              <div><strong className="text-dark">SKU:</strong> {p.sku}</div>
-                              <div className="text-truncate" style={{ maxWidth: '100px' }}>{categoryName}</div>
-                            </div>
-                          </div>
-
-                          {/* Availability Badge */}
-                          <div className="mb-3">
-                            <span 
-                              className={`badge rounded-mhenik fw-medium px-2 py-1 ${currentStock > 0 ? 'bg-primary bg-opacity-10 text-primary' : 'bg-danger bg-opacity-10 text-danger'}`} 
-                              style={{ fontSize: '11px' }}
-                            >
-                              {currentStock > 0 ? `${currentStock} units in stock` : 'Out of Stock'}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* 3. BOTTOM TITLE & VEHICLE FITMENT */}
-                        <div className="border-top pt-2 mt-2">
+                          {/* Part Name Priority */}
                           <h6 
                             className="fw-bold text-dark mb-1" 
                             title={name} 
                             style={{ 
                               fontSize: '13px', 
-                              lineHeight: '1.3', 
+                              lineHeight: '1.25', 
                               display: '-webkit-box', 
                               WebkitLineClamp: '2', 
                               WebkitBoxOrient: 'vertical', 
                               overflow: 'hidden', 
-                              height: '34px' 
+                              minHeight: '33px' 
                             }}
                           >
                             {name}
                           </h6>
-                          <div className="d-flex align-items-center gap-1 mt-1">
-                            <span className="badge bg-secondary bg-opacity-10 text-secondary fw-medium px-1.5 py-0.5" style={{ fontSize: '10px' }}>
+
+                          {/* Fitment info */}
+                          <div className="d-flex align-items-center gap-1 mb-2">
+                            <span className="badge bg-secondary bg-opacity-10 text-secondary fw-medium px-1.5 py-0.5 text-truncate" style={{ fontSize: '10px', maxWidth: '100%' }}>
                               Fit: {vehicleFit}
                             </span>
                           </div>
                         </div>
-                      </div>
 
-                      {/* 4. CART ACTION BUTTON */}
-                      <div className="card-footer bg-transparent border-0 pt-0 p-3">
-                        <button 
-                          type="button"
-                          className="btn btn-dark w-100 fw-bold rounded-mhenik py-2" 
-                          disabled={currentStock <= 0}
-                          onClick={() => addToCart(p)}
-                        >
-                          {currentStock > 0 ? 'Add to Cart' : 'Out of Stock'}
-                        </button>
+                        {/* 3. PRICE + CART + WHATSAPP ENQUIRY (ALL ON ONE ROW) */}
+                        <div className="pt-2 border-top d-flex align-items-center justify-content-between gap-2 mt-auto">
+                          {/* Left: Price Column */}
+                          <div className="lh-1">
+                            <span className="fw-bold text-dark" style={{ fontSize: '14px' }}>
+                              KES {Number(cost).toLocaleString()}
+                            </span>
+                            {/* <span className="text-muted d-block" style={{ fontSize: '9px', marginTop: '2px' }}>(Inc. VAT)</span> */}
+                          </div>
+
+                          {/* Right: Cart and Grey WhatsApp Buttons */}
+                          <div className="d-flex align-items-center gap-1 flex-shrink-0">
+                            {/* WhatsApp Enquiry Button (Grey) */}
+                            <button 
+                              type="button"
+                              className="btn btn-light border text-secondary rounded-mhenik p-0 d-flex align-items-center justify-content-center"
+                              style={{ width: '34px', height: '34px', backgroundColor: '#f8f9fa' }}
+                              title="Inquire via WhatsApp"
+                              onClick={() => openWhatsAppInquiry(p, name, cost)}
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.572-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+                              </svg>
+                            </button>
+
+                            {/* Cart Icon Button */}
+                            <button 
+                              type="button"
+                              className="btn btn-dark rounded-mhenik p-0 d-flex align-items-center justify-content-center"
+                              style={{ width: '34px', height: '34px' }}
+                              title="Add to Cart"
+                              onClick={() => addToCart(p)}
+                            >
+                              <ShoppingBag size={15} />
+                            </button>
+                          </div>
+                        </div>
+
                       </div>
 
                     </div>
@@ -286,7 +293,7 @@ export default function ProductCatalog() {
         </>
       )}
 
-      {/* Lightbox Modal (Click background or X button to dismiss) */}
+      {/* Lightbox Modal */}
       {previewImage && (
         <div 
           className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-3"
@@ -314,7 +321,6 @@ export default function ProductCatalog() {
 
             <div className="mt-3">
               <h6 className="fw-bold text-dark mb-1">{previewImage.name}</h6>
-              <span className="text-muted small font-monospace">SKU: {previewImage.sku}</span>
             </div>
           </div>
         </div>

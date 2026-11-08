@@ -14,7 +14,6 @@ function Navbar() {
   const closeMenu = () => {
     const menuEl = document.getElementById('mainNavbar');
     if (menuEl && menuEl.classList.contains('show')) {
-      // Bootstrap looks for a standard button target click or a class switch to collapse
       const toggler = document.querySelector('.navbar-toggler');
       if (toggler) toggler.click();
     }
@@ -24,7 +23,6 @@ function Navbar() {
     updateCount();
     window.addEventListener('storage', updateCount);
 
-    // Event listener to check if the user clicked anywhere outside the navbar frame
     const handleOutsideClick = (event) => {
       if (navbarRef.current && !navbarRef.current.contains(event.target)) {
         closeMenu();
@@ -39,26 +37,16 @@ function Navbar() {
   }, []);
 
   return (
-    <nav ref={navbarRef} className="navbar navbar-expand-lg navbar-light  shadow-sm  py-3  border-bottom border-light">
+    <nav ref={navbarRef} className="navbar navbar-expand-lg navbar-light shadow-sm py-3 border-bottom border-light">
       <div className="container">
         <Link 
-    to="/" 
-    className="navbar-brand fw-bold fs-4 tracking-tight d-flex align-items-center" 
-    style={{ color: '#612940' }} 
-    onClick={closeMenu}
-  >
-    {/* <img 
-      src="/logo.png" 
-      alt="Mhenik Traders Logo" 
-      className="me-2 rounded-2"
-      style={{ 
-        height: '40px',      
-        width: 'auto',       
-        objectFit: 'contain'
-      }} 
-  /> */}
-  Mhenik Traders 
-</Link>
+          to="/" 
+          className="navbar-brand fw-bold fs-4 tracking-tight d-flex align-items-center" 
+          style={{ color: '#612940' }} 
+          onClick={closeMenu}
+        >
+          Mhenik Traders 
+        </Link>
         
         <button className="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
           <span className="navbar-toggler-icon"></span>
@@ -72,12 +60,9 @@ function Navbar() {
             <li className="nav-item">
               <Link to="/shop" className="nav-link fw-semibold text-secondary px-1 custom-nav-link" onClick={closeMenu}>Shop Parts</Link>
             </li>
-            {/* <li className="nav-item">
-              <Link to="/vehicle-search" className="nav-link fw-semibold text-secondary px-1 custom-nav-link" onClick={closeMenu}>Vehicle Search</Link>
-            </li> */}
-            {/* <li className="nav-item">
-              <Link to="/about" className="nav-link fw-semibold text-secondary px-1 custom-nav-link" onClick={closeMenu}>About</Link>
-            </li> */}
+            <li className="nav-item">
+              <Link to="/blog" className="nav-link fw-semibold text-secondary px-1 custom-nav-link" onClick={closeMenu}>Guides &amp; Articles</Link>
+            </li>
             <li className="nav-item">
               <Link to="/contact" className="nav-link fw-semibold text-secondary px-1 custom-nav-link" onClick={closeMenu}>Contact Us</Link>
             </li>
@@ -98,7 +83,6 @@ function Navbar() {
         </div>
       </div>
     </nav>
-    
   );
 }
 

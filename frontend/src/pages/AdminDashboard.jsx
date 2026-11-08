@@ -2,6 +2,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
+import BlogManager from './BlogManager';
+import BlogEditor from './BlogEditor';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('orders');
@@ -12,6 +14,7 @@ export default function AdminDashboard() {
   const [transactions, setTransactions] = useState([]);
   const [adjustments, setAdjustments] = useState([]);
   const [staff, setStaff] = useState({ name: '', role: '' });
+  const [editingPostId, setEditingPostId] = useState(null);
   const navigate = useNavigate();
   const API_BASE = import.meta.env.VITE_API_URL || 'https://reactnodeshop-production.up.railway.app';
 
@@ -517,6 +520,7 @@ export default function AdminDashboard() {
     { id: 'incoming', label: 'INCOMING' },
     { id: 'orders', label: 'ORDERS', count: pendingOrdersCount },
     { id: 'adjustments', label: 'ADJUSTMENTS', count: pendingAdjustmentsCount },
+    { id: 'blog', label: 'ARTICLES & GUIDES' },
     staff.role === 'admin' ? { id: 'staff', label: 'STAFF', count: pendingUsersCount } : null,
     staff.role === 'admin' ? { id: 'ledger', label: 'LEDGER' } : null,
     staff.role === 'admin' ? { id: 'logs', label: 'LOGS' } : null
@@ -606,7 +610,7 @@ export default function AdminDashboard() {
             <select 
               className="form-select form-select-sm fw-bold rounded-mhenik border-secondary-subtle"
               style={{ fontSize: '13px', backgroundPosition: 'right 0.5rem center' }}
-              value={activeTab}
+              value={activeTab.startsWith('blog') ? 'blog' : activeTab}
               onChange={(e) => setActiveTab(e.target.value)}
             >
               {tabList.map(tab => (
@@ -624,7 +628,7 @@ export default function AdminDashboard() {
               key={tab.id} 
               onClick={() => setActiveTab(tab.id)} 
               className={`btn btn-sm fw-bold rounded-mhenik px-3 py-2 transition-all ${
-                activeTab === tab.id ? 'btn-primary' : 'btn-light text-secondary'
+                (tab.id === 'blog' && activeTab.startsWith('blog')) || activeTab === tab.id ? 'btn-primary' : 'btn-light text-secondary'
               }`}
             >
               {tab.label}
@@ -721,6 +725,22 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* TAB: BLOG ARTICLES & GUIDES */}
+      {activeTab === 'blog' && (
+        <BlogManager 
+          onAddNew={() => { setEditingPostId(null); setActiveTab('blog-editor'); }}
+          onEditPost={(id) => { setEditingPostId(id); setActiveTab('blog-editor'); }}
+        />
+      )}
+
+      {/* SUB-VIEW: GUTENBERG-STYLE EDITOR */}
+      {activeTab === 'blog-editor' && (
+        <BlogEditor 
+          postId={editingPostId}
+          onBack={() => { setEditingPostId(null); setActiveTab('blog'); }}
+        />
       )}
 
       {/* TAB 1: LIVE INVENTORY */}

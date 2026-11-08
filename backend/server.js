@@ -928,12 +928,205 @@ app.patch('/api/admin/inventory/:sku/jiji-status', authenticateStaff, async (req
 });
 
 const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
 
-// 🖼️ Serve uploaded product images
+// 🖼️ Serve static uploaded images
 app.use('/uploads', express.static(path.join(__dirname, 'data/public/uploads'), {
   maxAge: '7d',
   immutable: true
 }));
+
+// =========================================================================
+// 📸 BLOG & MEDIA UPLOADS
+// =========================================================================
+
+const blogUploadDir = path.join(__dirname, 'data/public/uploads/blog');
+if (!fs.existsSync(blogUploadDir)) {
+  fs.mkdirSync(blogUploadDir, { recursive: true });
+}
+
+const blogStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, blogUploadDir),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const cleanBase = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+    cb(null, `${cleanBase}-${Date.now()}${ext}`);
+  }
+});
+
+const uploadBlogImage = multer({
+  storage: blogStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) cb(null, true);
+    else cb(new Error('Only images are allowed'));
+  }
+});
+
+app.post('/api/media/upload', (req, res) => {
+  uploadBlogImage.single('image')(req, res, (err) => {
+    if (err) {
+      console.error("[UPLOAD ERROR]:", err);
+      return res.status(500).json({ error: err.message });
+    }
+    if (!req.file) {
+      console.error("[UPLOAD ERROR]: No file received");
+      return res.status(400).json({ error: "No image file provided" });
+    }
+    console.log("[UPLOAD SUCCESS]: Saved to", req.file.path);
+    return res.json({ url: `/uploads/blog/${req.file.filename}` });
+  });
+});
+
+// =========================================================================
+// 📝 BLOG POSTS CRUD ENDPOINTS
+// =========================================================================
+
+// Utility to generate URL-safe slugs
+const generateSlug = (text) =>
+  text.toString().toLowerCase().trim().replace(/[\s\W-]+/g, '-').replace(/^-+|-+$/g, '');
+
+// 1. GET ALL POSTS (With Status Tabs, Search, and Counts)
+app.get('/api/posts', async (req, res) => {
+  try {
+    const { status, search, category, page = 1, limit = 20 } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const where = {};
+
+    if (status && status !== 'ALL') where.status = status.toUpperCase();
+    if (category) where.category = category;
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { excerpt: { contains: search, mode: 'insensitive' } }
+      ];
+    }
+
+    const [posts, total, publishedCount, draftCount] = await Promise.all([
+      prisma.post.findMany({
+        where,
+        skip,
+        take: parseInt(limit),
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.post.count({ where }),
+      prisma.post.count({ where: { status: 'PUBLISHED' } }),
+      prisma.post.count({ where: { status: 'DRAFT' } })
+    ]);
+
+    res.json({ posts, total, publishedCount, draftCount });
+  } catch (err) {
+    console.error('Failed fetching posts:', err);
+    res.status(500).json({ error: 'Failed to fetch posts' });
+  }
+});
+
+// 2. GET POST BY ID (For Editor)
+app.get('/api/posts/:id', async (req, res) => {
+  try {
+    const post = await prisma.post.findUnique({ where: { id: req.params.id } });
+    if (!post) return res.status(404).json({ error: 'Post not found' });
+    res.json(post);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch post' });
+  }
+});
+
+// 3. CREATE NEW POST
+app.post('/api/posts', async (req, res) => {
+  try {
+    const { title, content, excerpt, coverImage, category, status, slug: customSlug } = req.body;
+    let slug = customSlug ? generateSlug(customSlug) : generateSlug(title);
+
+    const existing = await prisma.post.findUnique({ where: { slug } });
+    if (existing) slug = `${slug}-${Date.now().toString().slice(-4)}`;
+
+    const post = await prisma.post.create({
+      data: {
+        title,
+        slug,
+        content: content || '',
+        excerpt: excerpt || '',
+        coverImage: coverImage || null,
+        category: category || 'Fitment Guides',
+        status: status === 'PUBLISHED' ? 'PUBLISHED' : 'DRAFT'
+      }
+    });
+
+    res.status(201).json(post);
+  } catch (err) {
+    console.error('Failed creating post:', err);
+    res.status(500).json({ error: 'Failed to create post' });
+  }
+});
+
+// 4. UPDATE POST
+app.put('/api/posts/:id', async (req, res) => {
+  try {
+    const { title, content, excerpt, coverImage, category, status, slug: customSlug } = req.body;
+    const data = {
+      ...(title && { title }),
+      ...(content !== undefined && { content }),
+      ...(excerpt !== undefined && { excerpt }),
+      ...(coverImage !== undefined && { coverImage }),
+      ...(category && { category }),
+      ...(status && { status })
+    };
+
+    if (customSlug) data.slug = generateSlug(customSlug);
+
+    const post = await prisma.post.update({
+      where: { id: req.params.id },
+      data
+    });
+
+    res.json(post);
+  } catch (err) {
+    console.error('Failed updating post:', err);
+    res.status(500).json({ error: 'Failed to update post' });
+  }
+});
+
+// 5. DELETE POST
+app.delete('/api/posts/:id', async (req, res) => {
+  try {
+    await prisma.post.delete({ where: { id: req.params.id } });
+    res.json({ message: 'Post deleted successfully' });
+  } catch (err) {
+    console.error('Failed deleting post:', err);
+    res.status(500).json({ error: 'Failed to delete post' });
+  }
+});
+
+// GET PUBLISHED POST BY SLUG (For Public Customer Reader)
+// GET PUBLISHED POST BY SLUG OR ID (For Public Customer Reader)
+app.get('/api/posts/slug/:slug', async (req, res) => {
+  try {
+    const param = req.params.slug;
+
+    // Check by slug first, then fallback to id
+    let post = await prisma.post.findUnique({ where: { slug: param } });
+    if (!post) {
+      post = await prisma.post.findUnique({ where: { id: param } });
+    }
+
+    if (!post || post.status !== 'PUBLISHED') {
+      return res.status(404).json({ error: 'Article not found or not published' });
+    }
+
+    // Increment view count asynchronously
+    await prisma.post.update({
+      where: { id: post.id },
+      data: { views: { increment: 1 } }
+    });
+
+    return res.json(post);
+  } catch (err) {
+    console.error('Error fetching post by slug:', err);
+    return res.status(500).json({ error: 'Failed loading article' });
+  }
+});
 
 module.exports = { prisma };
 

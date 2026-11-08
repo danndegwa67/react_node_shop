@@ -238,3 +238,33 @@
 .btn-back-to-top:active {
   transform: translateY(-1px);
 }
+
+/* TipTap ProseMirror Editor Boundary & Caret Alignment */
+.tiptap-editor-surface {
+  min-height: 380px;
+}
+
+.tiptap-editor-surface .ProseMirror {
+  min-height: 360px;
+  outline: none !important;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #1e293b;
+  padding: 8px 6px;
+  cursor: text; /* strictly inside the active typing canvas */
+}
+
+.tiptap-editor-surface .ProseMirror p {
+  margin-bottom: 1rem;
+}
+
+.tiptap-editor-surface .ProseMirror:focus {
+  outline: none !important;
+}
+
+.tiptap-editor-surface .ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 1rem 0;
+}

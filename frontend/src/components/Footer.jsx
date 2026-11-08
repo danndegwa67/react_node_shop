@@ -14,7 +14,7 @@ function Footer() {
               Mhenik Traders
             </h5>
             <p className="small text-white-50 lh-base mb-2">
-              Genuine Automotive Parts & Accessories — Nairobi, Kenya
+              Genuine Automotive Parts &amp; Accessories — Nairobi, Kenya
             </p>
             <p className="small text-secondary opacity-75">
               Providing premium automotive spare parts and heavy-duty mechanical components to keep your fleet operating at peak efficiency.
@@ -28,8 +28,8 @@ function Footer() {
             </h6>
             <ul className="list-unstyled d-flex flex-column gap-2 small">
               <li><Link to="/shop" className="text-decoration-none text-white-50 hover-link">Shop Parts</Link></li>
-              {/* <li><Link to="/search" className="text-decoration-none text-white-50 hover-link">Vehicle Search</Link></li> */}
-              {/* <li><Link to="/categories" className="text-decoration-none text-white-50 hover-link">Categories</Link></li> */}
+              <li><Link to="/blog" className="text-decoration-none text-white-50 hover-link">Fitment &amp; Guides</Link></li>
+              <li><Link to="/orders" className="text-decoration-none text-white-50 hover-link">Track Order</Link></li>
             </ul>
           </div>
 
@@ -39,9 +39,7 @@ function Footer() {
               Company
             </h6>
             <ul className="list-unstyled d-flex flex-column gap-2 small">
-              {/* <li><Link to="/about" className="text-decoration-none text-white-50 hover-link">About Us</Link></li> */}
               <li><Link to="/contact" className="text-decoration-none text-white-50 hover-link">Contact Support</Link></li>
-              
             </ul>
           </div>
 
@@ -78,7 +76,6 @@ function Footer() {
 
       </div>
 
-      {/* Inline styles helper for clean interaction layers */}
       <style>{`
         .hover-link, .hover-legal { transition: color 0.2s cubic-bezier(0.25, 1, 0.5, 1), transform 0.2s ease; display: inline-block; }
         .hover-link:hover { color: #fff !important; transform: translateX(3px); }
