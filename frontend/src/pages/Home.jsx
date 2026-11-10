@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowRight, ShieldCheck, Wrench, Truck } from 'lucide-react';
 
-function Home() {
+export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // Auto-slide transition every 5 seconds
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev === 0 ? 1 : 0));
@@ -12,277 +12,239 @@ function Home() {
     return () => clearInterval(timer);
   }, []);
 
-  const nextSlide = () => setCurrentSlide((prev) => (prev === 0 ? 1 : 0));
-  const prevSlide = () => setCurrentSlide((prev) => (prev === 0 ? 1 : 0));
-
   return (
-    <div className="container py-5">
+    <div className="bg-white text-dark min-vh-100 overflow-hidden">
       
-      {/* 🌟 2-PART SLIDING HERO CAROUSEL */}
+      {/* 🌟 EDITORIAL FLOATING HERO (Slide Crossfade) */}
       <section 
-        className="card border-0 shadow-sm mb-5 rounded-mhenik overflow-hidden position-relative" 
+        className="position-relative py-2 py-lg-3 border-bottom" 
         style={{ 
-          minHeight: '440px',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.05)'
+          background: 'radial-gradient(ellipse at 75% 45%, #f1f3f7 0%, #ffffff 65%)',
+          minHeight: '68vh',   // 👈 Controls overall vertical height (percentage of viewport)
+          display: 'flex',     // 👈 Keeps content vertically balanced
+          alignItems: 'center' // 👈 Centers the row inside the height
         }}
       >
-        {/* Slides Track */}
-        <div 
-          className="d-flex w-100 h-100"
-          style={{ 
-            transform: `translateX(-${currentSlide * 100}%)`,
-            transition: 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)'
-          }}
-        >
-          {/* ────── SLIDE 1: BRAND IDENTITY ────── */}
-          <div 
-            className="w-100 flex-shrink-0 p-4 p-md-5 d-flex align-items-center text-white"
-            style={{ backgroundColor: 'rgb(110, 110, 110)', backdropFilter: 'blur(5px)' }}
-          >
-            <div className="row align-items-center g-4 w-100 m-0">
-              {/* Left Side: Logo */}
-              <div className="col-md-6 text-center animate-hero-logo">
+        <div className="container py-1 py-lg-2">
+          <div className="row align-items-center g-3 g-lg-4">
+            
+            {/* ─── TEXT & HEADLINE COLUMN ─── */}
+            <div className="col-lg-6 text-start d-flex flex-column" style={{ zIndex: 2 }}>
+              
+              <div className="d-inline-flex align-items-center gap-2 px-2.5 py-1 mb-2 border rounded-1 bg-white shadow-xs" style={{ width: 'fit-content' }}>
+                <span className="badge bg-danger rounded-1 p-1"></span>
+                <span className="small text-uppercase font-monospace fw-bold text-secondary" style={{ fontSize: '11px', letterSpacing: '1px' }}>
+                  OEM &amp; Genuine Spares
+                </span>
+              </div>
+
+              <h1 className="hero-heading-editorial text-dark mb-3">
+                Precision<br />
+                Auto Parts<br />
+                for Peak Performance.
+              </h1>
+
+              <p className="lead text-secondary mb-3 fs-6 lh-base" style={{ maxWidth: '440px' }}>
+                Direct inventory matching for Toyota, Nissan, and commercial fleet chassis. Certified durability, zero counterfeit compromise.
+              </p>
+
+              {/* 📱 MOBILE-ONLY SLIDER: Above Action Buttons */}
+              <div className="d-block d-lg-none text-center my-2 py-1 position-relative" style={{ height: '280px' }}>
                 <img 
-                  src="/logo1.jpeg" 
-                  alt="Mhenik Traders Shield Logo" 
-                  className="img-fluid py-2 rounded-mhenik"
+                  src="/hero-part-cutout.png" 
+                  alt="Precision Performance Spares" 
+                  className={`img-fluid position-absolute start-50 top-50 translate-middle transition-hero-slide ${currentSlide === 0 ? 'opacity-100' : 'opacity-0'}`}
                   style={{ 
-                    maxHeight: '340px', 
+                    maxHeight: '270px', 
+                    width: 'auto',
                     objectFit: 'contain',
-                    filter: 'drop-shadow(0px 10px 15px rgba(0,0,0,0.25))',
-                    borderRadius: '20px',
-                  }} 
+                    filter: 'drop-shadow(0 12px 20px rgba(0, 0, 0, 0.15))',
+                    transform: `translate(-50%, -50%) scale(${currentSlide === 0 ? 1.05 : 0.95})`,
+                    transition: 'all 0.8s ease'
+                  }}
+                  onError={(e) => { e.currentTarget.src = "/logo1.jpeg"; }}
+                />
+                <img 
+                  src="/logo-transparent.png" 
+                  alt="Mhenik Traders Crest" 
+                  className={`img-fluid position-absolute start-50 top-50 translate-middle transition-hero-slide ${currentSlide === 1 ? 'opacity-100' : 'opacity-0'}`}
+                  style={{ 
+                    maxHeight: '230px', 
+                    width: 'auto',
+                    objectFit: 'contain',
+                    filter: 'drop-shadow(0 15px 25px rgba(0, 0, 0, 0.15))',
+                    transform: `translate(-50%, -50%) scale(${currentSlide === 1 ? 1.05 : 0.95})`,
+                    transition: 'all 0.8s ease'
+                  }}
+                  onError={(e) => { e.currentTarget.src = "/logo1.jpeg"; }}
                 />
               </div>
 
-              {/* Right Side: Text Information */}
-              <div className="col-md-6 text-center text-md-start animate-hero-text-delayed">
-                <span className="badge bg-white text-mhenik-crimson fw-bold px-3 py-2 rounded-pill text-uppercase font-monospace mb-3 small tracking-wider">
-                  Official Inventory Platform
-                </span>
-                <h1 className="display-5 fw-black mb-3 text-uppercase font-monospace tracking-tight">
-                  MHENIK TRADERS
-                </h1>
-                <p className="lead text-light mb-0 fs-5 opacity-90 lh-base">
-                  Your trusted source for genuine automotive spare parts, mechanical components, and heavy-duty vehicle accessories.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* ────── SLIDE 2: HIGH PERFORMANCE SPARES ────── */}
-          <div 
-            className="w-100 flex-shrink-0 p-4 p-md-5 d-flex align-items-center text-dark"
-            style={{ backgroundColor: '#f5f5f3' }}
-          >
-            <div className="row align-items-center g-4 w-100 m-0">
-              {/* Left Side: Performance Image */}
-              <div className="col-md-6 text-center">
-                <img 
-                  src="/hero-parts.png" 
-                  alt="Mhenik Performance Parts" 
-                  className="img-fluid py-2 animate-hero-logo"
-                  style={{ 
-                    maxHeight: '320px', 
-                    objectFit: 'contain',
-                    filter: 'drop-shadow(0px 8px 16px rgba(0,0,0,0.12))',
-                    borderRadius: '16px'
-                  }} 
-                />
-              </div>
-
-              {/* Right Side: Parts Inventory Message & Compact Button */}
-              <div className="col-md-6 text-center text-md-start animate-hero-text-delayed">
-                <span className="badge bg-danger bg-opacity-10 text-danger fw-bold px-3 py-2 rounded-pill text-uppercase font-monospace mb-3 small tracking-wider">
-                  Performance &amp; Replacement
-                </span>
-                <h1 className="display-5 fw-black mb-3 text-uppercase font-monospace tracking-tight text-dark">
-                  GENUINE AUTO SPARES
-                </h1>
-                <p className="lead text-secondary mb-4 fs-5 lh-base">
-                  Precision-engineered brake calipers, high-durability coilover dampers, and certified suspension components ready for dispatch.
-                </p>
+              <div className="d-flex flex-wrap align-items-center gap-2 gap-sm-3 mb-3 mb-lg-0">
                 <Link 
                   to="/shop" 
-                  className="btn btn-dark rounded-mhenik fw-bold px-4 py-2.5 shadow-sm text-uppercase tracking-wide rounded-3 text-white border-0 transition-hover"
-                  style={{ fontSize: '0.82rem', letterSpacing: '0.5px' }}
+                  className="btn btn-dark btn-lg rounded-1 fw-bold px-4 py-2.5 fs-6 shadow-sm d-inline-flex align-items-center gap-2"
                 >
-                  Shop Parts Now
+                  Explore Catalog <ArrowRight size={16} />
                 </Link>
+                <Link 
+                  to="/blog" 
+                  className="btn btn-outline-secondary btn-lg rounded-1 fw-semibold px-4 py-2.5 fs-6"
+                >
+                  Fitment Guides
+                </Link>
+              </div>
+
+              {/* Specs & Metrics Ticker */}
+              <div className="d-flex gap-3 gap-sm-4 mt-3 mt-lg-4 pt-3 border-top">
+                <div>
+                  <div className="fs-4 fw-bold font-monospace text-dark lh-1 mb-1">4,000+</div>
+                  <div className="small text-muted" style={{ fontSize: '11px' }}>Parts Available</div>
+                </div>
+                <div className="border-end"></div>
+                <div>
+                  <div className="fs-4 fw-bold font-monospace text-dark lh-1 mb-1">100%</div>
+                  <div className="small text-muted" style={{ fontSize: '11px' }}>Traceable OEM</div>
+                </div>
+                <div className="border-end"></div>
+                <div>
+                  <div className="fs-4 fw-bold font-monospace text-dark lh-1 mb-1">Nairobi</div>
+                  <div className="small text-muted" style={{ fontSize: '11px' }}>Dispatch Hub</div>
+                </div>
+              </div>
+
+            </div>
+
+            {/* ─── 💻 DESKTOP-ONLY SLIDER: Smooth Crossfade Between Cutout & Transparent Logo ─── */}
+            <div className="col-lg-6 d-none d-lg-flex justify-content-center align-items-center position-relative overflow-visible" style={{ zIndex: 1, height: '480px' }}>
+              
+              {/* Slide 0: Mechanical Assembly Cutout */}
+              <img 
+                src="/hero-part-cutout.png" 
+                alt="Precision Performance Spares" 
+                className={`position-absolute img-fluid ${currentSlide === 0 ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+                style={{ 
+                  maxHeight: '620px', 
+                  width: '130%',
+                  maxWidth: '780px',
+                  objectFit: 'contain',
+                  filter: 'drop-shadow(0 25px 40px rgba(0, 0, 0, 0.18))',
+                  transform: currentSlide === 0 ? 'scale(1.3) translateY(-4px)' : 'scale(1.22) translateY(8px)',
+                  transition: 'opacity 0.9s cubic-bezier(0.4, 0, 0.2, 1), transform 0.9s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
+                onError={(e) => { e.currentTarget.src = "/logo1.jpeg"; }}
+              />
+
+              {/* Slide 1: High-Resolution Transparent Shield Logo */}
+              <img 
+                src="/logo-transparent.png" 
+                alt="Mhenik Traders Crest" 
+                className={`position-absolute img-fluid ${currentSlide === 1 ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+                style={{ 
+                  maxHeight: '440px', 
+                  width: 'auto',
+                  maxWidth: '520px',
+                  objectFit: 'contain',
+                  filter: 'drop-shadow(0 28px 45px rgba(0, 0, 0, 0.22))',
+                  transform: currentSlide === 1 ? 'scale(1.08) translateY(-4px)' : 'scale(1.0) translateY(8px)',
+                  transition: 'opacity 0.9s cubic-bezier(0.4, 0, 0.2, 1), transform 0.9s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
+                onError={(e) => { e.currentTarget.src = "/logo1.jpeg"; }}
+              />
+
+              {/* Subtle Slide Indicators */}
+              <div className="position-absolute bottom-0 start-50 translate-middle-x d-flex gap-2 mb-2" style={{ zIndex: 5 }}>
+                <button 
+                  type="button" 
+                  onClick={() => setCurrentSlide(0)} 
+                  className={`border-0 rounded-pill p-0 transition-all ${currentSlide === 0 ? 'bg-dark' : 'bg-secondary bg-opacity-25'}`}
+                  style={{ width: currentSlide === 0 ? '22px' : '8px', height: '6px', transition: 'all 0.3s ease' }}
+                  aria-label="Slide 1 - Performance Parts"
+                />
+                <button 
+                  type="button" 
+                  onClick={() => setCurrentSlide(1)} 
+                  className={`border-0 rounded-pill p-0 transition-all ${currentSlide === 1 ? 'bg-dark' : 'bg-secondary bg-opacity-25'}`}
+                  style={{ width: currentSlide === 1 ? '22px' : '8px', height: '6px', transition: 'all 0.3s ease' }}
+                  aria-label="Slide 2 - Mhenik Logo"
+                />
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* 🛠️ CORE VALUE PROPOSITION BAR */}
+      <section className="py-3 border-bottom bg-white">
+        <div className="container">
+          <div className="row g-4 text-start">
+            <div className="col-md-4 d-flex align-items-start gap-3">
+              <ShieldCheck size={26} className="text-danger flex-shrink-0 mt-1" />
+              <div>
+                <h6 className="fw-bold text-dark mb-1">Authentic Component Guarantee</h6>
+                <p className="text-muted small mb-0">Every spare maps directly to OEM manufacturing reference keys.</p>
+              </div>
+            </div>
+            <div className="col-md-4 d-flex align-items-start gap-3 border-start-md">
+              <Truck size={26} className="text-danger flex-shrink-0 mt-1" />
+              <div>
+                <h6 className="fw-bold text-dark mb-1">Fast Commercial Delivery</h6>
+                <p className="text-muted small mb-0">Prompt dispatch across Nairobi and countrywide courier networks.</p>
+              </div>
+            </div>
+            <div className="col-md-4 d-flex align-items-start gap-3 border-start-md">
+              <Wrench size={26} className="text-danger flex-shrink-0 mt-1" />
+              <div>
+                <h6 className="fw-bold text-dark mb-1">Technical Fitment Support</h6>
+                <p className="text-muted small mb-0">Direct mechanic assistance to confirm part sizing before order dispatch.</p>
               </div>
             </div>
           </div>
         </div>
-
-        {/* ◀️ Left Arrow Toggle */}
-        <button 
-          type="button"
-          onClick={prevSlide}
-          className="btn btn-sm btn-dark position-absolute start-0 top-50 translate-middle-y ms-2 ms-md-3 rounded-circle p-2 bg-dark bg-opacity-25 border-0 text-white-50 opacity-40 hover-arrow"
-          style={{ zIndex: 10, width: '40px', height: '40px', transition: 'all 0.2s ease' }}
-          aria-label="Previous slide"
-        >
-          &#10094;
-        </button>
-
-        {/* ▶️ Right Arrow Toggle */}
-        <button 
-          type="button"
-          onClick={nextSlide}
-          className="btn btn-sm btn-dark position-absolute end-0 top-50 translate-middle-y me-2 ms-md-3 rounded-circle p-2 bg-dark bg-opacity-25 border-0 text-white-50 opacity-40 hover-arrow"
-          style={{ zIndex: 10, width: '40px', height: '40px', transition: 'all 0.2s ease' }}
-          aria-label="Next slide"
-        >
-          &#10095;
-        </button>
-
-        {/* 🔘 Slide Indicators */}
-        <div className="position-absolute bottom-0 start-50 translate-middle-x mb-3 d-flex gap-2" style={{ zIndex: 10 }}>
-          <button 
-            type="button" 
-            onClick={() => setCurrentSlide(0)} 
-            className={`border-0 rounded-pill transition-all ${currentSlide === 0 ? 'bg-dark' : 'bg-dark opacity-25'}`}
-            style={{ width: currentSlide === 0 ? '24px' : '8px', height: '8px', transition: 'all 0.3s ease' }}
-            aria-label="Slide 1"
-          />
-          <button 
-            type="button" 
-            onClick={() => setCurrentSlide(1)} 
-            className={`border-0 rounded-pill transition-all ${currentSlide === 1 ? 'bg-dark' : 'bg-dark opacity-25'}`}
-            style={{ width: currentSlide === 1 ? '24px' : '8px', height: '8px', transition: 'all 0.3s ease' }}
-            aria-label="Slide 2"
-          />
-        </div>
       </section>
 
-      {/* Main Profile Panel: Styled with custom glass rounding */}
-      <div className="card border-0 shadow-sm p-4 p-md-5 rounded-mhenik card-mhenik-glass animate-hero-text-delayed">
-        <h2 className="h3 text-dark fw-bold border-bottom border-3 pb-2 mb-4" style={{ borderColor: '#612940' }}>
-          About Our Company
-        </h2>
-        <p className="text-muted fs-5 lh-base">
-          Welcome to <strong>Mhenik Traders</strong>. We are a premier automotive spare parts supplier dedicated to keeping fleets and personal vehicles operating at peak mechanical efficiency. Our extensive commercial stock includes a massive catalog of nearly 4,000 components carefully organized by precise manufacturing reference keys and individual product SKUs.
-        </p>
-        <p className="text-muted fs-5 lh-base mb-5">
-          Whether you are sourcing specific engine parts, pipe frameworks, or structural body accessories, our inventory framework ensures high compatibility matching, reducing ordering downtime and delivery delays.
-        </p>
-
-        {/* Pillars Row */}
-        <div className="row g-4 mb-5">
-          <div className="col-md-4">
-            <div className="feature-box h-100 py-2">
-              <h5 className="fw-bold text-dark mb-2">Genuine Tracking</h5>
-              <p className="text-muted small mb-0">
-                Every item maps to a verified catalog SKU to ensure direct vehicle compatibility.
-              </p>
-            </div>
-          </div>
-
-          <div className="col-md-4">
-            <div className="feature-box h-100 py-2">
-              <h5 className="fw-bold text-dark mb-2">Categorized Supply</h5>
-              <p className="text-muted small mb-0">
-                Fast discovery across structural engine segments, filtration, and custom piping assembly.
-              </p>
-            </div>
-          </div>
-
-          <div className="col-md-4">
-            <div className="feature-box h-100 py-2">
-              <h5 className="fw-bold text-dark mb-2">Direct Inquiries</h5>
-              <p className="text-muted small mb-0">
-                Instant verification loops connected directly to our support line over standard communication APIs.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Official Channels Block */}
-        <h3 className="h5 text-dark fw-bold mb-3">Official Channels &amp; Physical Location</h3>
-        <div className="p-4 rounded-3 border bg-white bg-opacity-60">
-          <div className="row g-3">
-            <div className="col-md-6">
-              <p className="mb-2 fs-6">📍 <strong>Physical Location:</strong> Nairobi, Kenya</p>
-              <p className="mb-0 fs-6">📞 <strong>Primary Phone Enquiries:</strong> +254 716 687687</p>
-            </div>
-            <div className="col-md-6">
-              <p className="mb-2 fs-6">✉️ <strong>Corporate Email Address:</strong> mhenikt@gmail.com</p>
-              <p className="mb-0 fs-6">⏱️ <strong>Operating Hours:</strong> Mon – Sat | 8:00 AM – 5:00 PM</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 🗺️ LOCATION GEOLOCATION MAP CONTAINER */}
-      <section className="card border-0 rounded-mhenik shadow-sm p-3 p-md-4 mt-5 mb-5 bg-white rounded-3 animate-hero-text-delayed">
-        <div className="container-fluid">
-          <div className="d-flex align-items-center gap-2 mb-3 px-1">
-            <i className="bi bi-map-fill text-secondary fs-5"></i>
-            <span className="fw-bold text-secondary text-uppercase font-monospace small tracking-wider">
-              Where to find us
+      {/* 🏢 COMPACT COMPANY PROFILE STATEMENT */}
+      <section className="py-4 py-lg-5 bg-light border-bottom">
+        <div className="container py-2" style={{ maxWidth: '860px' }}>
+          <div className="text-center">
+            <span className="text-uppercase font-monospace text-muted fw-bold small tracking-widest d-block mb-2">
+              About Mhenik Traders
             </span>
-          </div>
-
-          <div 
-            className="position-relative w-100 overflow-hidden rounded-3 shadow-sm" 
-            style={{ 
-              height: 'calc(250px + 10vw)', 
-              minHeight: '280px', 
-              maxHeight: '450px',
-              border: '1px solid rgba(0,0,0,0.05)'
-            }}
-          >
-            <iframe
-              title="Mhenik Traders Location"
-              src="https://maps.google.com/maps?q=MHENIK+TRADERS+49+Kirinyaga+Rd+Nairobi&t=&z=16&ie=UTF8&iwloc=&output=embed"
-              width="100%"
-              height="380"
-              style={{ border: 0, borderRadius: '8px' }}
-              allowFullScreen=""
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            ></iframe>
+            <h2 className="fw-bold text-dark mb-3">Your Strategic Partner in Fleet Reliability</h2>
+            <p className="text-secondary fs-6 lh-lg mb-4">
+              Headquartered in Nairobi, Kenya, Mhenik Traders supplies genuine mechanical components, body trims, and heavy-duty suspension gear[cite: 8]. We eliminate compatibility guesswork with standardized catalog SKU indexing, keeping vehicles on the road without costly workshop delays[cite: 8, 18].
+            </p>
+            <Link to="/contact" className="btn btn-outline-dark rounded-1 fw-bold px-4 py-2 small">
+              Visit Our Shop or Contact Dispatch
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* 🌐 SOCIAL MEDIA ENGAGEMENT FOOTER STRIP */}
-      <section className="card border-0 rounded-mhenik shadow-sm p-4 p-md-5 mt-5 mb-1 bg-white text-center rounded-3 animate-hero-text-delayed">
-        <div className="container">
-          <h2 className="fw-bold mb-2 text-dark font-monospace" style={{ fontSize: 'calc(22px + 0.5vw)' }}>
-            Follow us on social media
-          </h2>
-          <p className="text-muted fs-6 mb-4 font-monospace fw-semibold">
-            All the latest news for you
-          </p>
-
-          <div className="d-flex flex-wrap justify-content-center align-items-center gap-4 gap-md-5 pt-2">
-            <a href="https://www.tiktok.com/@mheniktraders8?_r=1&_t=ZS-99ZSFntMUY0" target="_blank" rel="noreferrer" className="text-decoration-none social-link-item">
-              <i className="bi bi-tiktok d-block fs-2 text-dark mb-1"></i>
-              <span className="small fw-bold text-secondary font-monospace">TikTok</span>
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Styled utilities for smooth slide overlays */}
       <style>{`
-        .hover-arrow:hover { 
-          opacity: 0.95 !important; 
-          background-color: rgba(0,0,0,0.5) !important;
-          color: #fff !important;
+        .hero-heading-editorial {
+          font-size: 2.25rem;
+          font-weight: 300;
+          line-height: 1.15;
+          letter-spacing: -0.8px;
         }
-        .transition-hover {
-          transition: transform 0.2s ease, background-color 0.2s ease;
+        @media (min-width: 992px) {
+          .hero-heading-editorial {
+            font-size: 3.35rem;
+            font-weight: 300;
+            line-height: 1.1;
+            letter-spacing: -1.2px;
+          }
         }
-        .transition-hover:hover {
-          transform: translateY(-1.5px);
-          background-color: #1e1e24 !important;
+        @media (min-width: 768px) {
+          .border-start-md {
+            border-left: 1px solid #e5e7eb;
+          }
         }
       `}</style>
 
     </div>
   );
 }
-
-export default Home;

@@ -11,6 +11,7 @@ import AdminDashboard from '../pages/AdminDashboard';
 import AdminAuth from '../pages/AdminAuth';
 import BlogList from '../pages/BlogList';
 import BlogPost from '../pages/BlogPost';
+import Learn from '../pages/Learn';
 
 function AppRoutes() {
   return (
