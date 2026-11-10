@@ -10,7 +10,12 @@ const JWT_SECRET = process.env.JWT_SECRET || "mhenik_super_secret_key_2026";
 
 // ⚙️ Core Global Middleware Setup
 app.use(cors({
-  origin: ['https://mheniktraders.shop', 'https://www.mheniktraders.shop', 'http://localhost:5173'],
+  origin: ['https://mheniktraders.shop', 
+    'https://www.mheniktraders.shop',
+    'https://foshanautoparts.com',       // New production domain
+    'https://www.foshanautoparts.com',   // New production domain (www)
+    'http://localhost:5173',             // Mhenik local dev
+    'http://localhost:5174'],            // FOSHAN local dev
   credentials: true
 }));
 app.options(/(.*)/, cors());// Enable pre-flight across-the-board for all routes
